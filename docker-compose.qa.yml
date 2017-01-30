@@ -1,0 +1,6 @@
+version: '2'
+services:
+  api:
+    command: ['npm', 'run', 'start-qa']
+    ports:
+      - 9000

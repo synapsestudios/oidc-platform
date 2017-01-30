@@ -1,0 +1,44 @@
+{
+  "name": "identity-platform-api",
+  "version": "0.0.0",
+  "description": "OpenID Connect provider for synapse projects",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "start-qa": "node server.js",
+    "drop-tables": "./src/bin/drop-tables.js",
+    "rebuild-db": "npm run drop-tables && knex migrate:latest && knex seed:run",
+    "migrate-seed": "knex migrate:latest && knex seed:run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synapsestudios/hapi-api-template.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/synapsestudios/hapi-api-template/issues"
+  },
+  "homepage": "https://github.com/synapsestudios/hapi-api-template#readme",
+  "dependencies": {
+    "bcrypt": "^1.0.2",
+    "bookshelf": "^0.10.2",
+    "boom": "^4.2.0",
+    "confidence": "^3.0.0",
+    "electrolyte": "^0.4.0",
+    "glue": "^4.1.0",
+    "handlebars": "^4.0.5",
+    "hapi": "^16.1.0",
+    "hapi-auth-jwt2": "^7.2.4",
+    "hapi-email-kue": "^0.3.0",
+    "knex": "^0.12.6",
+    "koa-cors": "0.0.16",
+    "oidc-provider": "^1.8.2",
+    "pg": "^6.1.2",
+    "uuid": "^3.0.1",
+    "vision": "^4.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.4.1"
+  }
+}

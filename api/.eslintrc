@@ -1,0 +1,27 @@
+{
+    "extends": "eslint:recommended",
+    "ecmaFeatures" : {
+        "modules"        : true,
+        "blockBindings"  : true,
+        "generators"     : true
+    },
+    "rules" : {
+        "indent"                        : [2, 2, {"SwitchCase": 1}],
+        "quotes"                        : 0,
+        "semi"                          : [2, "always"],
+        "strict"                        : 0,
+        "global-strict"                 : 0,
+        "no-multi-spaces"               : 0,
+        "key-spacing"                   : 0,
+        "space-unary-ops"               : 0,
+        "new-cap"                       : 0,
+        "camelcase"                     : 0,
+        "no-console"                    : 0,
+        "no-unused-vars"                : [2, { 'vars': 'local', 'args': 'none' }],
+        "comma-dangle"                  : 0,
+    },
+    "env"     : {
+        "node"    : true,
+        "es6"     : true
+    },
+}

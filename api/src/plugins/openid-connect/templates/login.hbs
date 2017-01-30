@@ -1,0 +1,23 @@
+<form autocomplete="off" action="/interaction/{{cookie.uuid}}/login" method="post">
+    {{#if error}}
+      <div class="error">{{error}}</div>
+    {{/if}}
+    <input type="hidden" name="uuid" value="{{cookie.uuid}}" />
+    <input
+        required
+        type="text"
+        name="login"
+        placeholder="Enter any login"
+        {{#if cookie.params.login_hint}}value="{{cookie.params.login_hint}}"{{else}}autofocus="on"{{/if}}
+    />
+    <input
+        required
+        type="password"
+        name="password"
+        placeholder="and password"
+        {{#if cookie.params.login_hint}}autofocus="on"{{/if}}
+    />
+
+    <label><input type="checkbox" name="remember" value="yes" checked="yes">Stay signed in</label>
+    <button type="submit" name="submit" class="login login-submit">Sign-in</button>
+</form>
