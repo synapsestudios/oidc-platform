@@ -64,9 +64,12 @@ module.exports = Promise.all([
         register : './plugins/openid-connect/openid-connect',
         options : {
           prefix : 'op',
+          authenticateUser : values[1].authenticate,
+          findUserById : values[1].findById,
+
           clientsPromise : values[0].model('client').fetchAll({
             withRelated: ['grant_types', 'contacts', 'redirect_uris'],
-          }).then(clients => clients.serialize({strictOidc: true}))
+          }).then(clients => clients.serialize({strictOidc: true})),
         }
       }
     }
