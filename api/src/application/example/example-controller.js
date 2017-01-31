@@ -1,4 +1,4 @@
-module.exports = (server, enqueueEmail) => {
+module.exports = () => {
   return {
     get : (request, reply) => {
       reply('example get request succeeded');
@@ -7,4 +7,4 @@ module.exports = (server, enqueueEmail) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['server'];
+module.exports['@require'] = [];

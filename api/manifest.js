@@ -7,7 +7,12 @@ ioc.use(ioc.dir('src/application'));
 
 module.exports = Promise.all([
   ioc.create('bookshelf'),
-  ioc.create('client/client-routes'), // this registers the client models
+  ioc.create('user/user-service'),
+
+  // register all the stuff
+  ioc.create('client/client-routes'),
+  ioc.create('user/user-routes'),
+  ioc.create('example/example-routes'),
 ])
 .then(values => ({
   server : {
@@ -38,7 +43,14 @@ module.exports = Promise.all([
     },
     {
       plugin : {
-        register : '../bootstrap'
+        register : '../bootstrap',
+        options : {
+          routeArrays : [
+            values[2],
+            values[3],
+            values[4],
+          ]
+        }
       }
     },
     {
