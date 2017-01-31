@@ -69,9 +69,8 @@ exports.register = function (server, options, next) {
   }))
     .then(() => {
       provider.app.use(cors());
+      provider.app.keys = options.cookieKeys;
 
-      //TODO: figure out what this is for
-      provider.app.keys = ['some secret key', 'and also the old one'];
       server.ext('onRequest', function(request, reply) {
         if (request.path.substring(0, prefix.length) === prefix) {
           provider.callback(request.raw.req, request.raw.res);

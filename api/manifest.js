@@ -66,6 +66,7 @@ module.exports = Promise.all([
           prefix : 'op',
           authenticateUser : values[1].authenticate,
           findUserById : values[1].findById,
+          cookieKeys : config('/oidcCookieKeys'),
 
           clientsPromise : values[0].model('client').fetchAll({
             withRelated: ['grant_types', 'contacts', 'redirect_uris'],
