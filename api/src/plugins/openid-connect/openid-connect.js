@@ -167,7 +167,7 @@ exports.register = function (server, options, next) {
               const cookie = provider.interactionDetails(request.raw.req);
               const client = provider.Client.find(cookie.params.client_id);
               reply.view('login', {
-                error: e,
+                error: 'Invalid email password combination',
                 client,
                 cookie,
                 title: 'Sign-in',

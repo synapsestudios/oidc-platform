@@ -48,7 +48,7 @@ class Account {
     }
 
     // return Promise.resolve(logins.get(login));
-    return Promise.reject();
+    return Promise.reject('hi');
   }
 
   static findById(id) {
