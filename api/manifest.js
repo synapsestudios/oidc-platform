@@ -73,6 +73,7 @@ module.exports = Promise.all([
           findUserById : lib.userService.findById,
           cookieKeys : config('/oidcCookieKeys'),
           adapter : lib.redisOidcAdapter,
+          keystores : require('./keystores.json'),
 
           clientsPromise : lib.bookshelf.model('client').fetchAll({
             withRelated: ['grant_types', 'contacts', 'redirect_uris'],
