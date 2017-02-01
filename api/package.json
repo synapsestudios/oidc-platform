@@ -4,8 +4,8 @@
   "description": "OpenID Connect provider for synapse projects",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js",
-    "start-qa": "node server.js",
+    "start": "npm run migrate-seed && nodemon server.js",
+    "start-qa": "npm run migrate-seed && node server.js",
     "drop-tables": "./src/bin/drop-tables.js",
     "rebuild-db": "npm run drop-tables && knex migrate:latest && knex seed:run",
     "migrate-seed": "knex migrate:latest && knex seed:run"
