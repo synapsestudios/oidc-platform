@@ -11,6 +11,7 @@ exports.register = function (server, options, next) {
 
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   const provider = new OidcProvider(issuer, {
+    adapter: options.adapter,
     findById: options.findUserById,
     routes: {
       authorization: `${prefix}/auth`,

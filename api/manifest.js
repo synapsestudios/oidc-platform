@@ -8,6 +8,7 @@ ioc.use(ioc.dir('src/application'));
 module.exports = Promise.all([
   ioc.create('bookshelf'),
   ioc.create('user/user-service'),
+  ioc.create('redis-oidc-adapter'),
 
   // register all the stuff
   ioc.create('client/client-routes'),
@@ -46,9 +47,9 @@ module.exports = Promise.all([
         register : '../bootstrap',
         options : {
           routeArrays : [
-            values[2],
             values[3],
             values[4],
+            values[5],
           ]
         }
       }
@@ -67,6 +68,7 @@ module.exports = Promise.all([
           authenticateUser : values[1].authenticate,
           findUserById : values[1].findById,
           cookieKeys : config('/oidcCookieKeys'),
+          adapter : values[2],
 
           clientsPromise : values[0].model('client').fetchAll({
             withRelated: ['grant_types', 'contacts', 'redirect_uris'],
