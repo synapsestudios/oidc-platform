@@ -1,7 +1,6 @@
 'use strict';
 const OidcProvider = require('oidc-provider');
 const cors = require('koa-cors');
-const Account = require('./account');
 const settings = require('./settings');
 const querystring = require('querystring');
 
@@ -12,7 +11,7 @@ exports.register = function (server, options, next) {
 
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   const provider = new OidcProvider(issuer, {
-    findById: Account.findById,
+    findById: options.findUserById,
     routes: {
       authorization: `${prefix}/auth`,
       certificates: `${prefix}/certs`,
@@ -149,7 +148,7 @@ exports.register = function (server, options, next) {
         method: 'POST',
         path: '/interaction/{grant}/login',
         handler: (request, reply) => {
-          Account.authenticateUser(request.payload.login, request.payload.password)
+          options.authenticateUser(request.payload.login, request.payload.password)
             .then(account => {
               const result = {
                 login: {
@@ -167,7 +166,7 @@ exports.register = function (server, options, next) {
               const cookie = provider.interactionDetails(request.raw.req);
               const client = provider.Client.find(cookie.params.client_id);
               reply.view('login', {
-                error: e,
+                error: 'Invalid email password combination',
                 client,
                 cookie,
                 title: 'Sign-in',

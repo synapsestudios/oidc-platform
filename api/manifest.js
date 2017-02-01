@@ -5,16 +5,16 @@ var ioc = require('electrolyte');
 ioc.use(ioc.dir('src/lib'));
 ioc.use(ioc.dir('src/application'));
 
-const clientsPromise = Promise.all([
+module.exports = Promise.all([
   ioc.create('bookshelf'),
-  ioc.create('client/client-routes'), // this registers the client models
-])
-  .then(values => values[0].model('client').fetchAll({
-    withRelated: ['grant_types', 'contacts', 'redirect_uris'],
-  }))
-  .then(clients => clients.serialize({strictOidc: true}));
+  ioc.create('user/user-service'),
 
-module.exports = {
+  // register all the stuff
+  ioc.create('client/client-routes'),
+  ioc.create('user/user-routes'),
+  ioc.create('example/example-routes'),
+])
+.then(values => ({
   server : {
     connections: {
       routes: {
@@ -43,7 +43,14 @@ module.exports = {
     },
     {
       plugin : {
-        register : '../bootstrap'
+        register : '../bootstrap',
+        options : {
+          routeArrays : [
+            values[2],
+            values[3],
+            values[4],
+          ]
+        }
       }
     },
     {
@@ -57,9 +64,14 @@ module.exports = {
         register : './plugins/openid-connect/openid-connect',
         options : {
           prefix : 'op',
-          clientsPromise,
+          authenticateUser : values[1].authenticate,
+          findUserById : values[1].findById,
+
+          clientsPromise : values[0].model('client').fetchAll({
+            withRelated: ['grant_types', 'contacts', 'redirect_uris'],
+          }).then(clients => clients.serialize({strictOidc: true})),
         }
       }
     }
   ]
-};
+}));
