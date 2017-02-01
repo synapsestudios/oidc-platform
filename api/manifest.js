@@ -71,7 +71,8 @@ module.exports = Promise.all([
           prefix : 'op',
           authenticateUser : lib.userService.authenticate,
           findUserById : lib.userService.findById,
-          cookieKeys : config('/oidcCookieKeys'),
+          cookieKeys : config('/oidc/cookieKeys'),
+          initialAccessToken : config('/oidc/initialAccessToken'),
           adapter : lib.redisOidcAdapter,
 
           clientsPromise : lib.bookshelf.model('client').fetchAll({

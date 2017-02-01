@@ -35,7 +35,10 @@ var config = {
         domain : DEV_EMAIL_DOMAIN,
       },
     },
-    oidcCookieKeys: [process.env.COOKIE_KEY, process.env.OLD_COOKIE_KEY],
+    oidc: {
+      cookieKeys: [process.env.COOKIE_KEY, process.env.OLD_COOKIE_KEY],
+      initialAccessToken: process.env.OIDC_INITIAL_ACCESS_TOKEN,
+    },
   },
   'development' : {
     email : {

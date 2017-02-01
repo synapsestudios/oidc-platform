@@ -48,7 +48,9 @@ exports.register = function (server, options, next) {
       clientCredentials: false,
       encryption: true,
       introspection: true,
-      registration: false,
+      registration: {
+        initialAccessToken: options.initialAccessToken,
+      },
       registrationManagement: false,
       request: true,
       requestUri: true,
