@@ -8,7 +8,8 @@
     "start-qa": "node server.js",
     "drop-tables": "./src/bin/drop-tables.js",
     "rebuild-db": "npm run drop-tables && knex migrate:latest && knex seed:run",
-    "migrate-seed": "knex migrate:latest && knex seed:run"
+    "migrate-seed": "knex migrate:latest && knex seed:run",
+    "generate-keys": "node src/bin/generate-keys.js"
   },
   "repository": {
     "type": "git",
