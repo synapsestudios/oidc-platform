@@ -2,7 +2,7 @@ var config = require('./config');
 
 module.exports = {
   development : {
-    client   : 'postgresql',
+    client   : config('/dbAdapter'),
     seeds    : {
       directory : './seeds/dev'
     },
