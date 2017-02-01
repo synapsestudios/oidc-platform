@@ -1,7 +1,6 @@
 'use strict';
 const OidcProvider = require('oidc-provider');
 const cors = require('koa-cors');
-// const settings = require('./settings');
 const querystring = require('querystring');
 
 const handlebars = require('handlebars');
