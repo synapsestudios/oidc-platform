@@ -1,7 +1,6 @@
 'use strict';
 const OidcProvider = require('oidc-provider');
 const cors = require('koa-cors');
-const Account = require('./account');
 const settings = require('./settings');
 const querystring = require('querystring');
 
@@ -12,7 +11,7 @@ exports.register = function (server, options, next) {
 
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   const provider = new OidcProvider(issuer, {
-    findById: Account.findById,
+    findById: options.findUserById,
     routes: {
       authorization: `${prefix}/auth`,
       certificates: `${prefix}/certs`,
@@ -43,8 +42,9 @@ exports.register = function (server, options, next) {
     },
     features: {
       devInteractions: false,
+      discovery: true,
       claimsParameter: true,
-      clientCredentials: true,
+      clientCredentials: false,
       encryption: true,
       introspection: true,
       registration: false,
@@ -52,8 +52,8 @@ exports.register = function (server, options, next) {
       request: true,
       requestUri: true,
       revocation: true,
-      sessionManagement: true,
-      backchannelLogout: true,
+      sessionManagement: false,
+      backchannelLogout: false,
     },
     subjectTypes: ['public', 'pairwise'],
     pairwiseSalt: 'da1c442b365b563dfc121f285a11eedee5bbff7110d55c88',
@@ -70,9 +70,8 @@ exports.register = function (server, options, next) {
   }))
     .then(() => {
       provider.app.use(cors());
+      provider.app.keys = options.cookieKeys;
 
-      //TODO: figure out what this is for
-      provider.app.keys = ['some secret key', 'and also the old one'];
       server.ext('onRequest', function(request, reply) {
         if (request.path.substring(0, prefix.length) === prefix) {
           provider.callback(request.raw.req, request.raw.res);
@@ -149,7 +148,7 @@ exports.register = function (server, options, next) {
         method: 'POST',
         path: '/interaction/{grant}/login',
         handler: (request, reply) => {
-          Account.authenticateUser(request.payload.login, request.payload.password)
+          options.authenticateUser(request.payload.login, request.payload.password)
             .then(account => {
               const result = {
                 login: {
@@ -167,7 +166,7 @@ exports.register = function (server, options, next) {
               const cookie = provider.interactionDetails(request.raw.req);
               const client = provider.Client.find(cookie.params.client_id);
               reply.view('login', {
-                error: e,
+                error: 'Invalid email password combination',
                 client,
                 cookie,
                 title: 'Sign-in',

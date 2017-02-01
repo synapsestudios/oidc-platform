@@ -35,6 +35,7 @@ var config = {
         domain : DEV_EMAIL_DOMAIN,
       },
     },
+    oidcCookieKeys: [process.env.COOKIE_KEY, process.env.OLD_COOKIE_KEY],
   },
   'development' : {
     email : {

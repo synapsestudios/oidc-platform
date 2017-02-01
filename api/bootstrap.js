@@ -20,24 +20,9 @@ exports.register = (server, options, next) => {
     verifyOptions: { algorithms: [ 'HS256' ] }
   });
 
-  ioc.use(function(id) {
-    if (id === 'server') {
-      server['@literal'] = true;
-      return server;
-    }
+  options.routeArrays.forEach(routes => {
+    server.route(routes);
   });
-
-  Promise.all([
-    ioc.create('example/example-routes'),
-    ioc.create('user/user-routes'),
-    ioc.create('client/client-routes'),
-  ])
-  .then(routeArrays => {
-    routeArrays.forEach(routes => {
-      server.route(routes);
-    });
-  })
-  .catch(e => console.error(e));
 
   next();
 };
