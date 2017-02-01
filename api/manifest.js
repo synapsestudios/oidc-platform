@@ -9,13 +9,21 @@ module.exports = Promise.all([
   ioc.create('bookshelf'),
   ioc.create('user/user-service'),
   ioc.create('redis-oidc-adapter'),
-
+])
+.then(values => Promise.all([
   // register all the stuff
   ioc.create('client/client-routes'),
   ioc.create('user/user-routes'),
   ioc.create('example/example-routes'),
 ])
-.then(values => ({
+  .then(routeArrays => ({
+    routeArrays,
+    bookshelf: values[0],
+    userService: values[1],
+    redisOidcAdapter: values[2],
+  }))
+)
+.then(lib => ({
   server : {
     connections: {
       routes: {
@@ -46,11 +54,7 @@ module.exports = Promise.all([
       plugin : {
         register : '../bootstrap',
         options : {
-          routeArrays : [
-            values[3],
-            values[4],
-            values[5],
-          ]
+          routeArrays: lib.routeArrays
         }
       }
     },
@@ -65,12 +69,12 @@ module.exports = Promise.all([
         register : './plugins/openid-connect/openid-connect',
         options : {
           prefix : 'op',
-          authenticateUser : values[1].authenticate,
-          findUserById : values[1].findById,
+          authenticateUser : lib.userService.authenticate,
+          findUserById : lib.userService.findById,
           cookieKeys : config('/oidcCookieKeys'),
-          adapter : values[2],
+          adapter : lib.redisOidcAdapter,
 
-          clientsPromise : values[0].model('client').fetchAll({
+          clientsPromise : lib.bookshelf.model('client').fetchAll({
             withRelated: ['grant_types', 'contacts', 'redirect_uris'],
           }).then(clients => clients.serialize({strictOidc: true})),
         }
