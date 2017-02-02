@@ -27,3 +27,5 @@ KEYSTORE_BUCKET=bucket-name //a S3 bucket
 AWS_ACCESS_KEY_ID=string //standard aws access key env var
 AWS_SECRET_ACCESS_KEY=string //standard aws secret key env var
 ```
+
+When `KEYSTORE` and `KEYSTORE_BUCKET` are provided the Synapse OpenID Provider will attempt to pull the keystores from S3 when the node service starts. If you provide the `KEYSTORE` and `KEYSTORE_BUCKET` variables but NOT the AWS credential variables then the provider api will fail to start.
