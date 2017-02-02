@@ -5,16 +5,25 @@ var ioc = require('electrolyte');
 ioc.use(ioc.dir('src/lib'));
 ioc.use(ioc.dir('src/application'));
 
-const clientsPromise = Promise.all([
+module.exports = Promise.all([
   ioc.create('bookshelf'),
-  ioc.create('client/client-routes'), // this registers the client models
+  ioc.create('user/user-service'),
+  ioc.create('redis-oidc-adapter'),
 ])
-  .then(values => values[0].model('client').fetchAll({
-    withRelated: ['grant_types', 'contacts', 'redirect_uris'],
+.then(values => Promise.all([
+  // register all the stuff
+  ioc.create('client/client-routes'),
+  ioc.create('user/user-routes'),
+  ioc.create('example/example-routes'),
+])
+  .then(routeArrays => ({
+    routeArrays,
+    bookshelf: values[0],
+    userService: values[1],
+    redisOidcAdapter: values[2],
   }))
-  .then(clients => clients.serialize({strictOidc: true}));
-
-module.exports = {
+)
+.then(lib => ({
   server : {
     connections: {
       routes: {
@@ -43,7 +52,10 @@ module.exports = {
     },
     {
       plugin : {
-        register : '../bootstrap'
+        register : '../bootstrap',
+        options : {
+          routeArrays: lib.routeArrays
+        }
       }
     },
     {
@@ -57,9 +69,16 @@ module.exports = {
         register : './plugins/openid-connect/openid-connect',
         options : {
           prefix : 'op',
-          clientsPromise,
+          authenticateUser : lib.userService.authenticate,
+          findUserById : lib.userService.findById,
+          cookieKeys : config('/oidcCookieKeys'),
+          adapter : lib.redisOidcAdapter,
+
+          clientsPromise : lib.bookshelf.model('client').fetchAll({
+            withRelated: ['grant_types', 'contacts', 'redirect_uris'],
+          }).then(clients => clients.serialize({strictOidc: true})),
         }
       }
     }
   ]
-};
+}));

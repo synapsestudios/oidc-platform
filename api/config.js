@@ -14,12 +14,13 @@ var DEV_EMAIL_DOMAIN = 'sandbox-subdomain-goes-here.mailgun.org';
 var config = {
   '$filter' : 'env',
   '$base'   : {
+    dbAdapter : process.env.OIDC_DB_ADAPTER,
     dbConnection : {
-      host: process.env.POSTGRES_HOST,
-      user: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      port: process.env.POSTGRES_PORT,
+      host: process.env.OIDC_DB_HOST,
+      user: process.env.OIDC_DB_USER,
+      password: process.env.OIDC_DB_PASSWORD,
+      database: process.env.OIDC_DB_NAME,
+      port: process.env.OIDC_DB_PORT,
     },
     auth : {
       secret : process.env.JWT_SECRET
@@ -34,6 +35,7 @@ var config = {
         domain : DEV_EMAIL_DOMAIN,
       },
     },
+    oidcCookieKeys: [process.env.COOKIE_KEY, process.env.OLD_COOKIE_KEY],
   },
   'development' : {
     email : {

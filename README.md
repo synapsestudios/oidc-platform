@@ -1,3 +1,5 @@
+# OpenID Connect Identity Platform
+
 # Hapi Api Template
 Template used by Synapse Studios, LLC to make hapi rest apis.
 

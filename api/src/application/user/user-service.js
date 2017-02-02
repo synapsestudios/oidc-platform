@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const uuid = require('uuid');
 
 module.exports = (bookshelf) => {
-  return {
+  var self = {
     encryptPassword: function(password) {
       return new Promise((resolve, reject) => {
         bcrypt.genSalt(10, (err, salt) => {
@@ -20,9 +20,9 @@ module.exports = (bookshelf) => {
       return new Promise(function(resolve, reject) {
         bcrypt.compare(password, hash, function(err, res) {
           if (res) {
-            resolve();
+            resolve(true);
           } else {
-            reject();
+            resolve(false);
           }
         });
       });
@@ -35,8 +35,28 @@ module.exports = (bookshelf) => {
           email,
           password : hashedPass
         }).save({}, {method: 'insert'}));
+    },
+
+    authenticate: function(email, password) {
+      return bookshelf.model('user').forge().fetch({email})
+        .then(user => {
+          if (!user) throw new Error('No user found for this email');
+          return self.comparePasswords(password, user)
+            .then(isAuthenticated => {
+              if (!isAuthenticated) throw new Error('Password does not match record');
+              return user.serialize({strictOidc: true});
+            });
+        });
+    },
+
+    findById: function(id) {
+      return bookshelf.model('user').forge().fetch({id})
+        .then(user => user.serialize({strictOidc: true}));
     }
+
   };
+
+  return self;
 };
 
 module.exports['@singleton'] = true;

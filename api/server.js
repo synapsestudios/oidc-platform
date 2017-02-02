@@ -1,17 +1,18 @@
 var Glue   = require('glue');
-var manifest = require('./manifest');
+var manifestPromise = require('./manifest');
 
 var options = {
   relativeTo: __dirname + '/src'
 };
 
-Glue.compose(manifest, options, function(err, server) {
+manifestPromise.then(manifest => {
+  Glue.compose(manifest, options, function(err, server) {
+    if (err) {
+      throw err;
+    }
 
-  if (err) {
-    throw err;
-  }
-
-  server.start(function () {
-    console.log('Server running at:', server.info.uri);
+    server.start(function () {
+      console.log('Server running at:', server.info.uri);
+    });
   });
 });
