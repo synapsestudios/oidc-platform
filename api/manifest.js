@@ -75,14 +75,9 @@ module.exports = Promise.all([
           findUserById : lib.userService.findById,
           cookieKeys : config('/oidc/cookieKeys'),
           initialAccessToken : config('/oidc/initialAccessToken'),
-          adapter : (name) => {
-            console.log(name);
-            if (name === 'Client') {
-              return new lib.knexOidcAdapter(name);
-            }
-            return new lib.redisOidcAdapter(name);
+          adapter : function OidcAdapterFactory(name) {
+            return (name === 'Client') ? new lib.knexOidcAdapter(name) : new lib.redisOidcAdapter(name);
           },
-
           clientsPromise : lib.bookshelf.model('client').fetchAll({
             withRelated: ['grant_types', 'contacts', 'redirect_uris'],
           }).then(clients => clients.serialize({strictOidc: true})),
