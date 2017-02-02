@@ -1,24 +1,19 @@
 'use strict';
-const Redis = require('ioredis'); // eslint-disable-line import/no-unresolved
 const _ = require('lodash');
-const redisConfig = require('../../config')('/redis');
+// const redisConfig = require('../../config')('/redis');
 
-const client = new Redis(redisConfig, {
-  keyPrefix: 'oidc:',
-});
-
-module.exports = () => {
+module.exports = (knex) => {
   function grantKeyFor(id) {
     return `grant:${id}`;
   }
 
-  class RedisAdapter {
+  class ClientAdapter {
     constructor(name) {
       this.name = name;
     }
 
     key(id) {
-      return `${this.name}:${id}`;
+      return id;
     }
 
     destroy(id) {
@@ -72,8 +67,8 @@ module.exports = () => {
     }
   }
 
-  return RedisAdapter;
+  return ClientAdapter;
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = [];
+module.exports['@require'] = ['knex'];
