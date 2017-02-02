@@ -1,5 +1,6 @@
 var config = require('./config');
 var formatError = require('./src/lib/format-error');
+var fetchKeystores = require('./src/lib/fetch-keystores');
 
 var ioc = require('electrolyte');
 ioc.use(ioc.dir('src/lib'));
@@ -9,6 +10,7 @@ module.exports = Promise.all([
   ioc.create('bookshelf'),
   ioc.create('user/user-service'),
   ioc.create('redis-oidc-adapter'),
+  fetchKeystores(),
 ])
 .then(values => Promise.all([
   // register all the stuff
@@ -21,6 +23,7 @@ module.exports = Promise.all([
     bookshelf: values[0],
     userService: values[1],
     redisOidcAdapter: values[2],
+    keystores: values[3],
   }))
 )
 .then(lib => ({
@@ -73,6 +76,7 @@ module.exports = Promise.all([
           findUserById : lib.userService.findById,
           cookieKeys : config('/oidcCookieKeys'),
           adapter : lib.redisOidcAdapter,
+          keystores : lib.keystores,
 
           clientsPromise : lib.bookshelf.model('client').fetchAll({
             withRelated: ['grant_types', 'contacts', 'redirect_uris'],

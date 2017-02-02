@@ -1,7 +1,6 @@
 'use strict';
 const OidcProvider = require('oidc-provider');
 const cors = require('koa-cors');
-const settings = require('./settings');
 const querystring = require('querystring');
 
 const handlebars = require('handlebars');
@@ -66,8 +65,8 @@ exports.register = function (server, options, next) {
 
   options.clientsPromise.then(clients => provider.initialize({
     clients,
-    keystore: { keys: settings.certificates },
-    integrity: { keys: settings.integrityKeys },
+    keystore: options.keystores.certificates,
+    integrity: options.keystores.integrity,
   }))
     .then(() => {
       provider.app.use(cors());

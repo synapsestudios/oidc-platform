@@ -8,7 +8,8 @@
     "start-qa": "npm run migrate-seed && node server.js",
     "drop-tables": "./src/bin/drop-tables.js",
     "rebuild-db": "npm run drop-tables && knex migrate:latest && knex seed:run",
-    "migrate-seed": "knex migrate:latest && knex seed:run"
+    "migrate-seed": "knex migrate:latest && knex seed:run",
+    "generate-keys": "node src/bin/generate-keys.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   },
   "homepage": "https://github.com/synapsestudios/hapi-api-template#readme",
   "dependencies": {
+    "aws-sdk": "^2.9.0",
     "bcrypt": "^1.0.2",
     "bookshelf": "^0.10.2",
     "boom": "^4.2.0",
