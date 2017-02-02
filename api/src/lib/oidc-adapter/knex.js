@@ -1,8 +1,7 @@
 'use strict';
 const _ = require('lodash');
-// const redisConfig = require('../../config')('/redis');
 
-module.exports = (knex) => {
+module.exports = (bookshelf) => {
   function grantKeyFor(id) {
     return `grant:${id}`;
   }
@@ -10,6 +9,7 @@ module.exports = (knex) => {
   class ClientAdapter {
     constructor(name) {
       this.name = name;
+      this.model = bookshelf.model(name.toLowerCase());
     }
 
     key(id) {
@@ -17,16 +17,11 @@ module.exports = (knex) => {
     }
 
     destroy(id) {
-      const key = this.key(id);
-
-      return client.hget(key, 'grantId')
-        .then(grantId => client.lrange(grantKeyFor(grantId), 0, -1))
-        .then(tokens => Promise.all(_.map(tokens, token => client.del(token))))
-        .then(() => client.del(key));
+      return this.model.forge({ id: this.key(id) }).destroy();
     }
 
     consume(id) {
-      return client.hset(this.key(id), 'consumed', Math.floor(Date.now() / 1000));
+      return this.model.forge({ id: this.key(id) }).save({ consumed: Math.floor(Date.now() / 1000) });
     }
 
     find(id) {
@@ -41,6 +36,7 @@ module.exports = (knex) => {
     }
 
     upsert(id, payload, expiresIn) {
+      console.log(payload);
       const key = this.key(id);
       let toStore = payload;
 
@@ -71,4 +67,4 @@ module.exports = (knex) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['knex'];
+module.exports['@require'] = ['bookshelf'];
