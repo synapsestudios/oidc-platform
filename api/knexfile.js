@@ -2,7 +2,7 @@ var config = require('./config');
 
 module.exports = {
   development : {
-    client   : 'postgresql',
+    client   : config('/dbAdapter'),
     seeds    : {
       directory : './seeds/dev'
     },
@@ -12,7 +12,7 @@ module.exports = {
       max : 10
     },
     migrations : {
-      tableName : 'knex_migrations'
+      tableName : 'oidc_migrations'
     }
   },
 
@@ -27,7 +27,7 @@ module.exports = {
       max : 10
     },
     migrations : {
-      tableName : 'knex_migrations'
+      tableName : 'oidc_migrations'
     }
   },
 
@@ -42,7 +42,7 @@ module.exports = {
       max : 10
     },
     migrations : {
-      tableName : 'knex_migrations'
+      tableName : 'oidc_migrations'
     }
   },
 
@@ -57,7 +57,7 @@ module.exports = {
       max : 10
     },
     migrations : {
-      tableName : 'knex_migrations'
+      tableName : 'oidc_migrations'
     }
   }
 
