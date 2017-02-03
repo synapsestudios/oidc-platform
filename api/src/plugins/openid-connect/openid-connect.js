@@ -2,7 +2,8 @@
 const OidcProvider = require('oidc-provider');
 const cors = require('koa-cors');
 const querystring = require('querystring');
-
+const path = require('path');
+const fs = require('fs');
 const handlebars = require('handlebars');
 
 exports.register = function (server, options, next) {
@@ -52,8 +53,17 @@ exports.register = function (server, options, next) {
       request: true,
       requestUri: true,
       revocation: true,
-      sessionManagement: false,
+      sessionManagement: true,
       backchannelLogout: false,
+    },
+    logoutSource: function renderLogoutSource(form) {
+      // this => koa context;
+      const layout = fs.readFileSync(path.join(__dirname, './templates/layout/layout.hbs'), 'utf8');
+      const logout = fs.readFileSync(path.join(__dirname, './templates/end_session.hbs'), 'utf8');
+
+      this.body = handlebars.compile(layout)({
+        content: handlebars.compile(logout)({ form })
+      });
     },
     subjectTypes: ['public', 'pairwise'],
     pairwiseSalt: 'da1c442b365b563dfc121f285a11eedee5bbff7110d55c88',
