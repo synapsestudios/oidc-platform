@@ -1,78 +1,31 @@
 # OpenID Connect Identity Platform
 
-# Hapi Api Template
-Template used by Synapse Studios, LLC to make hapi rest apis.
-
-## Installation
-1. `./initialize.sh`
-1. `git add -A`
-1. `git commit -m "Initial commit"`
-1. `git push -u origin master`
+The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com/panva/node-oidc-provider) to provide user authentication for our clients' applications. node-oidc-provider is an [OpenID Connect](http://openid.net/connect/) provider library. In order to fully understand the ins and outs of this application understanding OpenID Connect is a must.
 
 ## Usage
-Hapi is a simple framework that does a lot of stuff right. We try not to get in its way. Most usage details should be found in the hapi docs.
+TBD
 
-We use [bookshelf] (http://bookshelfjs.org/) and [knex] (http://knexjs.org/) for database stuff.
-We use [electrolyte] (https://github.com/jaredhanson/electrolyte) for IOC.
+## Keystores
 
-### Validation
-We validate our inputs using hapi's built in api validation which can be found documented [here] (http://hapijs.com/tutorials/validation). Hapi uses a validation library called [Joi] (https://github.com/hapijs/joi). The authors of Joi have decided to not provide hooks for custom validators nor to provide the ability for custom messages for validation errors so we have set up a couple standards for how we handle custom validation and client side messaging.
+node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes YOU SHOULD PROVIDE YOUR OWN KEYS. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but PLEASE DO NOT USE THE DEFAULTS IN PRODUCTION.
 
-#### Validation Messaging
+### Generating Keys
 
-*The client will be responsible for messaging*. Our validation errors will return with a key and a type for each error. The key is the field in the payload that is erronious (ie, if you provide an `email` field that is not an email then the key will be email). The type is a string that will map to a type of failure. For example, if you provide a non-email string to an email field the type that will be returned in the error is `string.email`. The client can then choose what messaging to show given that type.
-
-#### Custom Validation
-
-In order to do custom validation we provide a `mixedValidation` function in the `/src/lib/validator` directory. Custom validators are defined in `/src/lib/validator/constraints`. To define a new constraint create a new file in the constraints directory. The simplest validator looks like this:
+We provide a script that, if you're using docker-compose, can be run like this:
 
 ```
-module.exports = ValidationError => {                 // Called by electrolyte when setting up IOC container
-    return () => {                                    // Called by you in routes definition. Pass things like model name and constraint params
-        return value => {                             // Called by hapi during validation. Passes the value to be validated
-            return new Promise((resolve, reject) => { // Returns a promise. Reject if invalid, resolve if valid
-                if (/* value is valid */) {
-                    resolve(value);
-                } else {
-                    // Provide a message for api debugging and a type for client messaging
-                    reject(new ValidationError('some message', 'custom.type'));
-                }
-            });
-        };
-    };
-};
-
-module.exports['@singleton'] = true;
-module.exports['@require'] = ['validator/validation-error'];
+$ docker-compose exec synapse-oidc npm run generate-keys
+$ docker-compose exec cat > keystores.json
 ```
 
-In routes call `mixedValidation` like so:
+Now you have a `keystores.json` file. Put that in an AWS S3 bucket and provide these environment variables:
 
 ```
-{
-    method : 'POST',
-    path : '/example',
-    handler : controller.post,
-    config: {
-        validate: {
-            payload: mixedValidation({
-                email: Joi.string().email(),
-            }, {
-                email: customValidator()
-            })
-        }
-    }
-}
+KEYSTORE=keystores.json //a file name
+KEYSTORE_BUCKET=bucket-name //a S3 bucket
+
+AWS_ACCESS_KEY_ID=string //standard aws access key env var
+AWS_SECRET_ACCESS_KEY=string //standard aws secret key env var
 ```
 
-If Joi validation fails then the custom validators won't run.
-
-## Developing the template
-To work on the template itself:
-
-1. `git submodule add <cookbooks-repo> api/cookbooks`
-1. Be sure not to commit .gitmodules or the cookbooks directory
-1. `npm install` from `api`
-1. `vagrant up` from project root
-1. `vagrant ssh`
-1. `npm start` from `/vagrant`
+When `KEYSTORE` and `KEYSTORE_BUCKET` are provided the Synapse OpenID Provider will attempt to pull the keystores from S3 when the node service starts. If you provide the `KEYSTORE` and `KEYSTORE_BUCKET` variables but NOT the AWS credential variables then the provider api will fail to start.
