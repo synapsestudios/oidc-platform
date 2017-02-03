@@ -1,7 +1,7 @@
 module.exports = (bookshelf) => ({
   create(id, payload) {
     const toStore = Object.assign({}, payload);
-    const clientRelationships = Object.keys(bookshelf.model('client').relationships);
+    const clientRelationships = Object.keys(bookshelf.model('client').prototype.relationships);
 
     clientRelationships.forEach(relation => {
       delete toStore[relation];
