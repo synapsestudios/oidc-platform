@@ -78,9 +78,6 @@ module.exports = Promise.all([
           adapter : function OidcAdapterFactory(name) {
             return (name === 'Client') ? new lib.sqlOidcAdapter(name) : new lib.redisOidcAdapter(name);
           },
-          clientsPromise : lib.bookshelf.model('client').fetchAll({
-            withRelated: ['grant_types', 'contacts', 'redirect_uris'],
-          }).then(clients => clients.serialize({strictOidc: true})),
         }
       }
     }

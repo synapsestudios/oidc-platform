@@ -66,11 +66,10 @@ exports.register = function (server, options, next) {
     },
   });
 
-  options.clientsPromise.then(clients => provider.initialize({
-    clients,
+  provider.initialize({
     keystore: { keys: settings.certificates },
     integrity: { keys: settings.integrityKeys },
-  }))
+  })
     .then(() => {
       provider.app.use(cors());
       provider.app.keys = options.cookieKeys;
