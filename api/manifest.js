@@ -9,7 +9,7 @@ module.exports = Promise.all([
   ioc.create('bookshelf'),
   ioc.create('user/user-service'),
   ioc.create('oidc-adapter/redis'),
-  ioc.create('oidc-adapter/knex'),
+  ioc.create('oidc-adapter/sql'),
 ])
 .then(values => Promise.all([
   // register all the stuff
@@ -22,7 +22,7 @@ module.exports = Promise.all([
     bookshelf: values[0],
     userService: values[1],
     redisOidcAdapter: values[2],
-    knexOidcAdapter: values[3],
+    sqlOidcAdapter: values[3],
   }))
 )
 .then(lib => ({
@@ -76,7 +76,7 @@ module.exports = Promise.all([
           cookieKeys : config('/oidc/cookieKeys'),
           initialAccessToken : config('/oidc/initialAccessToken'),
           adapter : function OidcAdapterFactory(name) {
-            return (name === 'Client') ? new lib.knexOidcAdapter(name) : new lib.redisOidcAdapter(name);
+            return (name === 'Client') ? new lib.sqlOidcAdapter(name) : new lib.redisOidcAdapter(name);
           },
           clientsPromise : lib.bookshelf.model('client').fetchAll({
             withRelated: ['grant_types', 'contacts', 'redirect_uris'],
