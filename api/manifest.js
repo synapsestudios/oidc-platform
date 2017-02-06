@@ -9,7 +9,8 @@ ioc.use(ioc.dir('src/application'));
 module.exports = Promise.all([
   ioc.create('bookshelf'),
   ioc.create('user/user-service'),
-  ioc.create('redis-oidc-adapter'),
+  ioc.create('oidc-adapter/redis'),
+  ioc.create('oidc-adapter/sql'),
   fetchKeystores(),
 ])
 .then(values => Promise.all([
@@ -23,7 +24,8 @@ module.exports = Promise.all([
     bookshelf: values[0],
     userService: values[1],
     redisOidcAdapter: values[2],
-    keystores: values[3],
+    sqlOidcAdapter: values[3],
+    keystores: values[4],
   }))
 )
 .then(lib => ({
@@ -74,13 +76,12 @@ module.exports = Promise.all([
           prefix : 'op',
           authenticateUser : lib.userService.authenticate,
           findUserById : lib.userService.findById,
-          cookieKeys : config('/oidcCookieKeys'),
-          adapter : lib.redisOidcAdapter,
+          cookieKeys : config('/oidc/cookieKeys'),
+          initialAccessToken : config('/oidc/initialAccessToken'),
+          adapter : function OidcAdapterFactory(name) {
+            return (name === 'Client') ? new lib.sqlOidcAdapter(name) : new lib.redisOidcAdapter(name);
+          },
           keystores : lib.keystores,
-
-          clientsPromise : lib.bookshelf.model('client').fetchAll({
-            withRelated: ['grant_types', 'contacts', 'redirect_uris'],
-          }).then(clients => clients.serialize({strictOidc: true})),
         }
       }
     }

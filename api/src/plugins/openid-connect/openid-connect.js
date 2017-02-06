@@ -48,7 +48,9 @@ exports.register = function (server, options, next) {
       clientCredentials: false,
       encryption: true,
       introspection: true,
-      registration: false,
+      registration: {
+        initialAccessToken: options.initialAccessToken,
+      },
       registrationManagement: false,
       request: true,
       requestUri: true,
@@ -73,11 +75,10 @@ exports.register = function (server, options, next) {
     },
   });
 
-  options.clientsPromise.then(clients => provider.initialize({
-    clients,
+  provider.initialize({
     keystore: options.keystores.certificates,
     integrity: options.keystores.integrity,
-  }))
+  })
     .then(() => {
       provider.app.use(cors());
       provider.app.keys = options.cookieKeys;

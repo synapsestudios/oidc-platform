@@ -1,7 +1,7 @@
 'use strict';
 const Redis = require('ioredis'); // eslint-disable-line import/no-unresolved
 const _ = require('lodash');
-const redisConfig = require('../../config')('/redis');
+const redisConfig = require('../../../config')('/redis');
 
 const client = new Redis(redisConfig, {
   keyPrefix: 'oidc:',
