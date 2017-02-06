@@ -60,4 +60,4 @@ module.exports = (bookshelf) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];
+module.exports['@require'] = ['bookshelf', 'email/email-service'];

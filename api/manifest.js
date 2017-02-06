@@ -65,12 +65,6 @@ module.exports = Promise.all([
     },
     {
       plugin : {
-        register : 'hapi-email-kue',
-        options : config('/email')
-      }
-    },
-    {
-      plugin : {
         register : './plugins/openid-connect/openid-connect',
         options : {
           prefix : 'op',
