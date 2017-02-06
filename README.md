@@ -5,6 +5,10 @@ The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com
 ## Usage
 TBD
 
+## Session Management
+
+Sessions are persisted by default, a user can manually log out by visiting `${prefix}/session/end`. The following query parameters should also be sent: `id_token_hint` is to allow the client to determine which user is logging out, and `post_logout_redirect_uri` allows the user to be redirected back to the client app.
+
 ## Keystores
 
 node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes YOU SHOULD PROVIDE YOUR OWN KEYS. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but PLEASE DO NOT USE THE DEFAULTS IN PRODUCTION.
