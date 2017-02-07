@@ -52,7 +52,23 @@ module.exports = (bookshelf) => {
     findById: function(id) {
       return bookshelf.model('user').forge().fetch({id})
         .then(user => user.serialize({strictOidc: true}));
-    }
+    },
+
+    findByEmail: function(email) {
+      return bookshelf.model('user').forge().fetch({ email })
+        .then(user => user ? user.serialize({strictOidc: true}) : null);
+    },
+
+    createPasswordResetToken: function(id) {
+      const expires = new Date();
+      expires.setHours(expires.getHours() + 1);
+
+      return bookshelf.model('user_password_reset_token').forge({
+        token: uuid.v4(),
+        user_id: id,
+        expires_at: expires,
+      }).save({}, {method: 'insert'});
+    },
 
   };
 

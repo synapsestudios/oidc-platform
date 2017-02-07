@@ -143,7 +143,7 @@
             </div>
             {{{content}}}
             <div class="login-help">
-                <a href="{{returnTo}}">[ Cancel ]</a>
+                {{#if returnTo}}<a href="{{returnTo}}">[ Cancel ]</a>{{/if}}
                 {{#if client.tosUri}}<a href="{{client.tosUri}}">[ Terms of Service ]</a>{{/if}}
                 {{#if client.policyUri}}<a href="{{client.policyUri}}">[ Privacy Policy ]</a>{{/if}}
             </div>

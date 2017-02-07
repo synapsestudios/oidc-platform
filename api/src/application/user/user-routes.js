@@ -36,8 +36,38 @@ module.exports = (service, controller) => {
       },
       handler : controller.registerFormHandler,
     },
+    {
+      method : 'GET',
+      path : '/user/forgot-password',
+      config : {
+        validate : {
+          failAction : controller.getForgotPasswordForm,
+          query : queryValidation,
+        },
+      },
+      handler : controller.getForgotPasswordForm,
+    },
+    {
+      method : 'POST',
+      path : '/user/forgot-password',
+      config : {
+        validate : {
+          payload : {
+            email : Joi.string().email().required(),
+          },
+          query : queryValidation,
+          failAction : controller.getForgotPasswordForm,
+        }
+      },
+      handler : controller.postForgotPasswordForm,
+    },
   ];
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['user/user-service', 'user/user-controller', 'user/user-model'];
+module.exports['@require'] = [
+  'user/user-service',
+  'user/user-controller',
+  'user/user-model',
+  'user/user-password-reset-token-model',
+];

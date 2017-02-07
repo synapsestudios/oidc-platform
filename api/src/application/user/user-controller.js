@@ -1,10 +1,11 @@
 const querystring = require('querystring');
 const formatError = require('../../lib/format-error');
 
-module.exports = (service) => {
+module.exports = (service, server, renderTemplate) => {
 
   const errorMessages = {
     email : {
+      'any.required' : 'Email address is required',
       'any.empty' : 'Email address is required',
       'string.email' : 'Must be a valid email address',
     },
@@ -25,7 +26,7 @@ module.exports = (service) => {
     response_type : {
       'any.required' : 'Response type is required',
     },
-    schope : {
+    scope : {
       'any.required' : 'Scope is required',
     }
   };
@@ -77,9 +78,48 @@ module.exports = (service) => {
           email : request.payload.email || ''
         });
       }
-    }
+    },
+
+    getForgotPasswordForm: function(request, reply, source, error) {
+      var validationErrorMessages = {};
+
+      if (error) {
+        error = formatError(error);
+        error.output.payload.validationErrors.forEach(errorObj => {
+          validationErrorMessages[errorObj.key] = validationErrorMessages[errorObj.key] || [];
+
+          if (errorMessages[errorObj.key][errorObj.type]) {
+            validationErrorMessages[errorObj.key].push(errorMessages[errorObj.key][errorObj.type]);
+          } else {
+            validationErrorMessages[errorObj.key].push(errorObj.message);
+          }
+        });
+      }
+
+      reply.view('forgot-password', {
+        formAction : `/user/forgot-password?${querystring.stringify(request.query)}`,
+        returnTo : `${request.query.redirect_uri}?status=cancelled`,
+        error : !!error,
+        validationErrorMessages,
+      });
+    },
+
+    postForgotPasswordForm: function(request, reply) {
+      return service.findByEmail(request.payload.email)
+        .then(user => user ? service.createPasswordResetToken(user.accountId) : null)
+        .then(token => token ? renderTemplate('email/forgot-password', { url: token }) : null)
+        .then(email => {
+          console.log(email);
+          if (email) {
+            // send email
+          }
+        })
+        .then(() => {
+          reply.view('forgot-password-success');
+        });
+    },
   };
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['user/user-service'];
+module.exports['@require'] = ['user/user-service', 'server', 'render-template'];
