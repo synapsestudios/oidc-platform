@@ -61,6 +61,36 @@ module.exports = (service, controller) => {
       },
       handler : controller.postForgotPasswordForm,
     },
+    {
+      method : 'GET',
+      path : '/user/reset-password',
+      config : {
+        validate : {
+          failAction : controller.getResetPasswordForm,
+          query : Object.assign({
+            token: Joi.string().required(),
+          }, queryValidation),
+        },
+      },
+      handler : controller.getResetPasswordForm,
+    },
+    {
+      method : 'POST',
+      path : '/user/reset-password',
+      config : {
+        validate : {
+          payload : {
+            password : Joi.string().min(8).required(),
+            pass2 : Joi.any().valid(Joi.ref('password')).required(),
+          },
+          query : Object.assign({
+            token: Joi.string().required(),
+          }, queryValidation),
+          failAction : controller.getResetPasswordForm,
+        }
+      },
+      handler : controller.postResetPasswordForm,
+    },
   ];
 };
 

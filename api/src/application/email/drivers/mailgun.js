@@ -45,10 +45,6 @@ module.exports = function () {
           return reject('no to address provided');
         }
 
-        if (!emailObject.from) {
-          return reject('no from address provided');
-        }
-
         if (!emailObject.subject) {
           return reject('no subject provided');
         }
@@ -58,7 +54,7 @@ module.exports = function () {
         }
 
         const mail = {
-          from: emailObject.from,
+          from: emailObject.from || 'no-reply@' + process.env.MAILGUN_DOMAIN,
           to: checkWhitelist(emailObject.to, reject),
           subject: emailObject.subject,
           text: emailObject.text || '',

@@ -23,6 +23,7 @@ var config = {
       cookieKeys: [process.env.COOKIE_KEY, process.env.OLD_COOKIE_KEY],
       initialAccessToken: process.env.OIDC_INITIAL_ACCESS_TOKEN,
     },
+    baseUrl: process.env.OIDC_BASE_URL,
   },
   'development': {},
   'qa': {},
