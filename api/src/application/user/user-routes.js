@@ -36,6 +36,44 @@ module.exports = (service, controller) => {
       },
       handler : controller.registerFormHandler,
     },
+    {
+      method: 'GET',
+      path: '/user/profile',
+      handler: controller.profileFormHandler,
+    },
+    {
+      method: 'POST',
+      path: '/user/profile',
+      handler: controller.profileFormHandler,
+      config: {
+        validate: {
+          payload: {
+            name: Joi.string(),
+            given_name: Joi.string(),
+            family_name: Joi.string(),
+            middle_name: Joi.string(),
+            nickname: Joi.string(),
+            preferred_username: Joi.string(),
+            profile: Joi.string().uri(),
+            picture: Joi.string().uri(),
+            website: Joi.string().uri(),
+            email: Joi.string().email(),
+            gender: Joi.string(),
+            birthdate: Joi.date().iso(),
+            zoneinfo: Joi.string(),
+            locale: Joi.string(),
+            phone_number: Joi.string(),
+            address: {
+              street_address: Joi.string(),
+              locality: Joi.string(),
+              region: Joi.string(),
+              postal_code: Joi.string(),
+              country: Joi.string(),
+            }
+          }
+        }
+      },
+    },
   ];
 };
 

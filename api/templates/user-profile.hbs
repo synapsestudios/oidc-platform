@@ -1,0 +1,20 @@
+<h1>Profile</h1>
+<form action="{{formAction}}" method="post">
+  {{#each fields}}
+    <input
+      type='{{type}}'
+      name='{{name}}'
+      placeholder='{{label}}'
+      value=''
+    />
+    {{#if error}}
+      <div class="validation-errors-list">
+        {{#each validationErrorMessages.email}}
+          <div class="validation-error">{{this}}</div>
+        {{/each}}
+      </div>
+    {{/if}}
+  {{/each}}
+
+  <button type="submit" class="profile profile-submit">Submit</button>
+</form>

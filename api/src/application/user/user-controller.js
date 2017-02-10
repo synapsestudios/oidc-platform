@@ -25,7 +25,7 @@ module.exports = (service) => {
     response_type : {
       'any.required' : 'Response type is required',
     },
-    schope : {
+    scope : {
       'any.required' : 'Scope is required',
     }
   };
@@ -77,6 +77,113 @@ module.exports = (service) => {
           email : request.payload.email || ''
         });
       }
+    },
+
+    profileFormHandler: function(request, reply) {
+      reply.view('user-profile', {
+        fields: [
+          {
+            name: 'name',
+            label: 'Name',
+            type: 'text'
+          },
+          {
+            name: 'given_name',
+            label: 'Given Name',
+            type: 'text'
+          },
+          {
+            name: 'family_name',
+            label: 'Family Name',
+            type: 'text'
+          },
+          {
+            name: 'middle_name',
+            label: 'Middle Name',
+            type: 'text'
+          },
+          {
+            name: 'nickname',
+            label: 'Nickname',
+            type: 'text'
+          },
+          {
+            name: 'preferred_username',
+            label: 'Preferred Username',
+            type: 'text'
+          },
+          {
+            name: 'profile',
+            label: 'Profile',
+            type: 'text'
+          },
+          {
+            name: 'picture',
+            label: 'Picture',
+            type: 'text'
+          },
+          {
+            name: 'website',
+            label: 'Website',
+            type: 'text'
+          },
+          {
+            name: 'email',
+            label: 'Email',
+            type: 'text'
+          },
+          {
+            name: 'gender',
+            label: 'Gender',
+            type: 'text'
+          },
+          {
+            name: 'birthdate',
+            label: 'Birthdate',
+            type: 'text'
+          },
+          {
+            name: 'zoneinfo',
+            label: 'Timezone',
+            type: 'text'
+          },
+          {
+            name: 'locale',
+            label: 'Locale',
+            type: 'text'
+          },
+          {
+            name: 'phone_number',
+            label: 'Phone Number',
+            type: 'text'
+          },
+          {
+            name: 'address[street_address]',
+            label: 'Street Address',
+            type: 'text'
+          },
+          {
+            name: 'address[locality]',
+            label: 'Locality',
+            type: 'text'
+          },
+          {
+            name: 'address[region]',
+            label: 'Region',
+            type: 'text'
+          },
+          {
+            name: 'address[postal_code]',
+            label: 'Postal Code',
+            type: 'text'
+          },
+          {
+            name: 'address[country]',
+            label: 'Country',
+            type: 'text'
+          },
+        ]
+      });
     }
   };
 };
