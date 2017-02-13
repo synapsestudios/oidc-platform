@@ -32,7 +32,6 @@
     "handlebars": "^4.0.5",
     "hapi": "^16.1.0",
     "hapi-auth-jwt2": "^7.2.4",
-    "hapi-email-kue": "^0.3.0",
     "ioredis": "^2.5.0",
     "knex": "^0.12.6",
     "koa-cors": "0.0.16",
