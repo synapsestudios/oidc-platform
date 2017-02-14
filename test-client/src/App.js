@@ -91,7 +91,8 @@ class App extends Component {
           <p>{this.state.tokenType}</p>
         </div>
         <div>
-          <a href={`http://localhost:9000/op/session/end?id_token_hint=${this.state.idToken}&post_logout_redirect_uri=${config.postLogoutRedirectUri}`}>Log Out</a>
+          <div><a href={`http://localhost:9000/user/profile?accessToken=${localstorage('accessToken')}`}>Edit Profile</a></div>
+          <div><a href={`http://localhost:9000/op/session/end?id_token_hint=${this.state.idToken}&post_logout_redirect_uri=${config.postLogoutRedirectUri}`}>Log Out</a></div>
         </div>
       </div>
     );
