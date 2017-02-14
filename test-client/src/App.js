@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import queryString from 'query-string';
 import './App.css';
+import config from './config';
 
 import Client from '@synapsestudios/fetch-client';
 const client = new Client();
@@ -21,7 +22,7 @@ class App extends Component {
       formData.append('code', query.code);
       formData.append('redirect_uri', 'http://sso-client.dev:3000/');
 
-      const auth = btoa('acmf:91c0fabd17a9db3cfe53f28a10728e39b7724e234ecd78dba1fb05b909fb4ed98c476afc50a634d52808ad3cb2ea744bc8c3b45b7149ec459b5c416a6e8db242');
+      const auth = btoa(`${config.clientId}:${config.clientSecret}`);
 
       client.fetch('http://localhost:9000/op/token', {
         method: 'POST',
@@ -58,9 +59,9 @@ class App extends Component {
         <p>
           {!this.state.accessToken ? (
             <span>
-              <a href="http://localhost:9000/op/auth?client_id=acmf&response_type=code&scope=openid&redirect_uri=http://sso-client.dev:3000/">Login</a>
+              <a href={`http://localhost:9000/op/auth?client_id=${config.clientId}&response_type=code&scope=${config.scope}&redirect_uri=http://sso-client.dev:3000/`}>Login</a>
               <span> | </span>
-              <a href="http://localhost:9000/user/register?client_id=acmf&response_type=code&scope=openid&redirect_uri=http://sso-client.dev:3000/">Register</a>
+              <a href={`http://localhost:9000/user/register?client_id=${config.clientId}&response_type=code&scope=${config.scope}&redirect_uri=http://sso-client.dev:3000/`}>Register</a>
             </span>
           ) : 'Logged In'}
         </p>

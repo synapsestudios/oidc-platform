@@ -6,6 +6,19 @@ The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com
 TBD
 
 
+## Setting up for development
+
+1. `docker-compose up`
+2. Create an oauth client by posting to http://localhost:9000/op/reg with the payload:
+```
+{
+	"redirect_uris": ["http://sso-client.dev"]
+}
+```
+3. In `test-client/src` create a copy of `config.shape.js` and call it `config.js`. Fill in the
+client_id and client_secret of the client you created in the previous step.
+4. `npm i` and `npm start` in `test-client`
+
 ## Session Management
 
 Sessions are persisted by default, a user can manually log out by visiting `${prefix}/session/end`. The following query parameters should also be sent: `id_token_hint` is to allow the client to determine which user is logging out, and `post_logout_redirect_uri` allows the user to be redirected back to the client app.
@@ -13,13 +26,6 @@ Sessions are persisted by default, a user can manually log out by visiting `${pr
 ## Clients
 
 Clients can be registered dynamically with the `registration` endpoint defined in the OICD provider's Hapi plugin. By default this is `${prefix}/reg`. Any of the [OpenID Client Metadata](http://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) can be supplied. The Bearer token for this request is validated against the `OIDC_INITIAL_ACCESS_TOKEN` environment variable. YOU MUST PROVIDE A STRONG TOKEN in production to prevent unauthorized clients from being added.
-
-To create a client in development, post to http://localhost:9000/op/reg with the payload
-```
-{
-	"redirect_uris": ["http://sso-client.dev"]
-}
-```
 
 ## Keystores
 
