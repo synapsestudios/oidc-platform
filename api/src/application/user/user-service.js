@@ -50,7 +50,7 @@ module.exports = (bookshelf) => {
     },
 
     findById: function(id) {
-      return bookshelf.model('user').forge().fetch({id})
+      return bookshelf.model('user').where({ id }).fetch()
         .then(user => user.serialize({strictOidc: true}));
     }
 
