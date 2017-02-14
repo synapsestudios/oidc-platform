@@ -1,7 +1,10 @@
 const querystring = require('querystring');
 const formatError = require('../../lib/format-error');
+const atob = require('atob');
+const Boom = require('boom');
+const get = require('lodash/get');
 
-module.exports = (service) => {
+module.exports = (service, RedisAdapter) => {
 
   const errorMessages = {
     email : {
@@ -31,7 +34,6 @@ module.exports = (service) => {
   };
 
   const handlePost = function(request, reply) {
-    // http://localhost:9000/op/auth?client_id=acmf&response_type=code&scope=openid&redirect_uri=http://sso-client.dev:3000/
     service.create(request.payload.email, request.payload.password)
       .then(user => {
         reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
@@ -80,113 +82,154 @@ module.exports = (service) => {
     },
 
     profileFormHandler: function(request, reply) {
-      reply.view('user-profile', {
-        fields: [
-          {
-            name: 'name',
-            label: 'Name',
-            type: 'text'
-          },
-          {
-            name: 'given_name',
-            label: 'Given Name',
-            type: 'text'
-          },
-          {
-            name: 'family_name',
-            label: 'Family Name',
-            type: 'text'
-          },
-          {
-            name: 'middle_name',
-            label: 'Middle Name',
-            type: 'text'
-          },
-          {
-            name: 'nickname',
-            label: 'Nickname',
-            type: 'text'
-          },
-          {
-            name: 'preferred_username',
-            label: 'Preferred Username',
-            type: 'text'
-          },
-          {
-            name: 'profile',
-            label: 'Profile',
-            type: 'text'
-          },
-          {
-            name: 'picture',
-            label: 'Picture',
-            type: 'text'
-          },
-          {
-            name: 'website',
-            label: 'Website',
-            type: 'text'
-          },
-          {
-            name: 'email',
-            label: 'Email',
-            type: 'text'
-          },
-          {
-            name: 'gender',
-            label: 'Gender',
-            type: 'text'
-          },
-          {
-            name: 'birthdate',
-            label: 'Birthdate',
-            type: 'text'
-          },
-          {
-            name: 'zoneinfo',
-            label: 'Timezone',
-            type: 'text'
-          },
-          {
-            name: 'locale',
-            label: 'Locale',
-            type: 'text'
-          },
-          {
-            name: 'phone_number',
-            label: 'Phone Number',
-            type: 'text'
-          },
-          {
-            name: 'address[street_address]',
-            label: 'Street Address',
-            type: 'text'
-          },
-          {
-            name: 'address[locality]',
-            label: 'Locality',
-            type: 'text'
-          },
-          {
-            name: 'address[region]',
-            label: 'Region',
-            type: 'text'
-          },
-          {
-            name: 'address[postal_code]',
-            label: 'Postal Code',
-            type: 'text'
-          },
-          {
-            name: 'address[country]',
-            label: 'Country',
-            type: 'text'
-          },
-        ]
+      const redisAdapter = new RedisAdapter('AccessToken');
+      redisAdapter.find(request.query.accessToken.substr(0, 48)).then(token => {
+        if (token) {
+          if (token.signature !== request.query.accessToken.substr(48)) {
+            return reply(Boom.forbidden());
+          }
+          const payload = JSON.parse(atob(token.payload));
+          const accountId = payload.accountId;
+          service.findById(accountId).then(user => {
+            if (!user) {
+              return reply(Boom.notFound());
+            }
+            const profile = user.claims();
+            reply.view('user-profile', {
+              fields: [
+                {
+                  name: 'name',
+                  label: 'Name',
+                  type: 'text',
+                  value: get(profile, 'name', ''),
+                },
+                {
+                  name: 'given_name',
+                  label: 'Given Name',
+                  type: 'text',
+                  value: get(profile, 'given_name', ''),
+                },
+                {
+                  name: 'family_name',
+                  label: 'Family Name',
+                  type: 'text',
+                  value: get(profile, 'family_name', ''),
+                },
+                {
+                  name: 'middle_name',
+                  label: 'Middle Name',
+                  type: 'text',
+                  value: get(profile, 'middle_name', ''),
+                },
+                {
+                  name: 'nickname',
+                  label: 'Nickname',
+                  type: 'text',
+                  value: get(profile, 'nickname', ''),
+                },
+                {
+                  name: 'preferred_username',
+                  label: 'Preferred Username',
+                  type: 'text',
+                  value: get(profile, 'preferred_username', ''),
+                },
+                {
+                  name: 'profile',
+                  label: 'Profile',
+                  type: 'text',
+                  value: get(profile, 'profile', ''),
+                },
+                {
+                  name: 'picture',
+                  label: 'Picture',
+                  type: 'text',
+                  value: get(profile, 'picture', ''),
+                },
+                {
+                  name: 'website',
+                  label: 'Website',
+                  type: 'text',
+                  value: get(profile, 'website', ''),
+                },
+                {
+                  name: 'email',
+                  label: 'Email',
+                  type: 'text',
+                  value: get(profile, 'email', ''),
+                },
+                {
+                  name: 'gender',
+                  label: 'Gender',
+                  type: 'text',
+                  value: get(profile, 'gender', ''),
+                },
+                {
+                  name: 'birthdate',
+                  label: 'Birthdate',
+                  type: 'text',
+                  value: get(profile, 'birthdate', ''),
+                },
+                {
+                  name: 'zoneinfo',
+                  label: 'Timezone',
+                  type: 'text',
+                  value: get(profile, 'zoneinfo', ''),
+                },
+                {
+                  name: 'locale',
+                  label: 'Locale',
+                  type: 'text',
+                  value: get(profile, 'locale', ''),
+                },
+                {
+                  name: 'phone_number',
+                  label: 'Phone Number',
+                  type: 'text',
+                  value: get(profile, 'phone_number', ''),
+                },
+                {
+                  name: 'address[street_address]',
+                  label: 'Street Address',
+                  type: 'text',
+                  value: get(profile, 'address.street_address', ''),
+                },
+                {
+                  name: 'address[locality]',
+                  label: 'Locality',
+                  type: 'text',
+                  value: get(profile, 'address.locality', ''),
+                },
+                {
+                  name: 'address[region]',
+                  label: 'Region',
+                  type: 'text',
+                  value: get(profile, 'address.region', ''),
+                },
+                {
+                  name: 'address[postal_code]',
+                  label: 'Postal Code',
+                  type: 'text',
+                  value: get(profile, 'address.postal_code', ''),
+                },
+                {
+                  name: 'address[country]',
+                  label: 'Country',
+                  type: 'text',
+                  value: get(profile, 'address.country', ''),
+                },
+              ]
+            });
+          });
+        } else {
+          return reply(Boom.unauthorized());
+        }
       });
     }
   };
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['user/user-service'];
+module.exports['@require'] = [
+  'user/user-service',
+  'oidc-adapter/redis',
+];

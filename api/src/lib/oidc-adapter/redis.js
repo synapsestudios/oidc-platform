@@ -48,6 +48,7 @@ module.exports = () => {
     upsert(id, payload, expiresIn) {
       const key = this.key(id);
       let toStore = payload;
+      console.log('upsert', key, payload);
 
       // Clients are not simple objects where value is always a string
       // redis does only allow string values =>

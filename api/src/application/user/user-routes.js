@@ -40,6 +40,13 @@ module.exports = (service, controller) => {
       method: 'GET',
       path: '/user/profile',
       handler: controller.profileFormHandler,
+      config: {
+        validate: {
+          query: {
+            accessToken: Joi.string().required(),
+          },
+        }
+      }
     },
     {
       method: 'POST',
