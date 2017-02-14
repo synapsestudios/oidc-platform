@@ -37,8 +37,12 @@ module.exports = (bookshelf) => {
         }).save({}, {method: 'insert'}));
     },
 
+    update: function(id, payload) {
+      return bookshelf.model('user').forge({ id }).save(payload);
+    },
+
     authenticate: function(email, password) {
-      return bookshelf.model('user').forge().fetch({email})
+      return bookshelf.model('user').forge({ email }).fetch()
         .then(user => {
           if (!user) throw new Error('No user found for this email');
           return self.comparePasswords(password, user)
@@ -50,9 +54,42 @@ module.exports = (bookshelf) => {
     },
 
     findById: function(id) {
-      return bookshelf.model('user').forge().fetch({id})
+      return bookshelf.model('user').forge({ id }).fetch()
         .then(user => user.serialize({strictOidc: true}));
-    }
+    },
+
+    findByEmail: function(email) {
+      return bookshelf.model('user').forge({ email }).fetch()
+        .then(user => user ? user.serialize({strictOidc: true}) : null);
+    },
+
+    findByPasswordToken: function(token) {
+      return bookshelf.model('user_password_reset_token')
+        .forge({ token })
+        .where('expires_at', '>', bookshelf.knex.fn.now())
+        .fetch()
+        .then(tokenModel => {
+          if (tokenModel) {
+            return self.findById(tokenModel.get('user_id'));
+          }
+          return null;
+        });
+    },
+
+    destroyPasswordToken: function(token) {
+      return bookshelf.model('user_password_reset_token').forge({ token }).destroy();
+    },
+
+    createPasswordResetToken: function(id) {
+      const expires = new Date();
+      expires.setHours(expires.getHours() + 1);
+
+      return bookshelf.model('user_password_reset_token').forge({
+        token: uuid.v4(),
+        user_id: id,
+        expires_at: expires,
+      }).save({}, {method: 'insert'});
+    },
 
   };
 
@@ -60,4 +97,4 @@ module.exports = (bookshelf) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];
+module.exports['@require'] = ['bookshelf', 'email/email-service'];
