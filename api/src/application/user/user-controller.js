@@ -30,10 +30,19 @@ module.exports = (service, RedisAdapter) => {
     },
     scope : {
       'any.required' : 'Scope is required',
+    },
+    profile: {
+      'string.uri': 'Must be a valid URL',
+    },
+    picture: {
+      'string.uri': 'Must be a valid URL',
+    },
+    website: {
+      'string.uri': 'Must be a valid URL',
     }
   };
 
-  const handlePost = function(request, reply) {
+  const handleRegistrationPost = function(request, reply) {
     service.create(request.payload.email, request.payload.password)
       .then(user => {
         reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
@@ -50,13 +59,17 @@ module.exports = (service, RedisAdapter) => {
       });
   };
 
+  const handleProfilePost = function(request, reply) {
+    reply('ok');
+  };
+
   return {
     registerFormHandler: function(request, reply, source, error) {
       request.payload = request.payload || {};
       var validationErrorMessages = {};
 
       if (!error && request.method === 'post') {
-        handlePost(request, reply);
+        handleRegistrationPost(request, reply);
       } else {
         if (error) {
           error = formatError(error);
@@ -81,141 +94,184 @@ module.exports = (service, RedisAdapter) => {
       }
     },
 
-    profileFormHandler: function(request, reply) {
+    profileFormHandler: function(request, reply, source, error) {
       const redisAdapter = new RedisAdapter('AccessToken');
       redisAdapter.find(request.query.accessToken.substr(0, 48)).then(token => {
         if (token) {
           if (token.signature !== request.query.accessToken.substr(48)) {
+            // @todo redirect with error in query string
             return reply(Boom.forbidden());
           }
           const payload = JSON.parse(atob(token.payload));
           const accountId = payload.accountId;
           service.findById(accountId).then(user => {
             if (!user) {
+              // @todo redirect with error in query string
               return reply(Boom.notFound());
             }
+
+            const validationErrorMessages = {};
+            if (!error && request.method === 'post') {
+              return handleProfilePost(request, reply);
+            } else {
+              if (error) {
+                error = formatError(error);
+                error.output.payload.validationErrors.forEach(errorObj => {
+                  validationErrorMessages[errorObj.key] = validationErrorMessages[errorObj.key] || [];
+                  if (errorMessages[errorObj.key] && errorMessages[errorObj.key][errorObj.type]) {
+                    validationErrorMessages[errorObj.key].push(errorMessages[errorObj.key][errorObj.type]);
+                  } else {
+                    validationErrorMessages[errorObj.key].push('Invalid value');
+                  }
+                });
+              }
+            }
+
             const profile = user.claims();
+            const getValue = (field) => {
+              return (request.payload && request.payload[field]) || get(profile, field, '');
+            };
             reply.view('user-profile', {
               fields: [
                 {
                   name: 'name',
                   label: 'Name',
                   type: 'text',
-                  value: get(profile, 'name', ''),
+                  value: getValue('name'),
+                  error: validationErrorMessages.name,
                 },
                 {
                   name: 'given_name',
                   label: 'Given Name',
                   type: 'text',
-                  value: get(profile, 'given_name', ''),
+                  value: getValue('given_name'),
+                  error: validationErrorMessages.given_name,
                 },
                 {
                   name: 'family_name',
                   label: 'Family Name',
                   type: 'text',
-                  value: get(profile, 'family_name', ''),
+                  value: getValue('family_name'),
+                  error: validationErrorMessages.family_name,
                 },
                 {
                   name: 'middle_name',
                   label: 'Middle Name',
                   type: 'text',
-                  value: get(profile, 'middle_name', ''),
+                  value: getValue('middle_name'),
+                  error: validationErrorMessages.middle_name,
                 },
                 {
                   name: 'nickname',
                   label: 'Nickname',
                   type: 'text',
-                  value: get(profile, 'nickname', ''),
+                  value: getValue('nickname'),
+                  error: validationErrorMessages.nickname,
                 },
                 {
                   name: 'preferred_username',
                   label: 'Preferred Username',
                   type: 'text',
-                  value: get(profile, 'preferred_username', ''),
+                  value: getValue('preferred_username'),
+                  error: validationErrorMessages.preferred_username,
                 },
                 {
                   name: 'profile',
                   label: 'Profile',
                   type: 'text',
-                  value: get(profile, 'profile', ''),
+                  value: getValue('profile'),
+                  error: validationErrorMessages.profile,
                 },
                 {
                   name: 'picture',
                   label: 'Picture',
                   type: 'text',
-                  value: get(profile, 'picture', ''),
+                  value: getValue('picture'),
+                  error: validationErrorMessages.picture,
                 },
                 {
                   name: 'website',
                   label: 'Website',
                   type: 'text',
-                  value: get(profile, 'website', ''),
+                  value: getValue('website'),
+                  error: validationErrorMessages.website,
                 },
                 {
                   name: 'email',
                   label: 'Email',
                   type: 'text',
-                  value: get(profile, 'email', ''),
+                  value: getValue('email'),
+                  error: validationErrorMessages.email,
                 },
                 {
                   name: 'gender',
                   label: 'Gender',
                   type: 'text',
-                  value: get(profile, 'gender', ''),
+                  value: getValue('gender'),
+                  error: validationErrorMessages.gender,
                 },
                 {
                   name: 'birthdate',
                   label: 'Birthdate',
                   type: 'text',
-                  value: get(profile, 'birthdate', ''),
+                  value: getValue('birthdate'),
+                  error: validationErrorMessages.birthdate,
                 },
                 {
                   name: 'zoneinfo',
                   label: 'Timezone',
                   type: 'text',
-                  value: get(profile, 'zoneinfo', ''),
+                  value: getValue('zoneinfo'),
+                  error: validationErrorMessages.zoneinfo,
                 },
                 {
                   name: 'locale',
                   label: 'Locale',
                   type: 'text',
-                  value: get(profile, 'locale', ''),
+                  value: getValue('locale'),
+                  error: validationErrorMessages.locale,
                 },
                 {
                   name: 'phone_number',
                   label: 'Phone Number',
                   type: 'text',
-                  value: get(profile, 'phone_number', ''),
+                  value: getValue('phone_number'),
+                  error: validationErrorMessages.phone_number,
                 },
                 {
-                  name: 'address[street_address]',
+                  name: 'address.street_address',
                   label: 'Street Address',
                   type: 'text',
-                  value: get(profile, 'address.street_address', ''),
+                  value: getValue('address.street_address'),
+                  error: validationErrorMessages['address.street_address'],
                 },
                 {
-                  name: 'address[locality]',
+                  name: 'address.locality',
                   label: 'Locality',
                   type: 'text',
-                  value: get(profile, 'address.locality', ''),
+                  value: getValue('address.locality'),
+                  error: validationErrorMessages['address.locality'],
                 },
                 {
-                  name: 'address[region]',
+                  name: 'address.region',
                   label: 'Region',
                   type: 'text',
-                  value: get(profile, 'address.region', ''),
+                  value: getValue('address.region'),
+                  error: validationErrorMessages['address.region'],
                 },
                 {
-                  name: 'address[postal_code]',
+                  name: 'address.postal_code',
                   label: 'Postal Code',
                   type: 'text',
-                  value: get(profile, 'address.postal_code', ''),
+                  value: getValue('address.postal_code'),
+                  error: validationErrorMessages['address.postal_code'],
                 },
                 {
-                  name: 'address[country]',
+                  name: 'address.country',
                   label: 'Country',
                   type: 'text',
-                  value: get(profile, 'address.country', ''),
+                  value: getValue('address.country'),
+                  error: validationErrorMessages['address.country'],
                 },
               ]
             });

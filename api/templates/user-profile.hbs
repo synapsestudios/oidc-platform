@@ -9,7 +9,7 @@
     />
     {{#if error}}
       <div class="validation-errors-list">
-        {{#each validationErrorMessages.email}}
+        {{#each error}}
           <div class="validation-error">{{this}}</div>
         {{/each}}
       </div>
