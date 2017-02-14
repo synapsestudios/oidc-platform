@@ -12,12 +12,14 @@ TBD
 2. Create an oauth client by posting to http://localhost:9000/op/reg with the payload:
 ```
 {
-	"redirect_uris": ["http://sso-client.dev"]
+    "redirect_uris": ["http://sso-client.dev:3000/"],
+    "post_logout_redirect_uris": ["http://sso-client.dev:3000/logout"]
 }
 ```
 3. In `test-client/src` create a copy of `config.shape.js` and call it `config.js`. Fill in the
 client_id and client_secret of the client you created in the previous step.
-4. `npm i` and `npm start` in `test-client`
+4. Add `sso-client.dev`for `127.0.0.1` to your hosts file
+5. `npm i` and `npm start` in `test-client`
 
 ## Session Management
 

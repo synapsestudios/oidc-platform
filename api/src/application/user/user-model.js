@@ -9,7 +9,7 @@ module.exports = bookshelf => bookshelf.model('user', {
         accountId : this.get('id'),
         claims : () => {
           return {
-            email : this.get('email')
+            email: this.get('email'),
           };
         }
       };

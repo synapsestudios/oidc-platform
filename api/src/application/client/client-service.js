@@ -79,7 +79,10 @@ module.exports = (bookshelf) => ({
     return bookshelf.model('client').forge({ client_id: id }).destroy();
   },
   findById(id) {
-    return bookshelf.model('client').where({ client_id: id }).fetch({ withRelated: 'redirect_uris' });
+    return bookshelf
+      .model('client')
+      .where({ client_id: id })
+      .fetch({ withRelated: ['redirect_uris', 'post_logout_redirect_uris'] });
   },
   update(id, payload) {
     const toStore = Object.assign({}, payload);
