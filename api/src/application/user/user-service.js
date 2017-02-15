@@ -38,7 +38,7 @@ module.exports = (bookshelf) => {
     },
 
     authenticate: function(email, password) {
-      return bookshelf.model('user').forge().fetch({email})
+      return bookshelf.model('user').where({ email }).fetch()
         .then(user => {
           if (!user) throw new Error('No user found for this email');
           return self.comparePasswords(password, user)
