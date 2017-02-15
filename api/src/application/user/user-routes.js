@@ -44,6 +44,7 @@ module.exports = (service, controller, userFormData) => {
         validate: {
           query: {
             accessToken: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
           },
         }
       }

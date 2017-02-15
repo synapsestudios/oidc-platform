@@ -4,7 +4,7 @@ const atob = require('atob');
 const Boom = require('boom');
 const get = require('lodash/get');
 
-module.exports = (service, RedisAdapter, userFormData) => {
+module.exports = (service, clientService, RedisAdapter, userFormData) => {
 
   const errorMessages = {
     email : {
@@ -63,7 +63,7 @@ module.exports = (service, RedisAdapter, userFormData) => {
     const profile = user.get('profile');
     Object.assign(profile, request.payload);
     return user.save({ profile }).then(() => {
-      return reply();
+      return reply.redirect(request.query.redirect_uri);
     });
   };
 
@@ -108,10 +108,18 @@ module.exports = (service, RedisAdapter, userFormData) => {
           }
           const payload = JSON.parse(atob(token.payload));
           const accountId = payload.accountId;
-          service.findById(accountId).then(user => {
+          const clientId = payload.clientId;
+          Promise.all([
+            service.findById(accountId),
+            clientService.findById(clientId)
+          ]).then(results => {
+            const [ user, client ] = results;
+            const redirectUris = client.related('redirect_uris').map(uri => uri.get('uri'));
+            if (redirectUris.indexOf(request.query.redirect_uri) < 0) {
+              return reply(Boom.forbidden('redirect_uri not in whitelist'));
+            }
             if (!user) {
-              // @todo redirect with error in query string
-              return reply(Boom.notFound());
+              return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
             }
 
             const validationErrorMessages = {};
@@ -136,6 +144,7 @@ module.exports = (service, RedisAdapter, userFormData) => {
               return (request.payload && request.payload[field]) || get(profile, field, '');
             };
             reply.view('user-profile', {
+              returnTo: request.query.redirect_uri,
               fields: [
                 {
                   name: 'name',
@@ -301,6 +310,7 @@ module.exports = (service, RedisAdapter, userFormData) => {
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
+  'client/client-service',
   'oidc-adapter/redis',
   'user/user-form-data',
 ];
