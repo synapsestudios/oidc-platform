@@ -43,6 +43,9 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
     },
     website: {
       'string.uri': 'Must be a valid URL',
+    },
+    birthdate: {
+      'string.isoDate': 'Must be valid date in YYYY-MM-DD format'
     }
   };
 
@@ -72,9 +75,9 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
       error.output.payload.validationErrors.forEach(errorObj => {
         validationErrorMessages[errorObj.key] = validationErrorMessages[errorObj.key] || [];
 
-        if (errorMessages[errorObj.key][errorObj.type]) {
+        if (errorMessages[errorObj.key] && errorMessages[errorObj.key][errorObj.type]) {
           validationErrorMessages[errorObj.key].push(errorMessages[errorObj.key][errorObj.type]);
-        } else {
+        } else if (errorObj.message) {
           validationErrorMessages[errorObj.key].push(errorObj.message);
         }
       });
@@ -122,25 +125,15 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
               return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
             }
 
-            const validationErrorMessages = {};
+            let validationErrorMessages = {};
             if (!error && request.method === 'post') {
               const profile = user.get('profile');
               Object.assign(profile, request.payload);
               return userService.update(user.get('id'), { profile }).then(() => {
                 return reply.redirect(request.query.redirect_uri);
               });
-            } else {
-              if (error) {
-                error = formatError(error);
-                error.output.payload.validationErrors.forEach(errorObj => {
-                  validationErrorMessages[errorObj.key] = validationErrorMessages[errorObj.key] || [];
-                  if (errorMessages[errorObj.key] && errorMessages[errorObj.key][errorObj.type]) {
-                    validationErrorMessages[errorObj.key].push(errorMessages[errorObj.key][errorObj.type]);
-                  } else {
-                    validationErrorMessages[errorObj.key].push('Invalid value');
-                  }
-                });
-              }
+            } else if (error) {
+              validationErrorMessages = getValidationMessages(error);
             }
 
             const profile = user.get('profile');
