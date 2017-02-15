@@ -91,7 +91,7 @@ class App extends Component {
           <p>{this.state.tokenType}</p>
         </div>
         <div>
-          <div><a href={`http://localhost:9000/user/profile?accessToken=${localstorage('accessToken')}&redirect_uri=${config.redirectUri}`}>Edit Profile</a></div>
+          <div><a href={`http://localhost:9000/user/profile?clientId=${config.clientId}&accessToken=${localstorage('accessToken')}&redirect_uri=${config.redirectUri}`}>Edit Profile</a></div>
           <div><a href={`http://localhost:9000/op/session/end?id_token_hint=${this.state.idToken}&post_logout_redirect_uri=${config.postLogoutRedirectUri}`}>Log Out</a></div>
         </div>
       </div>

@@ -43,6 +43,7 @@ module.exports = (service, controller, userFormData) => {
       config: {
         validate: {
           query: {
+            clientId: Joi.string().required(),
             accessToken: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           },
