@@ -64,14 +64,6 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
       });
   };
 
-  const handleProfilePost = function(user, request, reply) {
-    const profile = user.get('profile');
-    Object.assign(profile, request.payload);
-    return user.save({ profile }).then(() => {
-      return reply.redirect(request.query.redirect_uri);
-    });
-  };
-
   const getValidationMessages = function(error) {
     var validationErrorMessages = {};
 
@@ -132,7 +124,11 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
 
             const validationErrorMessages = {};
             if (!error && request.method === 'post') {
-              return handleProfilePost(user, request, reply);
+              const profile = user.get('profile');
+              Object.assign(profile, request.payload);
+              return userService.update(user.get('id'), { profile }).then(() => {
+                return reply.redirect(request.query.redirect_uri);
+              });
             } else {
               if (error) {
                 error = formatError(error);
