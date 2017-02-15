@@ -37,6 +37,10 @@ module.exports = (bookshelf) => {
         }).save({}, {method: 'insert'}));
     },
 
+    update: function(id, payload) {
+      return bookshelf.model('user').forge({ id }).save(payload);
+    },
+
     authenticate: function(email, password) {
       return bookshelf.model('user').where({ email }).fetch()
         .then(user => {
@@ -54,8 +58,41 @@ module.exports = (bookshelf) => {
         .then(user => user.serialize({ strictOidc: true }));
     },
 
+    findByEmailForOidc: function(email) {
+      return bookshelf.model('user').forge({ email }).fetch()
+        .then(user => user ? user.serialize({strictOidc: true}) : null);
+    },
+
     findById: function(id) {
       return bookshelf.model('user').where({ id }).fetch();
+    },
+
+    findByPasswordToken: function(token) {
+      return bookshelf.model('user_password_reset_token')
+        .forge({ token })
+        .where('expires_at', '>', bookshelf.knex.fn.now())
+        .fetch()
+        .then(tokenModel => {
+          if (tokenModel) {
+            return self.findById(tokenModel.get('user_id'));
+          }
+          return null;
+        });
+    },
+
+    destroyPasswordToken: function(token) {
+      return bookshelf.model('user_password_reset_token').forge({ token }).destroy();
+    },
+
+    createPasswordResetToken: function(id) {
+      const expires = new Date();
+      expires.setHours(expires.getHours() + 1);
+
+      return bookshelf.model('user_password_reset_token').forge({
+        token: uuid.v4(),
+        user_id: id,
+        expires_at: expires,
+      }).save({}, {method: 'insert'});
     },
   };
 
@@ -63,4 +100,4 @@ module.exports = (bookshelf) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];
+module.exports['@require'] = ['bookshelf', 'email/email-service'];

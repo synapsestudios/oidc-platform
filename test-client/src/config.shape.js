@@ -1,7 +1,7 @@
 export default {
   scope: 'openid profile',
-  redirectUri: 'http://sso-client.dev:3000/',
-  postLogoutRedirectUri: 'http://sso-client.dev:3000/logout',
+  redirectUri: 'https://sso-client.dev:3000/',
+  postLogoutRedirectUri: 'https://sso-client.dev:3000/logout',
   clientId: '',
   clientSecret: '',
 };

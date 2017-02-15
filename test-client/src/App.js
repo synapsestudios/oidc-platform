@@ -3,10 +3,8 @@ import queryString from 'query-string';
 import localstorage from 'store2';
 import createHistory from 'history/createBrowserHistory';
 import config from './config';
-import Client from '@synapsestudios/fetch-client';
 import './App.css';
 
-const client = new Client();
 const history = createHistory();
 
 class App extends Component {
@@ -26,39 +24,17 @@ class App extends Component {
   }
 
   checkForCode() {
-    const query = queryString.parse(location.search);
+    const query = queryString.parse(location.hash.substr(1));
 
     if (query.code && !localstorage('accessToken')) {
-      const formData = new URLSearchParams();
-      formData.append('grant_type', 'authorization_code');
-      formData.append('code', query.code);
-      formData.append('redirect_uri', config.redirectUri);
-
-      const auth = btoa(`${config.clientId}:${config.clientSecret}`);
-
-      client.fetch('http://localhost:9000/op/token', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          Host: 'localhost:9000',
-          Authorization: `Basic ${auth}`,
-        },
-        mode: 'cors',
-      })
-        .then(response => response.json())
-        .then(response => {
-          localstorage({
-            accessToken: response.access_token,
-            expiresIn: response.expires_in,
-            idToken: response.id_token,
-            tokenType: response.token_type,
-          });
-          this.setState(localstorage());
-          history.replace('/');
-        })
-        .catch((e) => {
-          console.error(e);
-        });
+      localstorage({
+        accessToken: query.access_token,
+        expiresIn: query.expires_in,
+        idToken: query.id_token,
+        tokenType: query.token_type,
+      });
+      this.setState(localstorage());
+      history.replace('/');
     } else if (localstorage('accessToken')) {
       this.setState(localstorage());
     }
@@ -68,9 +44,9 @@ class App extends Component {
     return (
       <div>
         <span>
-          <a href={`http://localhost:9000/op/auth?client_id=${config.clientId}&response_type=code&scope=${config.scope}&redirect_uri=${config.redirectUri}`}>Login</a>
+          <a href={`http://localhost:9000/op/auth?client_id=${config.clientId}&response_type=code id_token token&scope=${config.scope}&redirect_uri=${config.redirectUri}&nonce=nonce`}>Login</a>
           <span> | </span>
-          <a href={`http://localhost:9000/user/register?client_id=${config.clientId}&response_type=code&scope=${config.scope}&redirect_uri=${config.redirectUri}`}>Register</a>
+          <a href={`http://localhost:9000/user/register?client_id=${config.clientId}&response_type=code id_token token&scope=${config.scope}&redirect_uri=${config.redirectUri}&nonce=nonce`}>Register</a>
         </span>
       </div>
     );

@@ -5,15 +5,19 @@ The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com
 ## Usage
 TBD
 
-
 ## Setting up for development
 
 1. `docker-compose up`
 2. Create an oauth client by posting to http://localhost:9000/op/reg with the payload:
 ```
 {
-    "redirect_uris": ["http://sso-client.dev:3000/"],
-    "post_logout_redirect_uris": ["http://sso-client.dev:3000/logout"]
+    "response_types": ["code id_token token"],
+    "grant_types": [
+        "authorization_code",
+        "implicit"
+    ],
+    "redirect_uris": ["https://sso-client.dev:3000/"],
+    "post_logout_redirect_uris": ["https://sso-client.dev:3000/logout"]
 }
 ```
 3. In `test-client/src` create a copy of `config.shape.js` and call it `config.js`. Fill in the
