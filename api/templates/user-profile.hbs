@@ -1,7 +1,9 @@
 <h1>Profile</h1>
 <form action="{{formAction}}" method="post">
   {{#each fields}}
+    <label for='{{name}}'>{{label}}</label>
     <input
+      id='{{name}}'
       type='{{type}}'
       name='{{name}}'
       placeholder='{{label}}'
