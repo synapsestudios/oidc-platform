@@ -15,6 +15,9 @@ module.exports = (service, controller) => {
       config : {
         validate : {
           failAction : controller.registerFormHandler,
+          options: {
+            allowUnknown: true,
+          },
           query : queryValidation,
         }
       },
@@ -25,11 +28,15 @@ module.exports = (service, controller) => {
       path : '/user/register',
       config : {
         validate : {
+          options: {
+            allowUnknown: true,
+          },
           payload : {
             email : Joi.string().email().required(),
             password : Joi.string().min(8).required(),
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
           },
+          
           query : queryValidation,
           failAction : controller.registerFormHandler,
         }
