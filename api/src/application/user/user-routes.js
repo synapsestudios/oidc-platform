@@ -58,6 +58,11 @@ module.exports = (service, controller, userFormData) => {
       config: {
         validate: {
           failAction: controller.profileFormHandler,
+          query: {
+            clientId: Joi.string().required(),
+            accessToken: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+          },
           payload: {
             name: Joi.string().allow(''),
             given_name: Joi.string().allow(''),
