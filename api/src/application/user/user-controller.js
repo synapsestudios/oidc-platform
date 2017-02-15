@@ -3,6 +3,7 @@ const formatError = require('../../lib/format-error');
 const atob = require('atob');
 const Boom = require('boom');
 const get = require('lodash/get');
+const set = require('lodash/set');
 const config = require('../../../config');
 
 module.exports = (userService, emailService, renderTemplate, clientService, RedisAdapter, userFormData) => {
@@ -86,6 +87,18 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
     return validationErrorMessages;
   };
 
+  // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
+  const expandDotPaths = function(object) {
+    Object.keys(object).forEach(key => {
+      if (key.indexOf('.') > -1) {
+        const value = object[key];
+        delete(object[key]);
+        set(object, key, value);
+      }
+    });
+    return object;
+  };
+
   return {
     registerFormHandler: function(request, reply, source, error) {
       request.payload = request.payload || {};
@@ -128,7 +141,8 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
             let validationErrorMessages = {};
             if (!error && request.method === 'post') {
               const profile = user.get('profile');
-              Object.assign(profile, request.payload);
+              const payload = expandDotPaths(request.payload);
+              Object.assign(profile, payload);
               return userService.update(user.get('id'), { profile }).then(() => {
                 return reply.redirect(request.query.redirect_uri);
               });
