@@ -5,6 +5,7 @@ const queryValidation = {
   response_type : Joi.string().required(),
   scope : Joi.string().required(),
   redirect_uri : Joi.string().required(),
+  nonce : Joi.string().optional(),
 };
 
 module.exports = (service, controller) => {
