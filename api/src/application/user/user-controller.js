@@ -4,7 +4,7 @@ const atob = require('atob');
 const Boom = require('boom');
 const get = require('lodash/get');
 
-module.exports = (service, RedisAdapter) => {
+module.exports = (service, RedisAdapter, userFormData) => {
 
   const errorMessages = {
     email : {
@@ -224,14 +224,24 @@ module.exports = (service, RedisAdapter) => {
                 {
                   name: 'zoneinfo',
                   label: 'Timezone',
-                  type: 'text',
+                  isDropdown: true,
+                  options: userFormData.timezones.map(name => ({
+                    label: name,
+                    value: name,
+                    selected: getValue('zoneinfo') === name
+                  })),
                   value: getValue('zoneinfo'),
                   error: validationErrorMessages.zoneinfo,
                 },
                 {
                   name: 'locale',
                   label: 'Locale',
-                  type: 'text',
+                  isDropdown: true,
+                  options: Object.keys(userFormData.locales).map((value) => ({
+                    label: userFormData.locales[value],
+                    value,
+                    selected: getValue('locale') === value,
+                  })),
                   value: getValue('locale'),
                   error: validationErrorMessages.locale,
                 },
@@ -292,4 +302,5 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
   'oidc-adapter/redis',
+  'user/user-form-data',
 ];

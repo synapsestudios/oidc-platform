@@ -7,7 +7,7 @@ const queryValidation = {
   redirect_uri : Joi.string().required(),
 };
 
-module.exports = (service, controller) => {
+module.exports = (service, controller, userFormData) => {
   return [
     {
       method : 'GET',
@@ -68,8 +68,8 @@ module.exports = (service, controller) => {
             email: Joi.string().email().allow(''),
             gender: Joi.string().allow(''),
             birthdate: Joi.string().isoDate().allow(''),
-            zoneinfo: Joi.string().allow(''),
-            locale: Joi.string().allow(''),
+            zoneinfo: Joi.string().valid(userFormData.timezones),
+            locale: Joi.string().valid(Object.keys(userFormData.locales)),
             phone_number: Joi.string().allow(''),
             'address.street_address': Joi.string().allow(''),
             'address.locality': Joi.string().allow(''),
@@ -84,4 +84,8 @@ module.exports = (service, controller) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['user/user-service', 'user/user-controller', 'user/user-model'];
+module.exports['@require'] = [
+  'user/user-service',
+  'user/user-controller',
+  'user/user-form-data',
+];
