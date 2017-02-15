@@ -67,7 +67,7 @@ module.exports = (service, controller) => {
             website: Joi.string().uri().allow(''),
             email: Joi.string().email().allow(''),
             gender: Joi.string().allow(''),
-            birthdate: Joi.date().iso().allow(''),
+            birthdate: Joi.string().isoDate().allow(''),
             zoneinfo: Joi.string().allow(''),
             locale: Joi.string().allow(''),
             phone_number: Joi.string().allow(''),

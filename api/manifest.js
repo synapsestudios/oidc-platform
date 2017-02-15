@@ -75,7 +75,7 @@ module.exports = Promise.all([
         options : {
           prefix : 'op',
           authenticateUser : lib.userService.authenticate,
-          findUserById : lib.userService.findById,
+          findUserById : lib.userService.findByIdForOidc,
           cookieKeys : config('/oidc/cookieKeys'),
           initialAccessToken : config('/oidc/initialAccessToken'),
           adapter : function OidcAdapterFactory(name) {

@@ -59,8 +59,12 @@ module.exports = (service, RedisAdapter) => {
       });
   };
 
-  const handleProfilePost = function(request, reply) {
-    reply('ok');
+  const handleProfilePost = function(user, request, reply) {
+    const profile = user.get('profile');
+    Object.assign(profile, request.payload);
+    return user.save({ profile }).then(() => {
+      return reply();
+    });
   };
 
   return {
@@ -112,7 +116,7 @@ module.exports = (service, RedisAdapter) => {
 
             const validationErrorMessages = {};
             if (!error && request.method === 'post') {
-              return handleProfilePost(request, reply);
+              return handleProfilePost(user, request, reply);
             } else {
               if (error) {
                 error = formatError(error);
@@ -127,7 +131,7 @@ module.exports = (service, RedisAdapter) => {
               }
             }
 
-            const profile = user.claims();
+            const profile = user.get('profile');
             const getValue = (field) => {
               return (request.payload && request.payload[field]) || get(profile, field, '');
             };
