@@ -8,9 +8,7 @@ module.exports = bookshelf => bookshelf.model('user', {
       return {
         accountId : this.get('id'),
         claims : () => {
-          return {
-            email : this.get('email')
-          };
+          return this.get('profile');
         }
       };
     } else {

@@ -7,13 +7,15 @@
   },
   "dependencies": {
     "@synapsestudios/fetch-client": "^1.0.2",
+    "history": "^4.5.1",
     "openid-client": "^1.4.0",
     "query-string": "^4.3.1",
     "react": "^15.4.2",
-    "react-dom": "^15.4.2"
+    "react-dom": "^15.4.2",
+    "store2": "^2.5.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "HTTPS=true react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"

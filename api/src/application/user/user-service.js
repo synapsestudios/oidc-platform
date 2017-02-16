@@ -42,7 +42,7 @@ module.exports = (bookshelf) => {
     },
 
     authenticate: function(email, password) {
-      return bookshelf.model('user').forge({ email }).fetch()
+      return bookshelf.model('user').where({ email }).fetch()
         .then(user => {
           if (!user) throw new Error('No user found for this email');
           return self.comparePasswords(password, user)
@@ -53,14 +53,18 @@ module.exports = (bookshelf) => {
         });
     },
 
-    findById: function(id) {
-      return bookshelf.model('user').forge({ id }).fetch()
-        .then(user => user.serialize({strictOidc: true}));
+    findByIdForOidc: function(id) {
+      return bookshelf.model('user').where({ id }).fetch()
+        .then(user => user.serialize({ strictOidc: true }));
     },
 
-    findByEmail: function(email) {
+    findByEmailForOidc: function(email) {
       return bookshelf.model('user').forge({ email }).fetch()
         .then(user => user ? user.serialize({strictOidc: true}) : null);
+    },
+
+    findById: function(id) {
+      return bookshelf.model('user').where({ id }).fetch();
     },
 
     findByPasswordToken: function(token) {
@@ -90,7 +94,6 @@ module.exports = (bookshelf) => {
         expires_at: expires,
       }).save({}, {method: 'insert'});
     },
-
   };
 
   return self;

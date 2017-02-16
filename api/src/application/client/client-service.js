@@ -75,13 +75,19 @@ module.exports = (bookshelf) => ({
       return bookshelf.model('client').forge({ client_id: id }).fetch({ withRelated: clientRelationships });
     });
   },
+
   destroy(id) {
     return bookshelf.model('client').forge({ client_id: id }).destroy();
   },
+
   findById(id) {
     const clientRelationships = Object.keys(bookshelf.model('client').prototype.relationships);
-    return bookshelf.model('client').forge({ client_id: id }).fetch({ withRelated: clientRelationships });
+    return bookshelf
+      .model('client')
+      .where({ client_id: id })
+      .fetch({ withRelated: clientRelationships });
   },
+
   update(id, payload) {
     const toStore = Object.assign({}, payload);
     return bookshelf.model('client').forge({ client_id: id }).save(toStore);

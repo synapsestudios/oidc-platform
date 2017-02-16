@@ -1,0 +1,32 @@
+<h1>Profile</h1>
+<form action="{{formAction}}" method="post">
+  {{#each fields}}
+    <div>
+      <label for='{{name}}'>{{label}}</label>
+      {{#if isDropdown}}
+        <select name='{{name}}'>
+          {{#each options}}
+            <option value={{value}} {{#if selected}}selected{{/if}}>{{label}}</option>
+          {{/each}}
+        </select>
+      {{else}}
+        <input
+          id='{{name}}'
+          type='{{type}}'
+          name='{{name}}'
+          placeholder='{{label}}'
+          value='{{value}}'
+        />
+      {{/if}}
+      {{#if error}}
+        <div class="validation-errors-list">
+          {{#each error}}
+            <div class="validation-error">{{this}}</div>
+          {{/each}}
+        </div>
+      {{/if}}
+    </div>
+  {{/each}}
+
+  <button type="submit" class="profile profile-submit">Submit</button>
+</form>

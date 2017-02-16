@@ -1,8 +1,12 @@
 const querystring = require('querystring');
 const formatError = require('../../lib/format-error');
+const atob = require('atob');
+const Boom = require('boom');
+const get = require('lodash/get');
+const set = require('lodash/set');
 const config = require('../../../config');
 
-module.exports = (userService, emailService, renderTemplate) => {
+module.exports = (userService, emailService, renderTemplate, clientService, RedisAdapter, userFormData) => {
 
   const errorMessages = {
     email: {
@@ -32,10 +36,21 @@ module.exports = (userService, emailService, renderTemplate) => {
     token: {
       'any.required': 'Token is required',
     },
+    profile: {
+      'string.uri': 'Must be a valid URL',
+    },
+    picture: {
+      'string.uri': 'Must be a valid URL',
+    },
+    website: {
+      'string.uri': 'Must be a valid URL',
+    },
+    birthdate: {
+      'string.isoDate': 'Must be valid date in YYYY-MM-DD format'
+    }
   };
 
-  const handlePost = function(request, reply) {
-    // http://localhost:9000/op/auth?client_id=acmf&response_type=code&scope=openid&redirect_uri=http://sso-client.dev:3000/
+  const handleRegistrationPost = function(request, reply) {
     userService.create(request.payload.email, request.payload.password)
       .then(user => {
         reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
@@ -61,9 +76,9 @@ module.exports = (userService, emailService, renderTemplate) => {
       error.output.payload.validationErrors.forEach(errorObj => {
         validationErrorMessages[errorObj.key] = validationErrorMessages[errorObj.key] || [];
 
-        if (errorMessages[errorObj.key][errorObj.type]) {
+        if (errorMessages[errorObj.key] && errorMessages[errorObj.key][errorObj.type]) {
           validationErrorMessages[errorObj.key].push(errorMessages[errorObj.key][errorObj.type]);
-        } else {
+        } else if (errorObj.message) {
           validationErrorMessages[errorObj.key].push(errorObj.message);
         }
       });
@@ -72,12 +87,24 @@ module.exports = (userService, emailService, renderTemplate) => {
     return validationErrorMessages;
   };
 
+  // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
+  const expandDotPaths = function(object) {
+    Object.keys(object).forEach(key => {
+      if (key.indexOf('.') > -1) {
+        const value = object[key];
+        delete(object[key]);
+        set(object, key, value);
+      }
+    });
+    return object;
+  };
+
   return {
     registerFormHandler: function(request, reply, source, error) {
       request.payload = request.payload || {};
 
       if (!error && request.method === 'post') {
-        handlePost(request, reply);
+        handleRegistrationPost(request, reply);
       } else {
         reply.view('user-registration', {
           title: 'Register',
@@ -88,6 +115,203 @@ module.exports = (userService, emailService, renderTemplate) => {
           email: request.payload.email || ''
         });
       }
+    },
+
+    profileFormHandler: function(request, reply, source, error) {
+      const redisAdapter = new RedisAdapter('AccessToken');
+      const clientId = request.query.clientId;
+      return clientService.findById(clientId).then(client => {
+        const redirectUris = client.related('redirect_uris').map(uri => uri.get('uri'));
+        if (redirectUris.indexOf(request.query.redirect_uri) < 0) {
+          return reply(Boom.forbidden('redirect_uri not in whitelist'));
+        }
+        return client;
+      }).then((client) => {
+        redisAdapter.find(request.query.accessToken.substr(0, 48)).then(token => {
+          if (!token || token && token.signature !== request.query.accessToken.substr(48)) {
+            return reply.redirect(`${request.query.redirect_uri}?error=unauthorized&error_description=invalid access token`);
+          }
+          const payload = JSON.parse(atob(token.payload));
+          const accountId = payload.accountId;
+          userService.findById(accountId).then(user => {
+            if (!user) {
+              return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
+            }
+
+            let validationErrorMessages = {};
+            if (!error && request.method === 'post') {
+              const profile = user.get('profile');
+              const payload = expandDotPaths(request.payload);
+              Object.assign(profile, payload);
+              return userService.update(user.get('id'), { profile }).then(() => {
+                return reply.redirect(request.query.redirect_uri);
+              });
+            } else if (error) {
+              validationErrorMessages = getValidationMessages(error);
+            }
+
+            const profile = user.get('profile');
+            const getValue = (field) => {
+              return (request.payload && request.payload[field]) || get(profile, field, '');
+            };
+            reply.view('user-profile', {
+              returnTo: request.query.redirect_uri,
+              fields: [
+                {
+                  name: 'name',
+                  label: 'Name',
+                  type: 'text',
+                  value: getValue('name'),
+                  error: validationErrorMessages.name,
+                },
+                {
+                  name: 'given_name',
+                  label: 'Given Name',
+                  type: 'text',
+                  value: getValue('given_name'),
+                  error: validationErrorMessages.given_name,
+                },
+                {
+                  name: 'family_name',
+                  label: 'Family Name',
+                  type: 'text',
+                  value: getValue('family_name'),
+                  error: validationErrorMessages.family_name,
+                },
+                {
+                  name: 'middle_name',
+                  label: 'Middle Name',
+                  type: 'text',
+                  value: getValue('middle_name'),
+                  error: validationErrorMessages.middle_name,
+                },
+                {
+                  name: 'nickname',
+                  label: 'Nickname',
+                  type: 'text',
+                  value: getValue('nickname'),
+                  error: validationErrorMessages.nickname,
+                },
+                {
+                  name: 'preferred_username',
+                  label: 'Preferred Username',
+                  type: 'text',
+                  value: getValue('preferred_username'),
+                  error: validationErrorMessages.preferred_username,
+                },
+                {
+                  name: 'profile',
+                  label: 'Profile',
+                  type: 'text',
+                  value: getValue('profile'),
+                  error: validationErrorMessages.profile,
+                },
+                {
+                  name: 'picture',
+                  label: 'Picture',
+                  type: 'text',
+                  value: getValue('picture'),
+                  error: validationErrorMessages.picture,
+                },
+                {
+                  name: 'website',
+                  label: 'Website',
+                  type: 'text',
+                  value: getValue('website'),
+                  error: validationErrorMessages.website,
+                },
+                {
+                  name: 'email',
+                  label: 'Email',
+                  type: 'text',
+                  value: getValue('email'),
+                  error: validationErrorMessages.email,
+                },
+                {
+                  name: 'gender',
+                  label: 'Gender',
+                  type: 'text',
+                  value: getValue('gender'),
+                  error: validationErrorMessages.gender,
+                },
+                {
+                  name: 'birthdate',
+                  label: 'Birthdate',
+                  type: 'text',
+                  value: getValue('birthdate'),
+                  error: validationErrorMessages.birthdate,
+                },
+                {
+                  name: 'zoneinfo',
+                  label: 'Timezone',
+                  isDropdown: true,
+                  options: userFormData.timezones.map(name => ({
+                    label: name,
+                    value: name,
+                    selected: getValue('zoneinfo') === name
+                  })),
+                  value: getValue('zoneinfo'),
+                  error: validationErrorMessages.zoneinfo,
+                },
+                {
+                  name: 'locale',
+                  label: 'Locale',
+                  isDropdown: true,
+                  options: Object.keys(userFormData.locales).map((value) => ({
+                    label: userFormData.locales[value],
+                    value,
+                    selected: getValue('locale') === value,
+                  })),
+                  value: getValue('locale'),
+                  error: validationErrorMessages.locale,
+                },
+                {
+                  name: 'phone_number',
+                  label: 'Phone Number',
+                  type: 'text',
+                  value: getValue('phone_number'),
+                  error: validationErrorMessages.phone_number,
+                },
+                {
+                  name: 'address.street_address',
+                  label: 'Street Address',
+                  type: 'text',
+                  value: getValue('address.street_address'),
+                  error: validationErrorMessages['address.street_address'],
+                },
+                {
+                  name: 'address.locality',
+                  label: 'Locality',
+                  type: 'text',
+                  value: getValue('address.locality'),
+                  error: validationErrorMessages['address.locality'],
+                },
+                {
+                  name: 'address.region',
+                  label: 'Region',
+                  type: 'text',
+                  value: getValue('address.region'),
+                  error: validationErrorMessages['address.region'],
+                },
+                {
+                  name: 'address.postal_code',
+                  label: 'Postal Code',
+                  type: 'text',
+                  value: getValue('address.postal_code'),
+                  error: validationErrorMessages['address.postal_code'],
+                },
+                {
+                  name: 'address.country',
+                  label: 'Country',
+                  type: 'text',
+                  value: getValue('address.country'),
+                  error: validationErrorMessages['address.country'],
+                },
+              ]
+            });
+          });
+        });
+      });
     },
 
     getForgotPasswordForm: function(request, reply, source, error) {
@@ -101,7 +325,7 @@ module.exports = (userService, emailService, renderTemplate) => {
     },
 
     postForgotPasswordForm: function(request, reply) {
-      return userService.findByEmail(request.payload.email)
+      return userService.findByEmailForOidc(request.payload.email)
         .then(user => user ? userService.createPasswordResetToken(user.accountId): null)
         .then(token => {
           if (token) {
@@ -160,4 +384,11 @@ module.exports = (userService, emailService, renderTemplate) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['user/user-service', 'email/email-service', 'render-template'];
+module.exports['@require'] = [
+  'user/user-service',
+  'email/email-service',
+  'render-template',
+  'client/client-service',
+  'oidc-adapter/redis',
+  'user/user-form-data',
+];

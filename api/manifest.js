@@ -53,11 +53,10 @@ module.exports = Promise.all([
           options : {
             prefix : 'op',
             authenticateUser : lib.userService.authenticate,
-            findUserById : lib.userService.findById,
+            findUserById : lib.userService.findByIdForOidc,
             cookieKeys : config('/oidc/cookieKeys'),
             initialAccessToken : config('/oidc/initialAccessToken'),
             adapter : function OidcAdapterFactory(name) {
-              // Clients are stored in database, other entities are stored in redis
               return (name === 'Client') ? new lib.sqlOidcAdapter(name) : new lib.redisOidcAdapter(name);
             },
             keystores : lib.keystores,
