@@ -7,6 +7,7 @@ TBD
 
 ## Setting up for development
 
+0. Copy `common.template.env` as `common.env` and provide a mailgun key
 1. `docker-compose up`
 2. Create an oauth client by posting to http://localhost:9000/op/reg with the payload:
 ```
@@ -20,7 +21,7 @@ TBD
     "post_logout_redirect_uris": ["https://sso-client.dev:3000/logout"]
 }
 ```
-3. In `test-client/src` create a copy of `config.shape.js` and call it `config.js`. Fill in the
+3. In `test-client/src` create a copy of `config.template.js` and call it `config.js`. Fill in the
 client_id and client_secret of the client you created in the previous step.
 4. Add `sso-client.dev`for `127.0.0.1` to your hosts file
 5. `npm i` and `npm start` in `test-client`
