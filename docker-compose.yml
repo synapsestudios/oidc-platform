@@ -16,7 +16,7 @@ services:
             - redis
             - migrate-seed
         entrypoint: ./wait-for-it.sh -t 0 postgres:5432 --
-        command: ["npm", "start-dev"]
+        command: ["npm", "run", "start-dev"]
     postgres:
         image: postgres:9.6.1
         env_file:
