@@ -82,6 +82,7 @@ exports.register = function (server, options, next) {
     .then(() => {
       provider.app.use(cors());
       provider.app.keys = options.cookieKeys;
+      provider.app.proxy = true;
 
       server.ext('onRequest', function(request, reply) {
         if (request.path.substring(0, prefix.length) === prefix) {
