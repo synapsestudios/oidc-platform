@@ -51,6 +51,7 @@ module.exports = Promise.all([
         plugin : {
           register : './plugins/openid-connect/openid-connect',
           options : {
+            issuer : 'https://replaceme.synsit.es',
             prefix : 'op',
             authenticateUser : lib.userService.authenticate,
             findUserById : lib.userService.findByIdForOidc,
