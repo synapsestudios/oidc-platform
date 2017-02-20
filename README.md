@@ -44,7 +44,7 @@ We provide a script that, if you're using docker-compose, can be run like this:
 
 ```
 $ docker-compose exec synapse-oidc npm run generate-keys
-$ docker-compose exec cat > keystores.json
+$ docker-compose exec synapse-oidc cat keystores.json > keystores.json
 ```
 
 Now you have a `keystores.json` file. Put that in an AWS S3 bucket and provide these environment variables:
