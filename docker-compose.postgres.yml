@@ -1,0 +1,18 @@
+version: '2'
+services:
+    postgres:
+        image: postgres:9.6.1
+        env_file:
+            - ./common.env
+        ports:
+            - "5432:5432"
+    api:
+        depends_on:
+            - postgres
+            - redis
+            - migrate-seed
+        entrypoint: ./wait-for-it.sh -t 0 postgres:5432 --
+    migrate-seed:
+        depends_on:
+            - postgres
+        entrypoint: ./wait-for-it.sh -t 0 postgres:5432 --
