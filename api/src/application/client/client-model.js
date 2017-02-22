@@ -5,6 +5,12 @@
 module.exports = (bookshelf) => bookshelf.model('client', {
   tableName: 'SIP_client',
   idAttribute: 'client_id',
+
+  parse(attributes) {
+    attributes.require_auth_time = !!attributes.require_auth_time;
+    return attributes;
+  },
+
   relationships: {
     default_acr_values() {
       return this.hasMany('client_default_acr_value', 'client_id');

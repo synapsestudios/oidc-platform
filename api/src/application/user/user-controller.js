@@ -121,6 +121,9 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
       const redisAdapter = new RedisAdapter('AccessToken');
       const clientId = request.query.clientId;
       return clientService.findById(clientId).then(client => {
+        if (!client) {
+          return reply(Boom.notFound());
+        }
         const redirectUris = client.related('redirect_uris').map(uri => uri.get('uri'));
         if (redirectUris.indexOf(request.query.redirect_uri) < 0) {
           return reply(Boom.forbidden('redirect_uri not in whitelist'));
