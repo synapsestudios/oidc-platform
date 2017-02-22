@@ -10,7 +10,6 @@ services:
         depends_on:
             - mysql
             - redis
-            - migrate-seed
         entrypoint: ./wait-for-it.sh -t 0 mysql:3306 --
     migrate-seed:
         depends_on:
