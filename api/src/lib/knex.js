@@ -1,7 +1,7 @@
 var config = require('../../config');
 var knex = require('knex')({
   debug : process.env.DEBUG,
-  client : config('/dbAdapter') === 'postgres' ? 'pg' : config('/dbAdapter'),
+  client : config('/dbAdapter'),
   connection : config('/dbConnection')
 });
 
