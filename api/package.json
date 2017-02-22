@@ -4,8 +4,8 @@
   "description": "OpenID Connect provider for synapse projects",
   "main": "server.js",
   "scripts": {
-    "start-dev": "npm run migrate-seed && nodemon server.js",
-    "start": "npm run migrate-seed && node server.js",
+    "start-dev": "nodemon server.js",
+    "start": "node server.js",
     "drop-tables": "./src/bin/drop-tables.js",
     "rebuild-db": "npm run drop-tables && knex migrate:latest && knex seed:run",
     "migrate-seed": "knex migrate:latest && knex seed:run",
@@ -38,6 +38,7 @@
     "koa-cors": "0.0.16",
     "lodash": "^4.17.4",
     "mailgun-js": "^0.8.1",
+    "mysql": "^2.13.0",
     "oidc-provider": "^1.8.2",
     "pg": "^6.1.2",
     "uuid": "^3.0.1",

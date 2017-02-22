@@ -11,16 +11,7 @@ services:
             - ./common.env
         volumes:
             - .:/src
-        depends_on:
-            - postgres
-            - redis
-            - migrate-seed
-        entrypoint: ./wait-for-it.sh -t 0 postgres:5432 --
         command: ["npm", "run", "start-dev"]
-    postgres:
-        image: postgres:9.6.1
-        env_file:
-            - ./common.env
     redis:
         image: redis
     migrate-seed:
@@ -32,9 +23,8 @@ services:
                 WORKING_DIR: /src/api
         env_file:
             - ./common.env
+        environment:
+            DEBUG: "true"
         volumes:
             - .:/src
-        depends_on:
-            - postgres
-        entrypoint: ./wait-for-it.sh -t 0 postgres:5432 --
         command: ["npm", "run", "migrate-seed"]

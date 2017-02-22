@@ -1,13 +1,29 @@
 module.exports = bookshelf => bookshelf.model('user', {
   tableName: 'SIP_user',
 
+  parse(attributes) {
+    // profile will be a text field if using mysql
+    if (typeof attributes.profile === 'string') {
+      attributes.profile = JSON.parse(attributes.profile);
+    }
+    return attributes;
+  },
+
+  format(attributes) {
+    // profile will be a text field if using mysql
+    if (typeof attributes.profile !== 'string') {
+      attributes.profile = JSON.stringify(attributes.profile);
+    }
+    return attributes;
+  },
+
   serialize(options) {
     options = options || {};
 
     if (options.strictOidc) {
       return {
-        accountId : this.get('id'),
-        claims : () => {
+        accountId: this.get('id'),
+        claims: () => {
           return this.get('profile');
         }
       };

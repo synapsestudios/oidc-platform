@@ -17,7 +17,7 @@ module.exports = {
   },
 
   qa : {
-    client   : 'postgresql',
+    client   : config('/dbAdapter'),
     seeds    : {
       directory : './seeds/dev'
     },
@@ -32,7 +32,7 @@ module.exports = {
   },
 
   staging : {
-    client   : 'postgresql',
+    client   : config('/dbAdapter'),
     seeds    : {
       directory : './seeds/prod'
     },
@@ -47,7 +47,7 @@ module.exports = {
   },
 
   production : {
-    client   : 'postgresql',
+    client   : config('/dbAdapter'),
     seeds    : {
       directory : './seeds/prod'
     },

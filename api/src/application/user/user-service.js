@@ -33,7 +33,11 @@ module.exports = (bookshelf) => {
         .then(hashedPass => bookshelf.model('user').forge({
           id : uuid.v4(),
           email,
-          password : hashedPass
+          password : hashedPass,
+          profile: JSON.stringify({
+            email_verified: false,
+            phone_number_verified: false
+          })
         }).save({}, {method: 'insert'}));
     },
 

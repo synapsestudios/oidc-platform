@@ -1,0 +1,18 @@
+version: '2'
+services:
+    mysql:
+        image: mysql:5.7.16
+        env_file:
+          - ./common.env
+        ports:
+          - "3306:3306"
+    api:
+        depends_on:
+            - mysql
+            - redis
+            - migrate-seed
+        entrypoint: ./wait-for-it.sh -t 0 mysql:3306 --
+    migrate-seed:
+        depends_on:
+            - mysql
+        entrypoint: ./wait-for-it.sh -t 0 mysql:3306 --

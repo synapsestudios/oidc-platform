@@ -21,7 +21,7 @@ module.exports = (clientService) => {
 
     find(id) {
       return this.service.findById(id)
-        .then(result => result.serialize({ strictOidc: true }));
+        .then(result => result && result.serialize({ strictOidc: true }));
     }
 
     upsert(id, payload, expiresIn) {
