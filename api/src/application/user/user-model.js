@@ -6,8 +6,8 @@ module.exports = bookshelf => bookshelf.model('user', {
 
     if (options.strictOidc) {
       return {
-        accountId : this.get('id'),
-        claims : () => {
+        accountId: this.get('id'),
+        claims: () => {
           return this.get('profile');
         }
       };

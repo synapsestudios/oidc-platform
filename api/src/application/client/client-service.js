@@ -85,7 +85,12 @@ module.exports = (bookshelf) => ({
     return bookshelf
       .model('client')
       .where({ client_id: id })
-      .fetch({ withRelated: clientRelationships });
+      .fetch({ withRelated: clientRelationships })
+      .then(client => {
+        // if require_auth_time is not a boolean, oidc-provider will throw an error
+        client.set('require_auth_time', !! client.get('require_auth_time'));
+        return client;
+      });
   },
 
   update(id, payload) {
