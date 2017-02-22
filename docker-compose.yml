@@ -3,7 +3,7 @@ services:
     api:
         build:
             context: .
-            dockerfile: Dockerfile.node
+            dockerfile: ./api/Dockerfile
             args:
                 PACKAGE_PATH: ./api/package.json
                 WORKING_DIR: /src/api
