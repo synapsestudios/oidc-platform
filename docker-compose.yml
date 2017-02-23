@@ -3,7 +3,7 @@ services:
     api:
         build:
             context: .
-            dockerfile: Dockerfile.node
+            dockerfile: ./api/Dockerfile
             args:
                 PACKAGE_PATH: ./api/package.json
                 WORKING_DIR: /src/api
@@ -14,17 +14,3 @@ services:
         command: ["npm", "run", "start-dev"]
     redis:
         image: redis
-    migrate-seed:
-        build:
-            context: .
-            dockerfile: Dockerfile.node
-            args:
-                PACKAGE_PATH: ./api/package.json
-                WORKING_DIR: /src/api
-        env_file:
-            - ./common.env
-        environment:
-            DEBUG: "true"
-        volumes:
-            - .:/src
-        command: ["npm", "run", "migrate-seed"]
