@@ -23,9 +23,7 @@ module.exports = bookshelf => bookshelf.model('user', {
     if (options.strictOidc) {
       return {
         accountId: this.get('id'),
-        claims: () => {
-          return this.get('profile');
-        }
+        claims: () => Object.assign({ sub: this.get('id') }, this.get('profile')),
       };
     } else {
       return bookshelf.Model.prototype.serialize.call(this, options);
