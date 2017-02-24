@@ -51,13 +51,17 @@ manifestPromise.then(manifest => {
             ioc.create('user/user-routes'),
           ])
             .then(routes => {
-              routes.forEach(routes => {
-                server.route(routes);
-              });
+              try {
+                routes.forEach(routes => {
+                  server.route(routes);
+                });
 
-              server.start(function () {
-                console.log('Server running at:', server.info.uri);
-              });
+                server.start(function () {
+                  console.log('Server running at:', server.info.uri);
+                });
+              } catch (e) {
+                console.log(e);
+              }
             });
         });
       }).catch(e => console.log(e));
