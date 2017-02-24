@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
 const uuid = require('uuid');
+const config = require('../../../config');
 
-module.exports = (bookshelf, emailService) => {
+module.exports = (bookshelf, emailService, renderTemplate) => {
   var self = {
     encryptPassword: function(password) {
       return new Promise((resolve, reject) => {
@@ -15,21 +16,9 @@ module.exports = (bookshelf, emailService) => {
       });
     },
 
-    comparePasswords: function(password, user) {
-      var hash = user.get('password');
-      return new Promise(function(resolve, reject) {
-        bcrypt.compare(password, hash, function(err, res) {
-          if (res) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        });
-      });
-    },
-
     inviteUser(payload) {
-      return this.create(
+      let createdUser;
+      return self.create(
         payload.email,
         uuid.v4(),
         {
@@ -37,11 +26,21 @@ module.exports = (bookshelf, emailService) => {
           profile : payload.profile || {}
         }
       ).then(user => {
-        return this.createPasswordResetToken(user.get('id'));
+        createdUser = user;
+        return self.createPasswordResetToken(user.get('id'));
       }).then(token => {
-        console.log('got token', token);
-        return token;
-      });
+        const base = config('/baseUrl');
+        return renderTemplate('email/invite', {
+          url: `${base}/user/accept-invite?token=${token.get('token')}`,
+          appName: payload.app_name
+        });
+      }).then(emailBody => {
+        return emailService.send({
+          to: payload.email,
+          subject: `${payload.app_name} Invitation`,
+          html: emailBody,
+        });
+      }).then(() => createdUser);
     },
 
     create: function(email, password, additional) {
@@ -67,23 +66,6 @@ module.exports = (bookshelf, emailService) => {
 
     update: function(id, payload) {
       return bookshelf.model('user').forge({ id }).save(payload);
-    },
-
-    authenticate: function(email, password) {
-      return bookshelf.model('user').where({ email }).fetch()
-        .then(user => {
-          if (!user) throw new Error('No user found for this email');
-          return self.comparePasswords(password, user)
-            .then(isAuthenticated => {
-              if (!isAuthenticated) throw new Error('Password does not match record');
-              return user.serialize({strictOidc: true});
-            });
-        });
-    },
-
-    findByIdForOidc: function(id) {
-      return bookshelf.model('user').where({ id }).fetch()
-        .then(user => user.serialize({ strictOidc: true }));
     },
 
     findByEmailForOidc: function(email) {
@@ -128,4 +110,8 @@ module.exports = (bookshelf, emailService) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf', 'email/email-service'];
+module.exports['@require'] = [
+  'bookshelf',
+  'email/email-service',
+  'render-template',
+];

@@ -1,10 +1,12 @@
 const Joi = require('joi');
 
-module.exports = (controller, mixedValidation, rowNotExists) => [
+module.exports = (service, mixedValidation, rowNotExists) => [
   {
     method: 'POST',
     path: '/api/invite',
-    handler: controller.inviteUser,
+    handler: (request, reply) => {
+      reply(service.inviteUser(request.payload));
+    },
     config: {
       auth: {
         strategy: 'jwt',
@@ -13,6 +15,7 @@ module.exports = (controller, mixedValidation, rowNotExists) => [
       validate: {
         payload: mixedValidation(
           {
+            app_name: Joi.string().required(),
             email: Joi.string().email().required(),
             app_metadata: Joi.object(),
             profile: Joi.object(),
@@ -28,7 +31,7 @@ module.exports = (controller, mixedValidation, rowNotExists) => [
 
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
-  'api/api-controller',
+  'user/user-service',
   'validator/mixed-validation',
   'validator/constraints/row-not-exists',
 ];

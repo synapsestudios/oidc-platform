@@ -43,7 +43,9 @@ module.exports = bookshelf => bookshelf.model('user', {
         }
       };
     } else {
-      return bookshelf.Model.prototype.serialize.call(this, options);
+      var json = bookshelf.Model.prototype.serialize.call(this, options);
+      delete(json.password);
+      return json;
     }
   },
 });
