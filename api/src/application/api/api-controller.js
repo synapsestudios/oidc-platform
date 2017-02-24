@@ -1,8 +1,10 @@
-module.exports = () => ({
-  inviteAdmin(request, reply) {
-
+module.exports = (userService) => ({
+  inviteUser(request, reply) {
+    reply(userService.inviteUser(request.payload));
   }
 });
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = [];
+module.exports['@require'] = [
+  'user/user-service',
+];

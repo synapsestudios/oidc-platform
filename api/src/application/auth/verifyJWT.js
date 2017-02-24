@@ -7,7 +7,8 @@ module.exports = () => (keystore) => (decoded, request, callback) => {
     const header = JSON.parse(atob(token.split('.')[0]));
     const key = keystore.get(header.kid);
     jose.JWS.createVerify(key).verify(token).then(verify => {
-      callback(null, true);
+      decoded.scope = (decoded.app_metadata && decoded.app_metadata.scope) || [];
+      callback(null, true, decoded);
     }).catch(e => {
       callback(null, false);
     });
@@ -17,4 +18,4 @@ module.exports = () => (keystore) => (decoded, request, callback) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = [];
+module.exports['@require'] = ['user/user-service'];

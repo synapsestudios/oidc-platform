@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const uuid = require('uuid');
 
-module.exports = (bookshelf) => {
+module.exports = (bookshelf, emailService) => {
   var self = {
     encryptPassword: function(password) {
       return new Promise((resolve, reject) => {
@@ -25,6 +25,22 @@ module.exports = (bookshelf) => {
             resolve(false);
           }
         });
+      });
+    },
+
+    inviteUser(payload) {
+      return this.create(
+        payload.email,
+        uuid.v4(),
+        {
+          app_metadata: payload.app_metadata || {},
+          profile : payload.profile || {}
+        }
+      ).then(user => {
+        return this.createPasswordResetToken(user.get('id'));
+      }).then(token => {
+        console.log('got token', token);
+        return token;
       });
     },
 
