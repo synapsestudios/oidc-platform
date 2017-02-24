@@ -35,7 +35,10 @@ module.exports = bookshelf => bookshelf.model('user', {
         claims: () => {
           return Object.assign(
             this.get('profile'),
-            { app_metadata: this.get('app_metadata') }
+            {
+              app_metadata: this.get('app_metadata'),
+              sub: this.get('id')
+            }
           );
         }
       };
