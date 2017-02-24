@@ -28,16 +28,24 @@ module.exports = (bookshelf) => {
       });
     },
 
-    create: function(email, password) {
+    create: function(email, password, additional) {
+      additional = additional || {};
+      const app_metadata = additional.app_metadata || [];
+      const profile = Object.assign(
+        {
+          email_verified: false,
+          phone_number_verified: false,
+        },
+        additional.profile || {}
+      );
+
       return this.encryptPassword(password)
         .then(hashedPass => bookshelf.model('user').forge({
           id : uuid.v4(),
           email,
           password : hashedPass,
-          profile: JSON.stringify({
-            email_verified: false,
-            phone_number_verified: false
-          })
+          profile,
+          app_metadata
         }).save({}, {method: 'insert'}));
     },
 
