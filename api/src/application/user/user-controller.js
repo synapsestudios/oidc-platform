@@ -99,7 +99,39 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
     return object;
   };
 
-  return {
+  const getPasswordResetHandler = (method, title) => {
+    if (method === 'GET') {
+      return (request, reply, source, error) => {
+        reply.view('reset-password', {
+          title: title,
+          returnTo: `${request.query.redirect_uri}?status=cancelled`,
+          error: !!error,
+          validationErrorMessages: getValidationMessages(error),
+        });
+      };
+    } else if (method === 'POST') {
+      return (request, reply) => {
+        userService.findByPasswordToken(request.query.token)
+        .then(user => {
+          if (user) {
+            return userService.encryptPassword(request.payload.password)
+              .then(password => userService.update(user.get('id'), { password }))
+              .then(() => userService.destroyPasswordToken(request.query.token))
+              .then(() => reply.view(`reset-password-success`));
+          } else {
+            return reply.view('reset-password', {
+              title: title,
+              returnTo: `${request.query.redirect_uri}?status=cancelled`,
+              error: true,
+              validationErrorMessages: { token: ['Token is invalid or expired'] },
+            });
+          }
+        });
+      };
+    }
+  };
+
+  const self = {
     registerFormHandler: function(request, reply, source, error) {
       request.payload = request.payload || {};
 
@@ -354,36 +386,16 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
         });
     },
 
-    getResetPasswordForm: function(request, reply, source, error) {
-      reply.view('reset-password', {
-        title: 'Reset Password',
-        formAction: `/user/reset-password?${querystring.stringify(request.query)}`,
-        returnTo: `${request.query.redirect_uri}?status=cancelled`,
-        error: !!error,
-        validationErrorMessages: getValidationMessages(error),
-      });
-    },
+    getResetPasswordForm: getPasswordResetHandler('GET', 'Reset Password'),
 
-    postResetPasswordForm: function(request, reply, source, error) {
-      return userService.findByPasswordToken(request.query.token)
-        .then(user => {
-          if (user) {
-            return userService.encryptPassword(request.payload.password)
-              .then(password => userService.update(user.accountId, { password }))
-              .then(() => userService.destroyPasswordToken(request.query.token))
-              .then(() => reply.view('reset-password-success'));
-          } else {
-            return reply.view('reset-password', {
-              title: 'Reset Password',
-              formAction: `/user/reset-password?${querystring.stringify(request.query)}`,
-              returnTo: `${request.query.redirect_uri}?status=cancelled`,
-              error: true,
-              validationErrorMessages: { token: ['Token is invalid or expired'] },
-            });
-          }
-        });
-    },
+    postResetPasswordForm: getPasswordResetHandler('POST', 'Reset Password'),
+
+    getAcceptInviteForm: getPasswordResetHandler('GET', 'Set Password'),
+
+    postAcceptInviteForm: getPasswordResetHandler('POST', 'Set Password'),
   };
+
+  return self;
 };
 
 module.exports['@singleton'] = true;

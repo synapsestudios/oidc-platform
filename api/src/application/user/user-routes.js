@@ -13,17 +13,18 @@ module.exports = (service, controller, userFormData) => {
     {
       method : 'GET',
       path : '/user/register',
+      handler : controller.registerFormHandler,
       config : {
         validate : {
           failAction : controller.registerFormHandler,
           query : queryValidation,
         }
       },
-      handler : controller.registerFormHandler
     },
     {
       method : 'POST',
       path : '/user/register',
+      handler : controller.registerFormHandler,
       config : {
         validate : {
           payload : {
@@ -35,7 +36,6 @@ module.exports = (service, controller, userFormData) => {
           failAction : controller.registerFormHandler,
         }
       },
-      handler : controller.registerFormHandler,
     },
     {
       method: 'GET',
@@ -91,17 +91,18 @@ module.exports = (service, controller, userFormData) => {
     {
       method : 'GET',
       path : '/user/forgot-password',
+      handler : controller.getForgotPasswordForm,
       config : {
         validate : {
           failAction : controller.getForgotPasswordForm,
           query : queryValidation,
         },
       },
-      handler : controller.getForgotPasswordForm,
     },
     {
       method : 'POST',
       path : '/user/forgot-password',
+      handler : controller.postForgotPasswordForm,
       config : {
         validate : {
           payload : {
@@ -111,11 +112,11 @@ module.exports = (service, controller, userFormData) => {
           failAction : controller.getForgotPasswordForm,
         }
       },
-      handler : controller.postForgotPasswordForm,
     },
     {
       method : 'GET',
       path : '/user/reset-password',
+      handler : controller.getResetPasswordForm,
       config : {
         validate : {
           failAction : controller.getResetPasswordForm,
@@ -124,11 +125,11 @@ module.exports = (service, controller, userFormData) => {
           }, queryValidation),
         },
       },
-      handler : controller.getResetPasswordForm,
     },
     {
       method : 'POST',
       path : '/user/reset-password',
+      handler : controller.postResetPasswordForm,
       config : {
         validate : {
           payload : {
@@ -141,7 +142,30 @@ module.exports = (service, controller, userFormData) => {
           failAction : controller.getResetPasswordForm,
         }
       },
-      handler : controller.postResetPasswordForm,
+    },
+    {
+      method: 'GET',
+      path: '/user/accept-invite',
+      handler: controller.getResetPasswordForm,
+      config: {
+        validate: {
+          query: {
+            token: Joi.string().guid().required(),
+          },
+        },
+      },
+    },
+    {
+      method: 'POST',
+      path: '/user/accept-invite',
+      handler: controller.postAcceptInviteForm,
+      config: {
+        validate: {
+          query: {
+            token: Joi.string().guid().required(),
+          },
+        },
+      },
     },
   ];
 };

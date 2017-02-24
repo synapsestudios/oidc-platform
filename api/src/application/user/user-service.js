@@ -65,7 +65,7 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
     },
 
     update: function(id, payload) {
-      return bookshelf.model('user').forge({ id }).save(payload);
+      return bookshelf.model('user').forge({ id }).save(payload, { patch: true });
     },
 
     findByEmailForOidc: function(email) {
