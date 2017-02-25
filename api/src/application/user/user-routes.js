@@ -146,7 +146,7 @@ module.exports = (service, controller, userFormData) => {
     {
       method: 'GET',
       path: '/user/accept-invite',
-      handler: controller.getResetPasswordForm,
+      handler: controller.getAcceptInviteForm,
       config: {
         validate: {
           query: {
