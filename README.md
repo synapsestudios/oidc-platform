@@ -10,8 +10,14 @@ TBD
 0. Copy `common.template.env` as `common.env` and provide a mailgun key
 0. Set the OIDC_DB_* vars based on what RDBMS you are using.
 0. Run either `./compose-mysql up` or `./compose-postgres up`
-0. Create an oauth client by posting to http://localhost:9000/op/reg with the payload:
+0. Create an oauth client by posting to http://localhost:9000/op/reg with the following:
 ```
+Headers:
+{
+    "Content-Type": "application/json",
+    "Authorization": "Bearer synapse1", // common.env -> OIDC_INITIAL_ACCESS_TOKEN value
+}
+Body:
 {
     "response_types": ["code id_token token"],
     "grant_types": [
