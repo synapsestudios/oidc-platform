@@ -6,6 +6,12 @@ module.exports = bookshelf => bookshelf.model('user', {
     if (typeof attributes.profile === 'string') {
       attributes.profile = JSON.parse(attributes.profile);
     }
+    if (typeof attributes.app_metadata === 'string') {
+      attributes.app_metadata = JSON.parse(attributes.app_metadata);
+    }
+    if (attributes.app_metadata === null) {
+      attributes.app_metadata = {};
+    }
     return attributes;
   },
 
@@ -13,6 +19,9 @@ module.exports = bookshelf => bookshelf.model('user', {
     // profile will be a text field if using mysql
     if (typeof attributes.profile !== 'string') {
       attributes.profile = JSON.stringify(attributes.profile);
+    }
+    if (typeof attributes.app_metadata !== 'string') {
+      attributes.app_metadata = JSON.stringify(attributes.app_metadata);
     }
     return attributes;
   },
@@ -23,10 +32,20 @@ module.exports = bookshelf => bookshelf.model('user', {
     if (options.strictOidc) {
       return {
         accountId: this.get('id'),
-        claims: () => Object.assign({ sub: this.get('id') }, this.get('profile')),
+        claims: () => {
+          return Object.assign(
+            this.get('profile'),
+            {
+              app_metadata: this.get('app_metadata'),
+              sub: this.get('id')
+            }
+          );
+        }
       };
     } else {
-      return bookshelf.Model.prototype.serialize.call(this, options);
+      var json = bookshelf.Model.prototype.serialize.call(this, options);
+      delete(json.password);
+      return json;
     }
   },
 });

@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
 const uuid = require('uuid');
+const config = require('../../../config');
 
-module.exports = (bookshelf) => {
+module.exports = (bookshelf, emailService, renderTemplate) => {
   var self = {
     encryptPassword: function(password) {
       return new Promise((resolve, reject) => {
@@ -15,51 +16,56 @@ module.exports = (bookshelf) => {
       });
     },
 
-    comparePasswords: function(password, user) {
-      var hash = user.get('password');
-      return new Promise(function(resolve, reject) {
-        bcrypt.compare(password, hash, function(err, res) {
-          if (res) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
+    inviteUser(payload) {
+      let createdUser;
+      return self.create(
+        payload.email,
+        uuid.v4(),
+        {
+          app_metadata: payload.app_metadata || {},
+          profile : payload.profile || {}
+        }
+      ).then(user => {
+        createdUser = user;
+        return self.createPasswordResetToken(user.get('id'));
+      }).then(token => {
+        const base = config('/baseUrl');
+        return renderTemplate('email/invite', {
+          url: `${base}/user/accept-invite?token=${token.get('token')}`,
+          appName: payload.app_name
         });
-      });
+      }).then(emailBody => {
+        return emailService.send({
+          to: payload.email,
+          subject: `${payload.app_name} Invitation`,
+          html: emailBody,
+        });
+      }).then(() => createdUser);
     },
 
-    create: function(email, password) {
+    create: function(email, password, additional) {
+      additional = additional || {};
+      const app_metadata = additional.app_metadata || [];
+      const profile = Object.assign(
+        {
+          email_verified: false,
+          phone_number_verified: false,
+        },
+        additional.profile || {}
+      );
+
       return this.encryptPassword(password)
         .then(hashedPass => bookshelf.model('user').forge({
           id : uuid.v4(),
           email,
           password : hashedPass,
-          profile: JSON.stringify({
-            email_verified: false,
-            phone_number_verified: false
-          })
+          profile,
+          app_metadata
         }).save({}, {method: 'insert'}));
     },
 
     update: function(id, payload) {
-      return bookshelf.model('user').forge({ id }).save(payload);
-    },
-
-    authenticate: function(email, password) {
-      return bookshelf.model('user').where({ email }).fetch()
-        .then(user => {
-          if (!user) throw new Error('No user found for this email');
-          return self.comparePasswords(password, user)
-            .then(isAuthenticated => {
-              if (!isAuthenticated) throw new Error('Password does not match record');
-              return user.serialize({strictOidc: true});
-            });
-        });
-    },
-
-    findByIdForOidc: function(id) {
-      return bookshelf.model('user').where({ id }).fetch()
-        .then(user => user.serialize({ strictOidc: true }));
+      return bookshelf.model('user').forge({ id }).save(payload, { patch: true });
     },
 
     findByEmailForOidc: function(email) {
@@ -104,4 +110,8 @@ module.exports = (bookshelf) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf', 'email/email-service'];
+module.exports['@require'] = [
+  'bookshelf',
+  'email/email-service',
+  'render-template',
+];

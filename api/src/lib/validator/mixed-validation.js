@@ -1,9 +1,10 @@
-var Joi = require('joi');
+const Joi = require('joi');
 
 // Mix JOI validation with our own custom validators
-var mixedValidation = (joiSchema, customSchema) => {
+const mixedValidation = (joiSchema, customSchema) => {
   return (values, options, next) => {
-    var schema = Joi.object().keys(joiSchema);
+    const schema = Joi.object().keys(joiSchema);
+    options.context.values = values;
 
     return Joi.validate(values, schema, options, (errors, value) => {
       if (errors && options.abortEarly) {
