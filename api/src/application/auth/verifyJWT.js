@@ -18,4 +18,4 @@ module.exports = () => (keystore) => (decoded, request, callback) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['user/user-service'];
+module.exports['@require'] = [];
