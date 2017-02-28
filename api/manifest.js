@@ -8,7 +8,7 @@ ioc.use(ioc.dir('src/application'));
 
 module.exports = Promise.all([
   ioc.create('bookshelf'),
-  ioc.create('user/user-service'),
+  ioc.create('user/user-oidc-service'),
   ioc.create('oidc-adapter/redis'),
   ioc.create('oidc-adapter/sql'),
   fetchKeystores(),

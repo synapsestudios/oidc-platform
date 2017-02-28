@@ -38,6 +38,7 @@ exports.register = function (server, options, next) {
       address: ['address'],
       email: ['email', 'email_verified'],
       phone: ['phone_number', 'phone_number_verified'],
+      app_metadata: ['app_metadata'],
       profile: ['birthdate', 'family_name', 'gender', 'name', 'given_name', 'locale', 'middle_name', 'name',
         'nickname', 'picture', 'preferred_username', 'profile', 'updated_at', 'website', 'zoneinfo'],
     },
