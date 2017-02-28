@@ -159,6 +159,7 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
             };
             reply.view('user-profile', {
               returnTo: request.query.redirect_uri,
+              title: 'Profile',
               fields: [
                 {
                   name: 'name',

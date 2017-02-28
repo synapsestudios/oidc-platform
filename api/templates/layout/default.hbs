@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html >
   <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{title}}</title>
     <style type="text/css">
       /* http://meyerweb.com/eric/tools/css/reset/
@@ -83,6 +84,7 @@
         align-items: center;
         width: 100%;
         min-height: 100vh;
+        padding: 16px;
       }
 
       .auth-lock {
@@ -253,9 +255,9 @@
       </div>
 
       <div class="auth-help">
-          {{#if returnTo}}<a href="{{returnTo}}">[ Cancel ]</a>{{/if}}
-          {{#if client.tosUri}}<a href="{{client.tosUri}}">[ Terms of Service ]</a>{{/if}}
-          {{#if client.policyUri}}<a href="{{client.policyUri}}">[ Privacy Policy ]</a>{{/if}}
+        {{#if returnTo}}<a href="{{returnTo}}">[ Cancel ]</a>{{/if}}
+        {{#if client.tosUri}}<a href="{{client.tosUri}}">[ Terms of Service ]</a>{{/if}}
+        {{#if client.policyUri}}<a href="{{client.policyUri}}">[ Privacy Policy ]</a>{{/if}}
       </div>
 
       <div class="auth-underlay" />
