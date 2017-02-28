@@ -1,152 +1,265 @@
 <!DOCTYPE html>
 <html >
-    <head>
-        <meta charset="UTF-8">
-        <title>{{title}}</title>
-        <style type="text/css">
-            @import url(https://fonts.googleapis.com/css?family=Roboto:400,100);
+  <head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <style type="text/css">
+      /* http://meyerweb.com/eric/tools/css/reset/
+      v2.0 | 20110126
+      License: none (public domain)
+      */
+      html, body, div, span, applet, object, iframe,
+      h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+      a, abbr, acronym, address, big, cite, code,
+      del, dfn, em, img, ins, kbd, q, s, samp,
+      small, strike, strong, sub, sup, tt, var,
+      b, u, i, center,
+      dl, dt, dd, ol, ul, li,
+      fieldset, form, label, legend,
+      table, caption, tbody, tfoot, thead, tr, th, td,
+      article, aside, canvas, details, embed,
+      figure, figcaption, footer, header, hgroup,
+      menu, nav, output, ruby, section, summary,
+      time, mark, audio, video {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+      }
+      /* HTML5 display-role reset for older browsers */
+      article, aside, details, figcaption, figure,
+      footer, header, hgroup, menu, nav, section {
+        display: block;
+      }
+      body {
+        line-height: 1;
+      }
+      ol, ul {
+        list-style: none;
+      }
+      blockquote, q {
+        quotes: none;
+      }
+      blockquote:before, blockquote:after,
+      q:before, q:after {
+        content: '';
+        content: none;
+      }
+      table {
+        border-collapse: collapse;
+        border-spacing: 0;
+      }
 
-            body {
-                font-family: 'Roboto', sans-serif;
-                margin-top: 25px;
-                margin-bottom: 25px;
-            }
+      /* Begin Auth Default Styling */
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+        font-size: 16px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        margin: 0;
+        padding: 0;
+      }
 
-            .validation-errors-list {
-              color: red;
-              margin-bottom: 1em;
-            }
+      html {
+        box-sizing: border-box;
+        background: transparent;
+      }
 
-            .login-card {
-                padding: 40px;
-                padding-top: 0px;
-                padding-bottom: 10px;
-                width: 274px;
-                background-color: #F7F7F7;
-                margin: 0 auto 10px;
-                border-radius: 2px;
-                box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-                overflow: hidden;
-            }
+      *, *:before, *:after {
+        box-sizing: inherit;
+      }
 
-            .login-card h1 {
-                font-weight: 100;
-                text-align: center;
-                font-size: 2.3em;
-            }
+      /* Here we go! */
+      .auth {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-height: 100vh;
+      }
 
-            .login-card [type=submit] {
-                width: 100%;
-                display: block;
-                margin-bottom: 10px;
-                position: relative;
-            }
+      .auth-lock {
+        width: 296px;
+        height: auto;
+        background: #fff;
+        box-shadow: 0 2px 10px 0 rgba(0,0,0,0.16), 0 2px 20px 0 rgba(0,0,0,0.12);
+        border-radius: 4px;
+        margin: 12px;
+      }
 
-            .login-card input[type=text], input[type=email], input[type=password] {
-                height: 44px;
-                font-size: 16px;
-                width: 100%;
-                margin-bottom: 10px;
-                -webkit-appearance: none;
-                background: #fff;
-                border: 1px solid #d9d9d9;
-                border-top: 1px solid #c0c0c0;
-                padding: 0 8px;
-                box-sizing: border-box;
-                -moz-box-sizing: border-box;
-            }
+      /* Help and back links */
+      .auth-help a {
+        color: #eee;
+        margin-left: 8px;
+        margin-right: 8px;
+      }
 
-            .login-card input[type=text]:hover, input[type=email]:hover, input[type=password]:hover {
-                border: 1px solid #b9b9b9;
-                border-top: 1px solid #a0a0a0;
-                -moz-box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-                -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-                box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
-            }
+      .auth--light .auth-help a {
+        color: #201C23;
+      }
 
-            .login {
-                text-align: center;
-                font-size: 14px;
-                font-family: 'Arial', sans-serif;
-                font-weight: 700;
-                height: 36px;
-                padding: 0 8px;
-            }
+      /* Background */
+      .auth-underlay {
+        display: block;
+        position: fixed;
+        top: 0; right: 0; bottom: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(#3E3942, #201C23);
+        background-color: #201C23;
+        z-index: -1;
+      }
 
-            .login-submit {
-                border: 0px;
-                color: #fff;
-                text-shadow: 0 1px rgba(0,0,0,0.1);
-                background-color: #4d90fe;
-            }
+      .auth--light .auth-underlay {
+        background-image: radial-gradient(#bbb, #eee);
+        background-color: #eee;
+      }
 
-            .login-submit:hover {
-                border: 0px;
-                text-shadow: 0 1px rgba(0,0,0,0.3);
-                background-color: #357ae8;
-            }
+      /* Auth lock header */
+      .auth-header {
+        text-align: center;
+        background: #eee;
+        padding: 16px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+      }
 
-            .login-card a {
-                text-decoration: none;
-                color: #666;
-                font-weight: 400;
-                text-align: center;
-                display: inline-block;
-                opacity: 0.6;
-                transition: opacity ease 0.5s;
-            }
+      .auth-header img {
+        max-width: 200px;
+        max-height: 80px;
+        margin-bottom: 8px;
+      }
 
-            .login-card a:hover {
-                opacity: 1;
-            }
+      .auth-header h1 {
+        font-size: 24px;
+        font-weight: bold;
+      }
 
-            .login-help {
-                width: 100%;
-                text-align: center;
-                font-size: 12px;
-            }
+      /* Form submit button */
+      .auth-form form > button {
+        /* Reset browser defaults */
+        display: block;
+        appearance: none;
+        user-select: none;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+        border-color: transparent;
+        padding: 0;
+        margin: 0;
 
-            .login-client-image img {
-                margin-bottom: 20px;
-            }
+        /* Button styling */
+        width: 100%;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 16px 24px;
+        background-color: #4d90fe;
+        color: #fff;
+        text-shadow: 0 1px rgba(0,0,0,0.1);
+        text-transform: uppercase;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+      }
 
-            .login-card input[type=checkbox] {
-                margin-bottom: 10px;
-            }
+      .auth-form form > button:hover {
+        text-shadow: 0 1px rgba(0,0,0,0.3);
+        background-color: #357ae8;
+      }
 
-            .login-card label {
-                color: #999;
-                font-size: 16px;
-            }
+      /* Form inputs and scaffolding */
+      .input-scaffold {
+        position: relative;
+        display: block;
+        width: 100%;
+        padding: 16px;
+      }
 
-            .grant-debug {
-                font-family: Fixed, monospace;
-                width: 100%;
-                text-align: center;
-                font-size: 12px;
-                color: #999;
-                padding-top: 10px;
-            }
+      .input-scaffold__label {
+        display: block;
+        width: 100%;
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 6px;
+      }
 
-            button {
-                cursor: pointer;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="login-card">
-            <h1>{{title}}</h1>
-            <div class="login-client-image">
-                {{#if client.logoUri}}
-                    <img src="{{client.logoUri}}" />
-                {{/if}}
-            </div>
-            {{{content}}}
-            <div class="login-help">
-                {{#if returnTo}}<a href="{{returnTo}}">[ Cancel ]</a>{{/if}}
-                {{#if client.tosUri}}<a href="{{client.tosUri}}">[ Terms of Service ]</a>{{/if}}
-                {{#if client.policyUri}}<a href="{{client.policyUri}}">[ Privacy Policy ]</a>{{/if}}
-            </div>
+      .input-scaffold__input {
+        display: block;
+        width: 100%;
+        color: inherit;
+        font-family: inherit;
+        font-size: 16px;
+        line-height: 20px;
+        border: 1px solid #eee;
+        border-radius: 2px;
+        padding: 8px 12px;
+        appearance: none;
+      }
+
+      .input-scaffold__validation {
+        margin-top: 8px;
+      }
+
+      .input-scaffold__validation .validation-error {
+        color: #ff3d00;
+        font-size: 14px;
+      }
+
+      .input-scaffold__validation .validation-error + .validation-error {
+        margin-top: 4px;
+      }
+
+      /* Alerts */
+      .alert {
+        width: 100%;
+        height: auto;
+        padding: 16px;
+        font-weight: bold;
+        border-radius: 4px;
+        margin-bottom: 16px;
+      }
+
+      .alert--error {
+        background: #ff3d00;
+        color: #fff;
+      }
+
+      .alert--success {
+        background: #00C853;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="auth">
+
+      <div class="auth-lock">
+        <div class="auth-header">
+          {{#if client.logoUri}}
+            <img src="{{client.logoUri}}" />
+          {{/if}}
+          <h1>{{title}}</h1>
         </div>
-    </body>
+        <div class="auth-form">
+          {{{content}}}
+        </div>
+      </div>
+
+      <div class="auth-help">
+          {{#if returnTo}}<a href="{{returnTo}}">[ Cancel ]</a>{{/if}}
+          {{#if client.tosUri}}<a href="{{client.tosUri}}">[ Terms of Service ]</a>{{/if}}
+          {{#if client.policyUri}}<a href="{{client.policyUri}}">[ Privacy Policy ]</a>{{/if}}
+      </div>
+
+      <div class="auth-underlay" />
+
+    </div>
+  </body>
 </html>
