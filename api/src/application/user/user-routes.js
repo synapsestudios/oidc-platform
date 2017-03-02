@@ -42,10 +42,14 @@ module.exports = (service, controller, userFormData) => {
       path: '/user/profile',
       handler: controller.profileFormHandler,
       config: {
+        auth: {
+          strategy: 'access_token',
+          scope: 'profile'
+        },
         validate: {
           query: {
-            clientId: Joi.string().required(),
-            accessToken: Joi.string().required(),
+            client_id: Joi.string().required(),
+            access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           },
         }
@@ -59,8 +63,8 @@ module.exports = (service, controller, userFormData) => {
         validate: {
           failAction: controller.profileFormHandler,
           query: {
-            clientId: Joi.string().required(),
-            accessToken: Joi.string().required(),
+            client_id: Joi.string().required(),
+            access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           },
           payload: {

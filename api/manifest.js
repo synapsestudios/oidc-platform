@@ -21,7 +21,7 @@ module.exports = Promise.all([
     keystores: values[4],
   }))
   .then(lib => ({
-    server : {
+    server: {
       connections: {
         routes: {
           validate: {
@@ -33,33 +33,38 @@ module.exports = Promise.all([
         }
       }
     },
-    connections : [{
-      port : 9000
+    connections: [{
+      port: 9000
     }],
-    registrations : [
+    registrations: [
       {
-        plugin : {
-          register : 'hapi-auth-jwt2'
+        plugin: {
+          register: 'hapi-auth-jwt2'
         }
       },
       {
         plugin : {
-          register : 'vision',
+          register: 'vision',
         }
       },
       {
-        plugin : {
-          register : './plugins/openid-connect/openid-connect',
-          options : {
-            prefix : 'op',
-            authenticateUser : lib.userService.authenticate,
-            findUserById : lib.userService.findByIdForOidc,
-            cookieKeys : config('/oidc/cookieKeys'),
-            initialAccessToken : config('/oidc/initialAccessToken'),
-            adapter : function OidcAdapterFactory(name) {
-              return (name === 'Client') ? new lib.sqlOidcAdapter(name) : new lib.redisOidcAdapter(name);
+        plugin: {
+          register: './plugins/access-token-scheme'
+        }
+      },
+      {
+        plugin: {
+          register: './plugins/openid-connect/openid-connect',
+          options: {
+            prefix: 'op',
+            authenticateUser: lib.userService.authenticate,
+            findUserById: lib.userService.findByIdForOidc,
+            cookieKeys: config('/oidc/cookieKeys'),
+            initialAccessToken: config('/oidc/initialAccessToken'),
+            adapter: function OidcAdapterFactory(name) {
+              return (name === 'Client') ? new lib.sqlOidcAdapter(name): new lib.redisOidcAdapter(name);
             },
-            keystores : lib.keystores,
+            keystores: lib.keystores,
           }
         }
       }
