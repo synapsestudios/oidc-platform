@@ -115,7 +115,11 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
         .then(user => {
           if (user) {
             return userService.encryptPassword(request.payload.password)
-              .then(password => userService.update(user.get('id'), { password }))
+              .then(password => {
+                const profile = user.get('profile');
+                profile.email_verified = true;
+                return userService.update(user.get('id'), { password, profile });
+              })
               .then(() => userService.destroyPasswordToken(request.query.token))
               .then(() => reply.view(`reset-password-success`));
           } else {
