@@ -10,7 +10,6 @@ exports.register = function (server, pluginOptions, next) {
       const clientId = get(request, 'query.client_id') || get(request, 'payload.client_id');
       const redirectUri = request.query.redirect_uri || request.payload.redirect_uri;
       if (clientId && redirectUri) {
-        console.log('======clientId======', clientId);
         provider.Client.find(clientId).then(client => {
           if (!client) {
             return reply(Boom.notFound('Client not found'));
@@ -40,10 +39,7 @@ exports.register = function (server, pluginOptions, next) {
           return onInvalidAccessToken(request, reply);
         }
 
-        console.log('======tokenString======', tokenString);
-
         provider.AccessToken.find(tokenString).then(token => {
-          console.log('token??', token);
           if (token) {
             token.scope = token.scope.split(' ');
             reply.continue({ credentials: token });
