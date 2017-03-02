@@ -68,7 +68,7 @@ class App extends Component {
         </div>
         <div>
           <div><a href={`http://sso-client.dev:9000/user/profile?client_id=${config.clientId}&access_token=${localstorage('accessToken')}&redirect_uri=${config.redirectUri}`}>Edit Profile</a></div>
-          <div><a href={`http://localhost:9000/op/session/end?id_token_hint=${this.state.idToken}&post_logout_redirect_uri=${config.postLogoutRedirectUri}`}>Log Out</a></div>
+          <div><a href={`http://sso-client.dev:9000/op/session/end?id_token_hint=${this.state.idToken}&post_logout_redirect_uri=${config.postLogoutRedirectUri}`}>Log Out</a></div>
         </div>
       </div>
     );
