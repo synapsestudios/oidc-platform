@@ -200,6 +200,8 @@ exports.register = function (server, options, next) {
         }
       });
 
+      server.expose('provider', provider);
+
       next();
     })
     .catch(e => {

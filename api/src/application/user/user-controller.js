@@ -1,13 +1,18 @@
 const querystring = require('querystring');
 const formatError = require('../../lib/format-error');
-const atob = require('atob');
 const Boom = require('boom');
 const get = require('lodash/get');
 const set = require('lodash/set');
 const config = require('../../../config');
 
-module.exports = (userService, emailService, renderTemplate, clientService, RedisAdapter, userFormData) => {
-
+module.exports = (
+  userService,
+  emailService,
+  renderTemplate,
+  clientService,
+  userFormData,
+  oidcProvider
+) => {
   const errorMessages = {
     email: {
       'any.required': 'Email address is required',
@@ -150,7 +155,6 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
     },
 
     profileFormHandler: function(request, reply, source, error) {
-      const redisAdapter = new RedisAdapter('AccessToken');
       const clientId = request.query.clientId;
       return clientService.findById(clientId).then(client => {
         if (!client) {
@@ -162,12 +166,16 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
         }
         return client;
       }).then((client) => {
-        redisAdapter.find(request.query.accessToken.substr(0, 48)).then(token => {
-          if (!token || token && token.signature !== request.query.accessToken.substr(48)) {
+        // oidcProvider.AccessToken.find(request.query.accessToken.substr(0, 48)).then(token => {
+        return oidcProvider.AccessToken.find(request.query.accessToken).then(token => {
+          // if (!token || token && token.signature !== request.query.accessToken.substr(48)) {
+          if (!token) {
             return reply.redirect(`${request.query.redirect_uri}?error=unauthorized&error_description=invalid access token`);
           }
-          const payload = JSON.parse(atob(token.payload));
-          const accountId = payload.accountId;
+          if (token.scope.split(' ').indexOf('profile') < 0) {
+            return reply.redirect(`${request.query.redirect_uri}?error=invalid_scope&error_description=access token missing profile scope`);
+          }
+          const accountId = token.accountId;
           userService.findById(accountId).then(user => {
             if (!user) {
               return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
@@ -404,6 +412,6 @@ module.exports['@require'] = [
   'email/email-service',
   'render-template',
   'client/client-service',
-  'oidc-adapter/redis',
   'user/user-form-data',
+  'oidc-provider',
 ];
