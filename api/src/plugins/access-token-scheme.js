@@ -28,7 +28,7 @@ exports.register = function (server, pluginOptions, next) {
     return {
       authenticate(request, reply) {
         let tokenString;
-        if (request.method === 'get') {
+        if (request.query) {
           tokenString = request.query.access_token;
         }
         if (!tokenString) {

@@ -60,6 +60,10 @@ module.exports = (service, controller, userFormData) => {
       path: '/user/profile',
       handler: controller.profileFormHandler,
       config: {
+        auth: {
+          strategy: 'access_token',
+          scope: 'profile'
+        },
         validate: {
           failAction: controller.profileFormHandler,
           query: {
