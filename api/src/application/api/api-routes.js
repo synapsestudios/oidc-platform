@@ -9,8 +9,8 @@ module.exports = (service, mixedValidation, rowNotExists) => [
     },
     config: {
       auth: {
-        strategy: 'jwt',
-        scope: 'invite'
+        strategy: 'access_token',
+        scope: 'admin'
       },
       validate: {
         payload: mixedValidation(

@@ -1,13 +1,17 @@
 const querystring = require('querystring');
 const formatError = require('../../lib/format-error');
-const atob = require('atob');
-const Boom = require('boom');
 const get = require('lodash/get');
 const set = require('lodash/set');
 const config = require('../../../config');
 
-module.exports = (userService, emailService, renderTemplate, clientService, RedisAdapter, userFormData) => {
-
+module.exports = (
+  userService,
+  emailService,
+  renderTemplate,
+  clientService,
+  userFormData,
+  oidcProvider
+) => {
   const errorMessages = {
     email: {
       'any.required': 'Email address is required',
@@ -154,202 +158,182 @@ module.exports = (userService, emailService, renderTemplate, clientService, Redi
     },
 
     profileFormHandler: function(request, reply, source, error) {
-      const redisAdapter = new RedisAdapter('AccessToken');
-      const clientId = request.query.clientId;
-      return clientService.findById(clientId).then(client => {
-        if (!client) {
-          return reply(Boom.notFound());
+      const accountId = request.auth.credentials.accountId;
+      userService.findById(accountId).then(user => {
+        if (!user) {
+          return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
         }
-        const redirectUris = client.related('redirect_uris').map(uri => uri.get('uri'));
-        if (redirectUris.indexOf(request.query.redirect_uri) < 0) {
-          return reply(Boom.forbidden('redirect_uri not in whitelist'));
-        }
-        return client;
-      }).then((client) => {
-        redisAdapter.find(request.query.accessToken.substr(0, 48)).then(token => {
-          if (!token || token && token.signature !== request.query.accessToken.substr(48)) {
-            return reply.redirect(`${request.query.redirect_uri}?error=unauthorized&error_description=invalid access token`);
-          }
-          const payload = JSON.parse(atob(token.payload));
-          const accountId = payload.accountId;
-          userService.findById(accountId).then(user => {
-            if (!user) {
-              return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
-            }
 
-            let validationErrorMessages = {};
-            if (!error && request.method === 'post') {
-              const profile = user.get('profile');
-              const payload = expandDotPaths(request.payload);
-              Object.assign(profile, payload);
-              return userService.update(user.get('id'), { profile }).then(() => {
-                return reply.redirect(request.query.redirect_uri);
-              });
-            } else if (error) {
-              validationErrorMessages = getValidationMessages(error);
-            }
-
-            const profile = user.get('profile');
-            const getValue = (field) => {
-              return (request.payload && request.payload[field]) || get(profile, field, '');
-            };
-            reply.view('user-profile', {
-              returnTo: request.query.redirect_uri,
-              title: 'Profile',
-              fields: [
-                {
-                  name: 'name',
-                  label: 'Name',
-                  type: 'text',
-                  value: getValue('name'),
-                  error: validationErrorMessages.name,
-                },
-                {
-                  name: 'given_name',
-                  label: 'Given Name',
-                  type: 'text',
-                  value: getValue('given_name'),
-                  error: validationErrorMessages.given_name,
-                },
-                {
-                  name: 'family_name',
-                  label: 'Family Name',
-                  type: 'text',
-                  value: getValue('family_name'),
-                  error: validationErrorMessages.family_name,
-                },
-                {
-                  name: 'middle_name',
-                  label: 'Middle Name',
-                  type: 'text',
-                  value: getValue('middle_name'),
-                  error: validationErrorMessages.middle_name,
-                },
-                {
-                  name: 'nickname',
-                  label: 'Nickname',
-                  type: 'text',
-                  value: getValue('nickname'),
-                  error: validationErrorMessages.nickname,
-                },
-                {
-                  name: 'preferred_username',
-                  label: 'Preferred Username',
-                  type: 'text',
-                  value: getValue('preferred_username'),
-                  error: validationErrorMessages.preferred_username,
-                },
-                {
-                  name: 'profile',
-                  label: 'Profile',
-                  type: 'text',
-                  value: getValue('profile'),
-                  error: validationErrorMessages.profile,
-                },
-                {
-                  name: 'picture',
-                  label: 'Picture',
-                  type: 'text',
-                  value: getValue('picture'),
-                  error: validationErrorMessages.picture,
-                },
-                {
-                  name: 'website',
-                  label: 'Website',
-                  type: 'text',
-                  value: getValue('website'),
-                  error: validationErrorMessages.website,
-                },
-                {
-                  name: 'email',
-                  label: 'Email',
-                  type: 'text',
-                  value: getValue('email'),
-                  error: validationErrorMessages.email,
-                },
-                {
-                  name: 'gender',
-                  label: 'Gender',
-                  type: 'text',
-                  value: getValue('gender'),
-                  error: validationErrorMessages.gender,
-                },
-                {
-                  name: 'birthdate',
-                  label: 'Birthdate',
-                  type: 'text',
-                  value: getValue('birthdate'),
-                  error: validationErrorMessages.birthdate,
-                },
-                {
-                  name: 'zoneinfo',
-                  label: 'Timezone',
-                  isDropdown: true,
-                  options: userFormData.timezones.map(name => ({
-                    label: name,
-                    value: name,
-                    selected: getValue('zoneinfo') === name
-                  })),
-                  value: getValue('zoneinfo'),
-                  error: validationErrorMessages.zoneinfo,
-                },
-                {
-                  name: 'locale',
-                  label: 'Locale',
-                  isDropdown: true,
-                  options: Object.keys(userFormData.locales).map((value) => ({
-                    label: userFormData.locales[value],
-                    value,
-                    selected: getValue('locale') === value,
-                  })),
-                  value: getValue('locale'),
-                  error: validationErrorMessages.locale,
-                },
-                {
-                  name: 'phone_number',
-                  label: 'Phone Number',
-                  type: 'text',
-                  value: getValue('phone_number'),
-                  error: validationErrorMessages.phone_number,
-                },
-                {
-                  name: 'address.street_address',
-                  label: 'Street Address',
-                  type: 'text',
-                  value: getValue('address.street_address'),
-                  error: validationErrorMessages['address.street_address'],
-                },
-                {
-                  name: 'address.locality',
-                  label: 'Locality',
-                  type: 'text',
-                  value: getValue('address.locality'),
-                  error: validationErrorMessages['address.locality'],
-                },
-                {
-                  name: 'address.region',
-                  label: 'Region',
-                  type: 'text',
-                  value: getValue('address.region'),
-                  error: validationErrorMessages['address.region'],
-                },
-                {
-                  name: 'address.postal_code',
-                  label: 'Postal Code',
-                  type: 'text',
-                  value: getValue('address.postal_code'),
-                  error: validationErrorMessages['address.postal_code'],
-                },
-                {
-                  name: 'address.country',
-                  label: 'Country',
-                  type: 'text',
-                  value: getValue('address.country'),
-                  error: validationErrorMessages['address.country'],
-                },
-              ]
-            });
+        let validationErrorMessages = {};
+        if (!error && request.method === 'post') {
+          const profile = user.get('profile');
+          const payload = expandDotPaths(request.payload);
+          Object.assign(profile, payload);
+          return userService.update(user.get('id'), { profile }).then(() => {
+            return reply.redirect(request.query.redirect_uri);
           });
+        } else if (error) {
+          validationErrorMessages = getValidationMessages(error);
+        }
+
+        const profile = user.get('profile');
+        const getValue = (field) => {
+          return (request.payload && request.payload[field]) || get(profile, field, '');
+        };
+        reply.view('user-profile', {
+          returnTo: request.query.redirect_uri,
+          fields: [
+            {
+              name: 'name',
+              label: 'Name',
+              type: 'text',
+              value: getValue('name'),
+              error: validationErrorMessages.name,
+            },
+            {
+              name: 'given_name',
+              label: 'Given Name',
+              type: 'text',
+              value: getValue('given_name'),
+              error: validationErrorMessages.given_name,
+            },
+            {
+              name: 'family_name',
+              label: 'Family Name',
+              type: 'text',
+              value: getValue('family_name'),
+              error: validationErrorMessages.family_name,
+            },
+            {
+              name: 'middle_name',
+              label: 'Middle Name',
+              type: 'text',
+              value: getValue('middle_name'),
+              error: validationErrorMessages.middle_name,
+            },
+            {
+              name: 'nickname',
+              label: 'Nickname',
+              type: 'text',
+              value: getValue('nickname'),
+              error: validationErrorMessages.nickname,
+            },
+            {
+              name: 'preferred_username',
+              label: 'Preferred Username',
+              type: 'text',
+              value: getValue('preferred_username'),
+              error: validationErrorMessages.preferred_username,
+            },
+            {
+              name: 'profile',
+              label: 'Profile',
+              type: 'text',
+              value: getValue('profile'),
+              error: validationErrorMessages.profile,
+            },
+            {
+              name: 'picture',
+              label: 'Picture',
+              type: 'text',
+              value: getValue('picture'),
+              error: validationErrorMessages.picture,
+            },
+            {
+              name: 'website',
+              label: 'Website',
+              type: 'text',
+              value: getValue('website'),
+              error: validationErrorMessages.website,
+            },
+            {
+              name: 'email',
+              label: 'Email',
+              type: 'text',
+              value: getValue('email'),
+              error: validationErrorMessages.email,
+            },
+            {
+              name: 'gender',
+              label: 'Gender',
+              type: 'text',
+              value: getValue('gender'),
+              error: validationErrorMessages.gender,
+            },
+            {
+              name: 'birthdate',
+              label: 'Birthdate',
+              type: 'text',
+              value: getValue('birthdate'),
+              error: validationErrorMessages.birthdate,
+            },
+            {
+              name: 'zoneinfo',
+              label: 'Timezone',
+              isDropdown: true,
+              options: userFormData.timezones.map(name => ({
+                label: name,
+                value: name,
+                selected: getValue('zoneinfo') === name
+              })),
+              value: getValue('zoneinfo'),
+              error: validationErrorMessages.zoneinfo,
+            },
+            {
+              name: 'locale',
+              label: 'Locale',
+              isDropdown: true,
+              options: Object.keys(userFormData.locales).map((value) => ({
+                label: userFormData.locales[value],
+                value,
+                selected: getValue('locale') === value,
+              })),
+              value: getValue('locale'),
+              error: validationErrorMessages.locale,
+            },
+            {
+              name: 'phone_number',
+              label: 'Phone Number',
+              type: 'text',
+              value: getValue('phone_number'),
+              error: validationErrorMessages.phone_number,
+            },
+            {
+              name: 'address.street_address',
+              label: 'Street Address',
+              type: 'text',
+              value: getValue('address.street_address'),
+              error: validationErrorMessages['address.street_address'],
+            },
+            {
+              name: 'address.locality',
+              label: 'Locality',
+              type: 'text',
+              value: getValue('address.locality'),
+              error: validationErrorMessages['address.locality'],
+            },
+            {
+              name: 'address.region',
+              label: 'Region',
+              type: 'text',
+              value: getValue('address.region'),
+              error: validationErrorMessages['address.region'],
+            },
+            {
+              name: 'address.postal_code',
+              label: 'Postal Code',
+              type: 'text',
+              value: getValue('address.postal_code'),
+              error: validationErrorMessages['address.postal_code'],
+            },
+            {
+              name: 'address.country',
+              label: 'Country',
+              type: 'text',
+              value: getValue('address.country'),
+              error: validationErrorMessages['address.country'],
+            },
+          ]
         });
       });
     },
@@ -409,6 +393,6 @@ module.exports['@require'] = [
   'email/email-service',
   'render-template',
   'client/client-service',
-  'oidc-adapter/redis',
   'user/user-form-data',
+  'oidc-provider',
 ];
