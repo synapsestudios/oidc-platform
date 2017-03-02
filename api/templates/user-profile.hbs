@@ -1,25 +1,30 @@
-<h1>Profile</h1>
 <form action="{{formAction}}" method="post">
   {{#each fields}}
-    <div>
-      <label for='{{name}}'>{{label}}</label>
-      {{#if isDropdown}}
-        <select name='{{name}}'>
-          {{#each options}}
-            <option value={{value}} {{#if selected}}selected{{/if}}>{{label}}</option>
-          {{/each}}
-        </select>
-      {{else}}
-        <input
-          id='{{name}}'
-          type='{{type}}'
-          name='{{name}}'
-          placeholder='{{label}}'
-          value='{{value}}'
-        />
-      {{/if}}
+    <div class="input-scaffold">
+      <label>
+        <span class="input-scaffold__label">{{label}}</span>
+        {{#if isDropdown}}
+          <select
+            name='{{name}}'
+            class="input-scaffold__input"
+          >
+            {{#each options}}
+              <option value={{value}} {{#if selected}}selected{{/if}}>{{label}}</option>
+            {{/each}}
+          </select>
+        {{else}}
+          <input
+            id='{{name}}'
+            class="input-scaffold__input"
+            type='{{type}}'
+            name='{{name}}'
+            placeholder='{{label}}'
+            value='{{value}}'
+          />
+        {{/if}}
+      </label>
       {{#if error}}
-        <div class="validation-errors-list">
+        <div class="input-scaffold__validation">
           {{#each error}}
             <div class="validation-error">{{this}}</div>
           {{/each}}
@@ -28,5 +33,5 @@
     </div>
   {{/each}}
 
-  <button type="submit" class="profile profile-submit">Submit</button>
+  <button type="submit">Submit</button>
 </form>
