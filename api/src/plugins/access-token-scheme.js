@@ -30,7 +30,8 @@ exports.register = function (server, pluginOptions, next) {
         let tokenString;
         if (request.method === 'get') {
           tokenString = request.query.access_token;
-        } else {
+        }
+        if (!tokenString) {
           const authorization = request.headers.Authorization || '';
           tokenString = authorization.split(' ')[1];
         }
