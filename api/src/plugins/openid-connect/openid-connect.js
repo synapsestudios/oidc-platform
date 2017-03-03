@@ -46,7 +46,7 @@ exports.register = function (server, options, next) {
       devInteractions: false,
       discovery: true,
       claimsParameter: true,
-      clientCredentials: false,
+      clientCredentials: true,
       encryption: true,
       introspection: true,
       registration: {

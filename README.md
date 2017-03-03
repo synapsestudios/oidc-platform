@@ -22,7 +22,8 @@ Body:
     "response_types": ["code id_token token"],
     "grant_types": [
         "authorization_code",
-        "implicit"
+        "implicit",
+        "client_credentials"
     ],
     "redirect_uris": ["https://sso-client.dev:3000/"],
     "post_logout_redirect_uris": ["https://sso-client.dev:3000/logout"]
