@@ -8,7 +8,7 @@ exports.register = function (server, pluginOptions, next) {
 
     const onInvalidAccessToken = (request, reply) => {
       const clientId = get(request, 'query.client_id') || get(request, 'payload.client_id');
-      const redirectUri = request.query.redirect_uri || request.payload.redirect_uri;
+      const redirectUri = get(request, 'query.redirect_uri') || get(request, 'payload.redirect_uri');
       if (clientId && redirectUri) {
         provider.Client.find(clientId).then(client => {
           if (!client) {
