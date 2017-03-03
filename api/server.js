@@ -13,7 +13,8 @@ manifestPromise.then(manifest => {
       throw err;
     }
 
-    server.auth.strategy('access_token', 'access_token');
+    server.auth.strategy('access_token', 'access_token', { token_type: 'access_token' });
+    server.auth.strategy('client_credentials', 'access_token', { token_type: 'client_credentials' });
 
     ioc.use(id => {
       if (id === 'server') {
