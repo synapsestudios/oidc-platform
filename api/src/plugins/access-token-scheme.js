@@ -2,13 +2,28 @@ const Boom = require('boom');
 const get = require('lodash/get');
 
 exports.register = function (server, pluginOptions, next) {
-
   server.auth.scheme('access_token', (server, schemeOptions) => {
+    if (!schemeOptions || !schemeOptions.token_type) {
+      throw new Error('Must specify token_type option');
+    }
+
+    let TokenModel;
+    switch (schemeOptions.token_type) {
+      case 'access_token':
+        TokenModel = 'AccessToken';
+        break;
+      case 'client_credentials':
+        TokenModel = 'ClientCredentials';
+        break;
+      default:
+        throw new Error('Invalid token type');
+    }
+
     const provider = server.plugins['open-id-connect'].provider;
 
     const onInvalidAccessToken = (request, reply) => {
       const clientId = get(request, 'query.client_id') || get(request, 'payload.client_id');
-      const redirectUri = request.query.redirect_uri || request.payload.redirect_uri;
+      const redirectUri = get(request, 'query.redirect_uri') || get(request, 'payload.redirect_uri');
       if (clientId && redirectUri) {
         provider.Client.find(clientId).then(client => {
           if (!client) {
@@ -32,7 +47,7 @@ exports.register = function (server, pluginOptions, next) {
           tokenString = request.query.access_token;
         }
         if (!tokenString) {
-          const authorization = request.headers.Authorization || '';
+          const authorization = get(request, 'headers.authorization', '');
           tokenString = authorization.split(' ')[1];
         }
 
@@ -40,13 +55,15 @@ exports.register = function (server, pluginOptions, next) {
           return onInvalidAccessToken(request, reply);
         }
 
-        provider.AccessToken.find(tokenString).then(token => {
+        provider[TokenModel].find(tokenString).then(token => {
           if (token) {
             token.scope = token.scope.split(' ');
             reply.continue({ credentials: token });
           } else {
             return onInvalidAccessToken(request, reply);
           }
+        }).catch(e => {
+          reply(Boom.badImplementation(null, e));
         });
       }
     };

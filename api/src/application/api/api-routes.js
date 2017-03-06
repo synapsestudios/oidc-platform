@@ -9,7 +9,7 @@ module.exports = (service, mixedValidation, rowNotExists) => [
     },
     config: {
       auth: {
-        strategy: 'access_token',
+        strategy: 'client_credentials',
         scope: 'admin'
       },
       validate: {
