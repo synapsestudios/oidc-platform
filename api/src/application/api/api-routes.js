@@ -1,11 +1,11 @@
 const Joi = require('joi');
 
-module.exports = (service, mixedValidation, rowNotExists) => [
+module.exports = (userService, mixedValidation, rowNotExists) => [
   {
     method: 'POST',
     path: '/api/invite',
     handler: (request, reply) => {
-      reply(service.inviteUser(request.payload));
+      reply(userService.inviteUser(request.payload));
     },
     config: {
       auth: {
@@ -24,6 +24,24 @@ module.exports = (service, mixedValidation, rowNotExists) => [
             email: rowNotExists('user', 'email', 'Email already in use')
           }
         )
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/api/users',
+    handler: (request, reply) => {
+      reply(userService.getUsers(request.query.ids));
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin'
+      },
+      validate: {
+        query: {
+          ids: Joi.array().items(Joi.string()).single(),
+        }
       }
     }
   }

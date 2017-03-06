@@ -16,6 +16,10 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       });
     },
 
+    getUsers(ids) {
+      return bookshelf.model('user').query(qb => qb.whereIn('id', ids)).fetchAll();
+    },
+
     inviteUser(payload) {
       let createdUser;
       return self.create(
