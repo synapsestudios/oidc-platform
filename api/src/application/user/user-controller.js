@@ -126,7 +126,6 @@ module.exports = (
     },
 
     profileFormHandler: function(request, reply, source, error) {
-      console.log(request.payload, error);
       const redisAdapter = new RedisAdapter('AccessToken');
       const clientId = request.query.clientId;
       return clientService.findById(clientId).then(client => {
