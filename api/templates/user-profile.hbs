@@ -1,5 +1,5 @@
-<h1>Profile</h1>
-<form action="{{formAction}}" method="post">
+<h1>Profile!!</h1>
+<form action="{{formAction}}" method="post" enctype="multipart/form-data">
   {{#each fields}}
     <div>
       <label for='{{name}}'>{{label}}</label>
@@ -9,6 +9,14 @@
             <option value={{value}} {{#if selected}}selected{{/if}}>{{label}}</option>
           {{/each}}
         </select>
+      {{else if isFile}}
+        {{#if value}}<img src='{{value}}' alt='Profile picture' />{{/if}}
+        <input
+          id='{{name}}'
+          type='file'
+          accept='{{accept}}'
+          name='{{name}}'
+        />
       {{else}}
         <input
           id='{{name}}'
