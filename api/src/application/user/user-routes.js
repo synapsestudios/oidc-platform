@@ -14,17 +14,18 @@ module.exports = (service, controller, userFormData) => {
     {
       method : 'GET',
       path : '/user/register',
+      handler : controller.registerFormHandler,
       config : {
         validate : {
           failAction : controller.registerFormHandler,
           query : queryValidation,
         }
       },
-      handler : controller.registerFormHandler
     },
     {
       method : 'POST',
       path : '/user/register',
+      handler : controller.registerFormHandler,
       config : {
         validate : {
           payload : {
@@ -36,17 +37,20 @@ module.exports = (service, controller, userFormData) => {
           failAction : controller.registerFormHandler,
         }
       },
-      handler : controller.registerFormHandler,
     },
     {
       method: 'GET',
       path: '/user/profile',
       handler: controller.profileFormHandler,
       config: {
+        auth: {
+          strategy: 'access_token',
+          scope: 'profile'
+        },
         validate: {
           query: {
-            clientId: Joi.string().required(),
-            accessToken: Joi.string().required(),
+            client_id: Joi.string().required(),
+            access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           },
         }
@@ -64,11 +68,15 @@ module.exports = (service, controller, userFormData) => {
           parse: true,
           allow: 'multipart/form-data',
         },
+        auth: {
+          strategy: 'access_token',
+          scope: 'profile',
+        },
         validate: {
           failAction: controller.profileFormHandler,
           query: {
-            clientId: Joi.string().required(),
-            accessToken: Joi.string().required(),
+            client_id: Joi.string().required(),
+            access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           },
           payload: Joi.object().keys({
@@ -102,17 +110,18 @@ module.exports = (service, controller, userFormData) => {
     {
       method : 'GET',
       path : '/user/forgot-password',
+      handler : controller.getForgotPasswordForm,
       config : {
         validate : {
           failAction : controller.getForgotPasswordForm,
           query : queryValidation,
         },
       },
-      handler : controller.getForgotPasswordForm,
     },
     {
       method : 'POST',
       path : '/user/forgot-password',
+      handler : controller.postForgotPasswordForm,
       config : {
         validate : {
           payload : {
@@ -122,11 +131,11 @@ module.exports = (service, controller, userFormData) => {
           failAction : controller.getForgotPasswordForm,
         }
       },
-      handler : controller.postForgotPasswordForm,
     },
     {
       method : 'GET',
       path : '/user/reset-password',
+      handler : controller.getResetPasswordForm,
       config : {
         validate : {
           failAction : controller.getResetPasswordForm,
@@ -135,11 +144,11 @@ module.exports = (service, controller, userFormData) => {
           }, queryValidation),
         },
       },
-      handler : controller.getResetPasswordForm,
     },
     {
       method : 'POST',
       path : '/user/reset-password',
+      handler : controller.postResetPasswordForm,
       config : {
         validate : {
           payload : {
@@ -152,7 +161,30 @@ module.exports = (service, controller, userFormData) => {
           failAction : controller.getResetPasswordForm,
         }
       },
-      handler : controller.postResetPasswordForm,
+    },
+    {
+      method: 'GET',
+      path: '/user/accept-invite',
+      handler: controller.getAcceptInviteForm,
+      config: {
+        validate: {
+          query: {
+            token: Joi.string().guid().required(),
+          },
+        },
+      },
+    },
+    {
+      method: 'POST',
+      path: '/user/accept-invite',
+      handler: controller.postAcceptInviteForm,
+      config: {
+        validate: {
+          query: {
+            token: Joi.string().guid().required(),
+          },
+        },
+      },
     },
   ];
 };

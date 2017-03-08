@@ -1,8 +1,7 @@
-var Glue = require('glue');
-var ioc = require('electrolyte');
-var handlebars = require('handlebars');
-var manifestPromise = require('./manifest');
-var config = require('./config');
+const Glue = require('glue');
+const ioc = require('electrolyte');
+const handlebars = require('handlebars');
+const manifestPromise = require('./manifest');
 
 var options = {
   relativeTo: __dirname + '/src'
@@ -13,6 +12,9 @@ manifestPromise.then(manifest => {
     if (err) {
       throw err;
     }
+
+    server.auth.strategy('access_token', 'access_token', { token_type: 'access_token' });
+    server.auth.strategy('client_credentials', 'access_token', { token_type: 'client_credentials' });
 
     ioc.use(id => {
       if (id === 'server') {
@@ -32,13 +34,6 @@ manifestPromise.then(manifest => {
       layout: 'default',
     });
 
-    // Configure route authentication
-    server.auth.strategy('jwt', 'jwt', {
-      key: config('/auth/secret'),
-      validateFunc: ioc.create('auth/validateJWT'),
-      verifyOptions: { algorithms: [ 'HS256' ] }
-    });
-
     // Register models
     ioc.create('client/client-contact-model');
     ioc.create('client/client-default-acr-value-model');
@@ -52,18 +47,23 @@ manifestPromise.then(manifest => {
     ioc.create('user/user-password-reset-token-model');
 
     // Register routes
-    Promise.all([
+    return Promise.all([
+      ioc.create('api/api-routes'),
       ioc.create('client/client-routes'),
       ioc.create('user/user-routes'),
     ])
       .then(routes => {
-        routes.forEach(routes => {
-          server.route(routes);
-        });
+        try {
+          routes.forEach(routes => {
+            server.route(routes);
+          });
 
-        server.start(function () {
-          console.log('Server running at:', server.info.uri);
-        });
+          server.start(function () {
+            console.log('Server running at:', server.info.uri);
+          });
+        } catch (e) {
+          console.log(e);
+        }
       });
   });
 });
