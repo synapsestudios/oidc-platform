@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
-const uuid = require('uuid');
+const Boom = require('boom');
 const config = require('../../../config');
+const uuid = require('uuid');
 
 module.exports = (bookshelf, emailService, renderTemplate) => {
   var self = {
@@ -20,6 +21,32 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       return bookshelf.model('user').query(qb => qb.whereIn('id', ids)).fetchAll();
     },
 
+    sendInvite(user, appName, hoursTillExpiration) {
+      return self.createPasswordResetToken(user.get('id'), hoursTillExpiration).then(token => {
+        const base = config('/baseUrl');
+        return renderTemplate('email/invite', {
+          url: `${base}/user/accept-invite?token=${token.get('token')}`,
+          appName: appName
+        });
+      }).then(emailBody => {
+        return emailService.send({
+          to: user.get('email'),
+          subject: `${appName} Invitation`,
+          html: emailBody,
+        });
+      });
+    },
+
+    resendUserInvite(userId, appName, hoursTillExpiration) {
+      return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
+        if (!user) {
+          return Boom.notFound();
+        }
+
+        return self.sendInvite(user, appName, hoursTillExpiration).then(() => user);
+      });
+    },
+
     inviteUser(payload) {
       let createdUser;
       return self.create(
@@ -31,19 +58,11 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
         }
       ).then(user => {
         createdUser = user;
-        return self.createPasswordResetToken(user.get('id'));
-      }).then(token => {
-        const base = config('/baseUrl');
-        return renderTemplate('email/invite', {
-          url: `${base}/user/accept-invite?token=${token.get('token')}`,
-          appName: payload.app_name
-        });
-      }).then(emailBody => {
-        return emailService.send({
-          to: payload.email,
-          subject: `${payload.app_name} Invitation`,
-          html: emailBody,
-        });
+        return self.sendInvite(
+          user,
+          payload.app_name,
+          payload.hours_till_expiration
+        );
       }).then(() => createdUser);
     },
 
@@ -58,7 +77,7 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
         additional.profile || {}
       );
 
-      return this.encryptPassword(password)
+      return self.encryptPassword(password)
         .then(hashedPass => bookshelf.model('user').forge({
           id : uuid.v4(),
           email,
@@ -98,9 +117,10 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       return bookshelf.model('user_password_reset_token').forge({ token }).destroy();
     },
 
-    createPasswordResetToken: function(id) {
+    createPasswordResetToken: function(id, hoursTillExpiration) {
+      hoursTillExpiration = hoursTillExpiration || 1;
       const expires = new Date();
-      expires.setHours(expires.getHours() + 1);
+      expires.setHours(expires.getHours() + hoursTillExpiration);
 
       return bookshelf.model('user_password_reset_token').forge({
         token: uuid.v4(),
