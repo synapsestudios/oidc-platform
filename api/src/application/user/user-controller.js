@@ -2,6 +2,7 @@ const querystring = require('querystring');
 const formatError = require('../../lib/format-error');
 const get = require('lodash/get');
 const set = require('lodash/set');
+const uuid = require('uuid');
 const config = require('../../../config');
 
 module.exports = (
@@ -10,7 +11,8 @@ module.exports = (
   renderTemplate,
   clientService,
   userFormData,
-  oidcProvider
+  oidcProvider,
+  imageService
 ) => {
   const errorMessages = {
     email: {
@@ -168,12 +170,38 @@ module.exports = (
         if (!error && request.method === 'post') {
           const profile = user.get('profile');
           const payload = expandDotPaths(request.payload);
-          Object.assign(profile, payload);
-          return userService.update(user.get('id'), { profile }).then(() => {
-            return reply.redirect(request.query.redirect_uri);
-          });
+
+          const oldPicture = profile.picture;
+          const pictureMIME = request.payload.picture.hapi.headers['content-type'];
+
+          return new Promise((resolve, reject) => {
+            if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
+              const filename = uuid();
+              const bucket = filename.substring(0, 2);
+              imageService.uploadImageStream(request.payload.picture, `pictures/${bucket}/${filename}`)
+                .then(filename => {
+                  resolve(Object.assign(profile, payload, { picture: filename }));
+                })
+                .catch(err => {
+                  reject(err);
+                });
+            } else {
+              delete request.payload.picture;
+              resolve(Object.assign(profile, payload));
+            }
+          })
+            .then(profile => userService.update(user.get('id'), { profile }))
+            .then(() => {
+              if (oldPicture) {
+                imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
+              }
+            })
+            .then(() => reply.redirect(request.query.redirect_uri));
         } else if (error) {
           validationErrorMessages = getValidationMessages(error);
+          if (validationErrorMessages.picture || validationErrorMessages['hapi.headers.content-type']) {
+            validationErrorMessages.picture = ['Must be JPEG or PNG image less than 1MB'];
+          }
         }
 
         const profile = user.get('profile');
@@ -235,7 +263,8 @@ module.exports = (
             {
               name: 'picture',
               label: 'Picture',
-              type: 'text',
+              isFile: true,
+              accept: 'image/jpeg, image/png',
               value: getValue('picture'),
               error: validationErrorMessages.picture,
             },
@@ -395,4 +424,5 @@ module.exports['@require'] = [
   'client/client-service',
   'user/user-form-data',
   'oidc-provider',
+  'image/image-service',
 ];

@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const Readable = require('stream').Readable;
 
 const queryValidation = {
   client_id : Joi.string().required(),
@@ -60,9 +61,16 @@ module.exports = (service, controller, userFormData) => {
       path: '/user/profile',
       handler: controller.profileFormHandler,
       config: {
+        payload: {
+          failAction: 'ignore', // set payload to null if picture is too large
+          maxBytes: 1048576, // 1MiB
+          output: 'stream',
+          parse: true,
+          allow: 'multipart/form-data',
+        },
         auth: {
           strategy: 'access_token',
-          scope: 'profile'
+          scope: 'profile',
         },
         validate: {
           failAction: controller.profileFormHandler,
@@ -71,7 +79,7 @@ module.exports = (service, controller, userFormData) => {
             access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           },
-          payload: {
+          payload: Joi.object().keys({
             name: Joi.string().allow(''),
             given_name: Joi.string().allow(''),
             family_name: Joi.string().allow(''),
@@ -79,7 +87,10 @@ module.exports = (service, controller, userFormData) => {
             nickname: Joi.string().allow(''),
             preferred_username: Joi.string().allow(''),
             profile: Joi.string().uri().allow(''),
-            picture: Joi.string().uri().allow(''),
+            picture: Joi.object().type(Readable).assert(
+              'hapi.headers.content-type',
+              Joi.any().valid(['image/jpeg', 'image/png', 'application/octet-stream'])
+            ),
             website: Joi.string().uri().allow(''),
             email: Joi.string().email().allow(''),
             gender: Joi.string().allow(''),
@@ -92,7 +103,7 @@ module.exports = (service, controller, userFormData) => {
             'address.region': Joi.string().allow(''),
             'address.postal_code': Joi.string().allow(''),
             'address.country': Joi.string().allow(''),
-          }
+          }).invalid(null).label('picture') // null payload means picture size validation failed
         }
       },
     },
