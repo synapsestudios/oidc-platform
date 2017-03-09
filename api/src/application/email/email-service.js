@@ -4,10 +4,15 @@ const mailgun = require('./drivers/mailgun');
 const drivers = { mailgun };
 
 module.exports = () => {
-  if (!drivers[config('/email')]) {
-    throw 'Invalid email driver, please set OIDC_EMAIL_DRIVER';
+  if (drivers[config('/email')]) {
+    return drivers[config('/email')]();
+  } else {
+    return {
+      send: () => {
+        console.log(`You're attempting to send an email without an email provider configured!`);
+      }
+    };
   }
-  return drivers[config('/email')]();
 };
 
 module.exports['@singleton'] = true;
