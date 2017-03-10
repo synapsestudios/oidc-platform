@@ -54,6 +54,12 @@ manifestPromise.then(manifest => {
     ])
       .then(routes => {
         try {
+
+          server.route([{
+            method: 'GET',
+            path: '/health-check',
+            handler: (req, reply) => reply('all good'),
+          }]);
           routes.forEach(routes => {
             server.route(routes);
           });
