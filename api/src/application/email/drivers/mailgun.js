@@ -7,7 +7,7 @@ module.exports = function () {
 
   const mailgunClient = Mailgun({
     apiKey: process.env.MAILGUN_API_KEY,
-    domain: process.env.FROM_DOMAIN,
+    domain: process.env.OIDC_EMAIL_DOMAIN,
   });
 
   return {
@@ -28,7 +28,7 @@ module.exports = function () {
         }
 
         const mail = {
-          from: emailObject.from || 'no-reply@' + process.env.FROM_DOMAIN,
+          from: emailObject.from || 'no-reply@' + process.env.OIDC_EMAIL_DOMAIN,
           to: checkWhitelist(emailObject.to, reject),
           subject: emailObject.subject,
           text: emailObject.text || '',
