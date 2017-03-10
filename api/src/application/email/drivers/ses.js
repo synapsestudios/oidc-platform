@@ -31,10 +31,10 @@ class SesDriver {
             },
           },
           Subject: {
-            data: emailObject.subject,
+            Data: emailObject.subject,
           },
         },
-        source: emailObject.from || 'no-reply@' + process.env.OIDC_EMAIL_DOMAIN,
+        Source: emailObject.from || 'no-reply@' + process.env.OIDC_EMAIL_DOMAIN,
       };
 
       ses.sendEmail(params).promise().then(result => {
