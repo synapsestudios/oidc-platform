@@ -1,40 +1,14 @@
 'use strict';
 
-const _ = require('lodash');
 const Mailgun = require('mailgun-js');
+const checkWhitelist = require('../check-whitelist');
 
 module.exports = function () {
 
   const mailgunClient = Mailgun({
     apiKey: process.env.MAILGUN_API_KEY,
-    domain: process.env.MAILGUN_DOMAIN,
+    domain: process.env.OIDC_EMAIL_DOMAIN,
   });
-
-  const options = {
-    trap: process.env.MAILGUN_TRAP,
-    whitelist: process.env.MAILGUN_WHITELIST ? process.env.MAILGUN_WHITELIST.split(',') : null,
-  };
-
-  const checkWhitelist = (emailAddress, reject) => {
-
-    if (!options.whitelist || !options.whitelist.length) {
-      return emailAddress;
-    }
-
-    const domainPattern = /@(.*)$/;
-    const domain = emailAddress.match(domainPattern)[1];
-
-    if (_.findIndex(options.whitelist, (whitelisted) => domain === whitelisted) >= 0) {
-      return emailAddress;
-    }
-
-    if (!options.trap) {
-      reject('trap option must be set if using whitelist');
-    }
-    else {
-      return options.trap;
-    }
-  };
 
   return {
     send : (emailObject) => {
@@ -54,7 +28,7 @@ module.exports = function () {
         }
 
         const mail = {
-          from: emailObject.from || 'no-reply@' + process.env.MAILGUN_DOMAIN,
+          from: emailObject.from || 'no-reply@' + process.env.OIDC_EMAIL_DOMAIN,
           to: checkWhitelist(emailObject.to, reject),
           subject: emailObject.subject,
           text: emailObject.text || '',

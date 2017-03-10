@@ -1,4 +1,4 @@
-FROM node:6.7.0
+FROM node:6.10.0
 
 ARG PACKAGE_PATH=package.json
 ARG WORKING_DIR=/src

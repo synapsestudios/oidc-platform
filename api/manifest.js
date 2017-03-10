@@ -54,6 +54,20 @@ module.exports = Promise.all([
       },
       {
         plugin: {
+          register: 'good',
+          options: {
+            reporters: {
+              consoleReporter: [
+                {module: 'good-squeeze', name: 'Squeeze', args: [{log: '*', response: '*', error: '*', request: '*'}]},
+                {module: 'good-console'},
+                'stdout'
+              ]
+            }
+          }
+        },
+      },
+      {
+        plugin: {
           register: './plugins/openid-connect/openid-connect',
           options: {
             prefix: 'op',
