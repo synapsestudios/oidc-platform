@@ -1,11 +1,12 @@
 const config = require('../../../config');
 const mailgun = require('./drivers/mailgun');
+const ses = require('./drivers/ses');
 
-const drivers = { mailgun };
+const drivers = { mailgun, ses };
 
 module.exports = () => {
   if (drivers[config('/email')]) {
-    return drivers[config('/email')]();
+    return new drivers[config('/email')]();
   } else {
     return {
       send: () => {
