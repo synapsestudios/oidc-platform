@@ -5,22 +5,49 @@ exports.up = function(knex, Promise) {
       table.string('client_id').references('SIP_client.client_id');
       table.string('value');
       table.primary(['client_id', 'value']);
+
+// CREATE TABLE `SIP_client_default_acr_value` (
+//   `client_id` varchar(255) NOT NULL,
+//   `value` varchar(255) NOT NULL,
+//   PRIMARY KEY (`client_id`,`value`),
+//   CONSTRAINT `sip_client_default_acr_value_client_id_foreign` FOREIGN KEY (`client_id`) REFERENCES `SIP_client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE
+// )
     }),
     knex.schema.createTable('SIP_client_post_logout_redirect_uri', function(table) {
       table.string('client_id').references('SIP_client.client_id');
       table.string('uri');
       table.primary(['client_id', 'uri']);
     }),
+// CREATE TABLE `SIP_client_post_logout_redirect_uri` (
+//   `client_id` varchar(255) NOT NULL,
+//   `uri` varchar(255) NOT NULL,
+//   PRIMARY KEY (`client_id`,`uri`),
+//   CONSTRAINT `sip_client_post_logout_redirect_uri_client_id_foreign` FOREIGN KEY (`client_id`) REFERENCES `SIP_client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE
+// )
+
     knex.schema.createTable('SIP_client_request_uri', function(table) {
       table.string('client_id').references('SIP_client.client_id');
       table.string('uri');
       table.primary(['client_id', 'uri']);
     }),
+
+// CREATE TABLE `SIP_client_request_uri` (
+//   `client_id` varchar(255) NOT NULL,
+//   `uri` varchar(255) NOT NULL,
+//   PRIMARY KEY (`client_id`,`uri`),
+//   CONSTRAINT `sip_client_request_uri_client_id_foreign` FOREIGN KEY (`client_id`) REFERENCES `SIP_client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE
+// )
     knex.schema.createTable('SIP_client_response_type', function(table) {
       table.string('client_id').references('SIP_client.client_id');
       table.string('value');
       table.primary(['client_id', 'value']);
     }),
+// CREATE TABLE `SIP_client_response_type` (
+//   `client_id` varchar(255) NOT NULL,
+//   `value` varchar(255) NOT NULL,
+//   PRIMARY KEY (`client_id`,`value`),
+//   CONSTRAINT `sip_client_response_type_client_id_foreign` FOREIGN KEY (`client_id`) REFERENCES `SIP_client` (`client_id`) ON DELETE CASCADE ON UPDATE CASCADE
+// )
     knex.schema.table('SIP_client', function(table) {
       table.string('backchannel_logout_uri');
       table.bool('backchannel_logout_session_required');

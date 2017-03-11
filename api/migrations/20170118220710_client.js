@@ -10,29 +10,70 @@ exports.up = function(knex, Promise) {
     table.string('tos_uri');
     table.enum('application_type', ['native', 'web']).defaultTo('web');
   })
-    .then(() => knex.schema.createTable('SIP_client_redirect_uri', table => {
-      table.string('client_id').references('SIP_client.client_id');
-      table.string('uri');
+    .then(() => {
+      if (process.env.OIDC_DB_ADAPTER === 'mysql') {
+        return knex.raw(`
+          CREATE TABLE SIP_client_redirect_uri (
+            client_id varchar(255) NOT NULL,
+            uri varchar(255) NOT NULL,
+            PRIMARY KEY (client_id,uri),
+            CONSTRAINT sip_client_redirect_uri_client_id_foreign FOREIGN KEY (client_id) REFERENCES SIP_client (client_id) ON DELETE CASCADE ON UPDATE CASCADE
+          )
+        `);
+      } else {
+        return knex.schema.createTable('SIP_client_redirect_uri', table => {
+          table.string('client_id').references('SIP_client.client_id');
+          table.string('uri');
 
-      table.primary(['client_id', 'uri']);
-    }))
-    .then(() => knex.schema.createTable('SIP_client_grant', table => {
-      table.string('client_id').references('SIP_client.client_id');
-      table.enum('grant_type', [
-        'client_credentials',
-        'refresh_token',
-        'authorization_code',
-        'implicit'
-      ]);
+          table.primary(['client_id', 'uri']);
+        });
+      }
+    })
+    .then(() => {
+      if (process.env.OIDC_DB_ADAPTER === 'mysql') {
+        return knex.raw(`
+          CREATE TABLE SIP_client_grant (
+            client_id varchar(255) NOT NULL,
+            grant_type enum('client_credentials','refresh_token','authorization_code','implicit') NOT NULL,
+            PRIMARY KEY (client_id,grant_type),
+            CONSTRAINT sip_client_grant_client_id_foreign FOREIGN KEY (client_id) REFERENCES SIP_client (client_id) ON DELETE CASCADE ON UPDATE CASCADE
+          )
+        `);
+      } else {
+        return knex.schema.createTable('SIP_client_grant', table => {
+          table.string('client_id').references('SIP_client.client_id');
+          table.enum('grant_type', [
+            'client_credentials',
+            'refresh_token',
+            'authorization_code',
+            'implicit'
+          ]);
 
-      table.primary(['client_id', 'grant_type']);
-    }))
-    .then(() => knex.schema.createTable('SIP_client_contact', table => {
-      table.string('client_id').references('SIP_client.client_id');
-      table.string('email');
+          table.primary(['client_id', 'grant_type']);
+        });
+      }
+    })
+    .then(() => {
 
-      table.primary(['client_id', 'email']);
-    }));
+      if (process.env.OIDC_DB_ADAPTER === 'mysql') {
+        return knex.raw(`
+          CREATE TABLE SIP_client_contact (
+            client_id varchar(255) NOT NULL,
+            email varchar(255) NOT NULL,
+            PRIMARY KEY (client_id,email),
+            CONSTRAINT sip_client_contact_client_id_foreign FOREIGN KEY (client_id) REFERENCES SIP_client (client_id) ON DELETE CASCADE ON UPDATE CASCADE
+          )
+        `);
+      } else {
+        return knex.schema.createTable('SIP_client_contact', table => {
+
+          table.string('client_id').references('SIP_client.client_id');
+          table.string('email');
+
+          table.primary(['client_id', 'email']);
+        });
+      }
+    });
 };
 
 exports.down = function(knex, Promise) {
