@@ -210,6 +210,7 @@ module.exports = (
         };
         reply.view('user-profile', {
           returnTo: request.query.redirect_uri,
+          title: 'User Profile',
           fields: [
             {
               name: 'name',
