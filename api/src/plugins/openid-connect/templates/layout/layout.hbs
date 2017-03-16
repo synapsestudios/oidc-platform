@@ -240,30 +240,24 @@
     </style>
   </head>
   <body>
-    <div class="login-card">
-      <h1>{{title}}</h1>
-      <div class="login-client-image">
-        {{#if client.logoUri}}
-        <img src="{{client.logoUri}}" />
-        {{/if}}
+    <div class="auth">
+      <div class="auth-lock">
+        <div class="auth-header">
+          {{#if client.logoUri}}
+            <img src="{{client.logoUri}}" />
+          {{/if}}
+          <h1>{{title}}</h1>
+        </div>
+        <div class="auth-form">
+          {{{content}}}
+        </div>
+        <div class="auth-help">
+          <a href="{{cookie.returnTo}}">[ Cancel ]</a>
+          {{#if client.tosUri}}<a href="{{client.tosUri}}">[ Terms of Service ]</a>{{/if}}
+          {{#if client.policyUri}}<a href="{{client.policyUri}}">[ Privacy Policy ]</a>{{/if}}
+        </div>
       </div>
-      {{{content}}}
-      <div class="login-help">
-        <a href="{{cookie.returnTo}}">[ Cancel ]</a>
-        {{#if client.tosUri}}<a href="{{client.tosUri}}">[ Terms of Service ]</a>{{/if}}
-        {{#if client.policyUri}}<a href="{{client.policyUri}}">[ Privacy Policy ]</a>{{/if}}
-      </div>
-    </div>
-    <div class="login-card">
-      <div class="grant-debug">
-        {{cookie.uuid}}
-      </div>
-      <div class="grant-debug">
-        {{{debug}}}
-      </div>
-      <div class="grant-debug">
-        {{{interaction}}}
-      </div>
+      <div class="auth-underlay" />
     </div>
   </body>
 </html>
