@@ -45,9 +45,18 @@
     {{/if}}
   </div>
 
-  <label>
-    <input type="checkbox" name="remember" value="yes" checked="yes"> Stay signed in
-  </label>
+  <div class="toggle-scaffold">
+    <label>
+      <input
+        class="toggle-scaffold__input"
+        type="checkbox"
+        name="remember"
+        value="yes"
+        checked="yes"
+      >
+      <span class="toggle-scaffold__label">Remember me</span>
+    </label>
+  </div>
 
-  <button type="submit">Sign-in</button>
+  <button type="submit">Log In</button>
 </form>

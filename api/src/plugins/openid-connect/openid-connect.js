@@ -114,7 +114,7 @@ exports.register = function (server, options, next) {
             reply.view('login', {
               client,
               cookie,
-              title: 'Sign-in',
+              title: 'Log In',
               debug: querystring.stringify(cookie.params, ',<br/>', ' = ', {
                 encodeURIComponent: value => value,
               }),
@@ -182,7 +182,7 @@ exports.register = function (server, options, next) {
                 error: 'Invalid email password combination',
                 client,
                 cookie,
-                title: 'Sign-in',
+                title: 'Log In',
                 debug: querystring.stringify(cookie.params, ',<br/>', ' = ', {
                   encodeURIComponent: value => value,
                 }),

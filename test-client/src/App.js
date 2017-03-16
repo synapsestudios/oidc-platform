@@ -44,9 +44,9 @@ class App extends Component {
     return (
       <div>
         <span>
-          <a href={`http://sso-client.dev:9000/op/auth?client_id=${config.clientId}&response_type=code id_token token&scope=${config.scope}&redirect_uri=${config.redirectUri}&nonce=nonce`}>Login</a>
+          <a href={`http://sso-client.dev:9000/op/auth?client_id=${config.clientId}&response_type=code id_token token&scope=${config.scope}&redirect_uri=${config.redirectUri}&nonce=nonce`}>Log In</a>
           <span> | </span>
-          <a href={`http://sso-client.dev:9000/user/register?client_id=${config.clientId}&response_type=code id_token token&scope=${config.scope}&redirect_uri=${config.redirectUri}&nonce=nonce`}>Register</a>
+          <a href={`http://sso-client.dev:9000/user/register?client_id=${config.clientId}&response_type=code id_token token&scope=${config.scope}&redirect_uri=${config.redirectUri}&nonce=nonce`}>Sign Up</a>
         </span>
       </div>
     );
