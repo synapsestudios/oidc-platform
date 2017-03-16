@@ -64,7 +64,7 @@ module.exports = (
       .catch(error => {
         // assume email collision and show validation message
         reply.view('user-registration', {
-          title: 'Register',
+          title: 'Sign Up',
           formAction: `/user/register?${querystring.stringify(request.query)}`,
           returnTo: `${request.query.redirect_uri}?status=cancelled`,
           error: true,
@@ -149,7 +149,7 @@ module.exports = (
         handleRegistrationPost(request, reply);
       } else {
         reply.view('user-registration', {
-          title: 'Register',
+          title: 'Sign Up',
           formAction: `/user/register?${querystring.stringify(request.query)}`,
           returnTo: `${request.query.redirect_uri}?status=cancelled`,
           error: !!error,
