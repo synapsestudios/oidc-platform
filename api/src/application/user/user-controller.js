@@ -277,13 +277,6 @@ module.exports = (
               error: validationErrorMessages.website,
             },
             {
-              name: 'email',
-              label: 'Email',
-              type: 'text',
-              value: getValue('email'),
-              error: validationErrorMessages.email,
-            },
-            {
               name: 'gender',
               label: 'Gender',
               type: 'text',
