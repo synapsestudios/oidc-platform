@@ -36,6 +36,9 @@ module.exports = bookshelf => bookshelf.model('user', {
           return Object.assign(
             this.get('profile'),
             {
+              email: this.get('email'),
+            },
+            {
               app_metadata: this.get('app_metadata'),
               sub: this.get('id')
             }
