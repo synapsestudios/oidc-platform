@@ -394,7 +394,9 @@ module.exports = (
           }
         })
         .then(() => {
-          reply.view('forgot-password-success');
+          reply.view('forgot-password-success', {
+            title: 'Forgot Password',
+          });
         });
     },
 
