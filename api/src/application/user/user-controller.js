@@ -127,7 +127,9 @@ module.exports = (
                 return userService.update(user.get('id'), { password, profile });
               })
               .then(() => userService.destroyPasswordToken(request.query.token))
-              .then(() => reply.view(`reset-password-success`));
+              .then(() => reply.view(`reset-password-success`, {
+                title: 'Reset Password',
+              }));
           } else {
             return reply.view('reset-password', {
               title: title,
@@ -394,7 +396,9 @@ module.exports = (
           }
         })
         .then(() => {
-          reply.view('forgot-password-success');
+          reply.view('forgot-password-success', {
+            title: 'Forgot Password',
+          });
         });
     },
 
