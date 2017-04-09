@@ -42,9 +42,9 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
         scope: 'admin'
       },
       validate: {
-        // query: {
-        //   email: Joi.string().email().required()
-        // },
+        query: {
+          email: Joi.string().email().required()
+        },
       },
     }
   },

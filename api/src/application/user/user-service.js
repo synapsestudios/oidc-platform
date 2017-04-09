@@ -67,9 +67,6 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
     },
 
     getByEmail(email) {
-      console.log();
-      console.log(email);
-      console.log();
       return bookshelf.model('user').where({email}).fetch();
     },
 
