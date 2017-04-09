@@ -66,6 +66,10 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       }).then(() => createdUser);
     },
 
+    getByEmail(email) {
+      return bookshelf.model('user').where({email}).fetch();
+    },
+
     create: function(email, password, additional) {
       additional = additional || {};
       const app_metadata = additional.app_metadata || [];

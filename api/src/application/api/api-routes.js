@@ -31,6 +31,24 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
     }
   },
   {
+    method: 'GET',
+    path: '/api/users/find',
+    handler: (request, reply) => {
+      reply(userService.getByEmail(request.query.email));
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin'
+      },
+      validate: {
+        query: {
+          email: Joi.string().email().required()
+        },
+      },
+    }
+  },
+  {
     method: 'POST',
     path: '/api/resend-invite/{userId}',
     handler: (request, reply) => {
