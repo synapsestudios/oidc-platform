@@ -18,10 +18,13 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
     },
 
     getUsers(query) {
+      console.log(query);
       let model = bookshelf.model('user');
       if (query.ids) {
         model.where('id', 'in', query.ids);
-      } else {
+      }
+
+      if (query.email) {
         model.where('email', query.email);
       }
 
