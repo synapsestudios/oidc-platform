@@ -17,8 +17,17 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       });
     },
 
-    getUsers(ids) {
-      return bookshelf.model('user').query(qb => qb.whereIn('id', ids)).fetchAll();
+    getUsers(query) {
+      let model = bookshelf.model('user');
+      if (query.ids) {
+        model = model.where('id', 'in', query.ids);
+      }
+
+      if (query.email) {
+        model = model.where('email', query.email);
+      }
+
+      return model.fetchAll();
     },
 
     sendInvite(user, appName, hoursTillExpiration) {

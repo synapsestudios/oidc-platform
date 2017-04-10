@@ -67,7 +67,7 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
     method: 'GET',
     path: '/api/users',
     handler: (request, reply) => {
-      reply(userService.getUsers(request.query.ids));
+      reply(userService.getUsers(request.query));
     },
     config: {
       auth: {
@@ -77,6 +77,7 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
       validate: {
         query: {
           ids: Joi.array().items(Joi.string()).single(),
+          email: Joi.string().email()
         }
       }
     }
