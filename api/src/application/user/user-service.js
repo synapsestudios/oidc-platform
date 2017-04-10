@@ -21,11 +21,11 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       console.log(query);
       let model = bookshelf.model('user');
       if (query.ids) {
-        model.where('id', 'in', query.ids);
+        model = model.where('id', 'in', query.ids);
       }
 
       if (query.email) {
-        model.where('email', query.email);
+        model = model.where('email', query.email);
       }
 
       return model.fetchAll();
