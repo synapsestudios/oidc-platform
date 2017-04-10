@@ -77,7 +77,7 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
       validate: {
         query: {
           ids: Joi.array().items(Joi.string()).single(),
-          email: Joi.string().email().required()
+          email: Joi.string().email()
         }
       }
     }
