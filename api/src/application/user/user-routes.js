@@ -180,6 +180,10 @@ module.exports = (service, controller, userFormData) => {
       handler: controller.postAcceptInviteForm,
       config: {
         validate: {
+          payload : {
+            password : Joi.string().min(8).required(),
+            pass2 : Joi.any().valid(Joi.ref('password')).required(),
+          }, 
           query: {
             token: Joi.string().guid().required(),
           },
