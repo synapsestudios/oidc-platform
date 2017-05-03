@@ -187,6 +187,7 @@ module.exports = (service, controller, userFormData) => {
           query: {
             token: Joi.string().guid().required(),
           },
+          failAction: controller.getAcceptInviteForm,
         },
       },
     },
