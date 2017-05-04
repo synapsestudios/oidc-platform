@@ -110,7 +110,7 @@ module.exports = (
       return (request, reply, source, error) => {
         reply.view('reset-password', {
           title: title,
-          returnTo: (request.query.redirect_uri) ? false : `${request.query.redirect_uri}?status=cancelled`,
+          returnTo: (!!request.query.redirect_uri) ? false : `${request.query.redirect_uri}?status=cancelled`,
           error: !!error,
           validationErrorMessages: getValidationMessages(error),
         });
