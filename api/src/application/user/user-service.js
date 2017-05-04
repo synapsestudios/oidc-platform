@@ -24,7 +24,7 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       }
 
       if (query.email) {
-        model = model.where('email', query.email);
+        model = model.whereRaw('LOWER(email) = ?', `%${query.email.toLowerCase()}%`);
       }
 
       return model.fetchAll();
