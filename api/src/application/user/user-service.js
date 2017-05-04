@@ -59,7 +59,7 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
     inviteUser(payload) {
       let createdUser;
       return self.create(
-        payload.email,
+        payload.email.toLowerCase(),
         uuid.v4(),
         {
           app_metadata: payload.app_metadata || {},
@@ -89,7 +89,7 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       return self.encryptPassword(password)
         .then(hashedPass => bookshelf.model('user').forge({
           id : uuid.v4(),
-          email,
+          email: email.toLowerCase(),
           password : hashedPass,
           profile,
           app_metadata
@@ -101,7 +101,7 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
     },
 
     findByEmailForOidc: function(email) {
-      return bookshelf.model('user').forge({ email }).fetch()
+      return bookshelf.model('user').forge({ email: email.toLowerCase() }).fetch()
         .then(user => user ? user.serialize({strictOidc: true}) : null);
     },
 
