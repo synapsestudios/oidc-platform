@@ -108,9 +108,11 @@ module.exports = (
   const getPasswordResetHandler = (method, title) => {
     if (method === 'GET') {
       return (request, reply, source, error) => {
+        console.log(request.query.redirect_uri, typeof request.query.redirect_uri);
+        const redirectSet = request.query.redirect_uri == undefined || request.query.redirect_uri == 'undefined';
         reply.view('reset-password', {
           title: title,
-          returnTo: (!!request.query.redirect_uri) ? false : `${request.query.redirect_uri}?status=cancelled`,
+          returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
           error: !!error,
           validationErrorMessages: getValidationMessages(error),
         });
