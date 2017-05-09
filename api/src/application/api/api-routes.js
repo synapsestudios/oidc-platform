@@ -18,6 +18,7 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
         payload: mixedValidation(
           {
             app_name: Joi.string().required(),
+            client_id: Joi.string().required(),
             email: Joi.string().email().required(),
             app_metadata: Joi.object(),
             profile: Joi.object(),
@@ -58,6 +59,7 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
         ),
         payload: {
           app_name: Joi.string().required(),
+          client_id: Joi.string().required(),
           hours_till_expiration: hoursTillExpirationSchema,
         }
       },
