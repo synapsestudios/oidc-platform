@@ -95,7 +95,7 @@ module.exports = (bookshelf) => ({
 
   findRedirectUriByClientId(clientId) {
     console.log('At fetch redirect URI', clientId);
-    return bookshelf.model('client_redirect_uri').where({ id: clientId }).fetch();
+    return bookshelf.model('client_redirect_uri').where({ client_id: clientId }).fetch();
   }
 });
 
