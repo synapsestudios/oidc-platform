@@ -91,6 +91,11 @@ module.exports = (bookshelf) => ({
   update(id, payload) {
     const toStore = Object.assign({}, payload);
     return bookshelf.model('client').forge({ client_id: id }).save(toStore);
+  },
+
+  findRedirectUriByClientId(clientId) {
+    console.log('At fetch redirect URI', clientId);
+    return bookshelf.model('client_redirect_uri').where({ id: clientId }).fetch();
   }
 });
 

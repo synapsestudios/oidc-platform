@@ -30,9 +30,10 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       return model.fetchAll();
     },
 
-    sendInvite(user, appName, hoursTillExpiration) {
+    sendInvite(user, appName, clientId, hoursTillExpiration) {
       return self.createPasswordResetToken(user.get('id'), hoursTillExpiration).then(token => {
         const base = config('/baseUrl');
+        
         return renderTemplate('email/invite', {
           url: `${base}/user/accept-invite?token=${token.get('token')}`,
           appName: appName
@@ -46,13 +47,13 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       });
     },
 
-    resendUserInvite(userId, appName, hoursTillExpiration) {
+    resendUserInvite(userId, appName, clientId, hoursTillExpiration) {
       return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
         if (!user) {
           return Boom.notFound();
         }
 
-        return self.sendInvite(user, appName, hoursTillExpiration).then(() => user);
+        return self.sendInvite(user, appName, clientId, hoursTillExpiration).then(() => user);
       });
     },
 
@@ -70,6 +71,7 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
         return self.sendInvite(
           user,
           payload.app_name,
+          payload.client_id,
           payload.hours_till_expiration
         );
       }).then(() => createdUser);
@@ -146,5 +148,6 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'bookshelf',
   'email/email-service',
+  'client/client-service',
   'render-template',
 ];

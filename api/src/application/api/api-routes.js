@@ -39,6 +39,7 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
         userService.resendUserInvite(
           request.params.userId,
           request.payload.app_name,
+          request.payload.client_id,
           request.payload.hours_till_expiration
         )
       );
