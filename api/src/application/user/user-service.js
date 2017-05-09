@@ -35,12 +35,12 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
         const base = config('/baseUrl');
 
         clientService.findRedirectUriByClientId(clientId).then(client => {
+          console.log(client);
           return renderTemplate('email/invite', {
               url: `${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${client.uri}`,
               appName: appName
             });
           }).then(emailBody => {
-            console.log(emailBody);
             return emailService.send({
               to: user.get('email'),
               subject: `${appName} Invitation`,
