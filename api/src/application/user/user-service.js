@@ -3,7 +3,7 @@ const Boom = require('boom');
 const config = require('../../../config');
 const uuid = require('uuid');
 
-module.exports = (bookshelf, emailService, renderTemplate) => {
+module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
   var self = {
     encryptPassword: function(password) {
       return new Promise((resolve, reject) => {
@@ -33,6 +33,10 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
     sendInvite(user, appName, clientId, hoursTillExpiration) {
       return self.createPasswordResetToken(user.get('id'), hoursTillExpiration).then(token => {
         const base = config('/baseUrl');
+
+        clientService.findRedirectUriByClientId(clientId).then(client => {
+          console.log(client);
+        });
         
         return renderTemplate('email/invite', {
           url: `${base}/user/accept-invite?token=${token.get('token')}`,
