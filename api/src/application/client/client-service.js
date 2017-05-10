@@ -88,6 +88,10 @@ module.exports = (bookshelf) => ({
       .fetch({ withRelated: clientRelationships });
   },
 
+  findRedirectUriByClientId(clientId) {
+    return bookshelf.model('client_redirect_uri').where({ client_id: clientId }).fetch();
+  },
+
   update(id, payload) {
     const toStore = Object.assign({}, payload);
     return bookshelf.model('client').forge({ client_id: id }).save(toStore);
