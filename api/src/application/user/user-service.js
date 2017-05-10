@@ -35,9 +35,8 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
         const base = config('/baseUrl');
 
         clientService.findRedirectUriByClientId(clientId).then(client => {
-          console.log(client);
           return renderTemplate('email/invite', {
-              url: `${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${client.uri}`,
+              url: `${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${client.attributes.uri}`,
               appName: appName
             });
           }).then(emailBody => {

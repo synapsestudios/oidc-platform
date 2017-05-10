@@ -108,7 +108,7 @@ module.exports = (
   const getPasswordResetHandler = (method, title) => {
     if (method === 'GET') {
       return (request, reply, source, error) => {
-        const redirectSet = request.query.redirect_uri == undefined;
+        const redirectSet = request.query.token != undefined;
         reply.view('reset-password', {
           title: title,
           returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
@@ -132,9 +132,10 @@ module.exports = (
                 title: 'Reset Password',
               }));
           } else {
+            const redirectSet = request.query.token != undefined;
             return reply.view('reset-password', {
               title: title,
-              returnTo: `${request.query.redirect_uri}?status=cancelled`,
+              returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
               error: true,
               validationErrorMessages: { token: ['Token is invalid or expired'] },
             });
