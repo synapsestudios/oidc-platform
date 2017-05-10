@@ -128,9 +128,13 @@ module.exports = (
                 return userService.update(user.get('id'), { password, profile });
               })
               .then(() => userService.destroyPasswordToken(request.query.token))
-              .then(() => reply.view(`reset-password-success`, {
-                title: 'Reset Password',
-              }));
+              .then(() => {
+                const base = config('/baseUrl');
+                reply.view(`reset-password-success`, {
+                  title: 'Password Set',
+                  linkUrl: `${base}/interaction/${request.query.client_id}`,
+                });
+            });
           } else {
             const redirectSet = request.query.token != undefined;
             return reply.view('reset-password', {

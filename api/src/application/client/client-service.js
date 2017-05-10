@@ -93,9 +93,6 @@ module.exports = (bookshelf) => ({
     return bookshelf.model('client').forge({ client_id: id }).save(toStore);
   },
 
-  findRedirectUriByClientId(clientId) {
-    return bookshelf.model('client_redirect_uri').where({ client_id: clientId }).fetch();
-  }
 });
 
 module.exports['@singleton'] = true;
