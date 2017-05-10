@@ -1,5 +1,11 @@
 
 exports.up = function(knex, Promise) {
+  if (process.env.OIDC_DB_ADAPTER === 'mysql') {
+    return knex.raw(`
+      UPDATE SIP_user SET email_id=LCASE(email);
+    `);
+  }
+
   return knex.schema.table('SIP_user', table => {
     table.string('email_id').notNullable();
   }).then(knex.select().from('SIP_user').then(users => {
