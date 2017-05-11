@@ -24,7 +24,7 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
             hours_till_expiration: hoursTillExpirationSchema,
           },
           {
-            email: rowNotExists('user', 'email', 'Email already in use')
+            email: rowNotExists('user', 'email_id', 'Email already in use')
           }
         )
       }
