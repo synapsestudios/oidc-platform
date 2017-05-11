@@ -132,7 +132,7 @@ module.exports = (
                 const base = config('/baseUrl');
                 reply.view(`reset-password-success`, {
                   title: 'Password Set',
-                  linkUrl: `${base}/interaction/${request.query.client_id}`,
+                  linkUrl: `${base}/op/auth?client_id=${request.query.client_id}&response_type=code id_token token&scope=openid profile app_metadata&redirect_uri=${request.query.redirectUri}&nonce=nonce`,
                 });
             });
           } else {
