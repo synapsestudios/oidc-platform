@@ -7,7 +7,7 @@ const fs = require('fs');
 const handlebars = require('handlebars');
 
 exports.register = function (server, options, next) {
-  const issuer = options.issuer || 'http://localhost:9000';
+  const issuer = process.env.OIDC_BASE_URL || 'http://localhost:9000';
 
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   const provider = new OidcProvider(issuer, {
