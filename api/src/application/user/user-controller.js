@@ -132,7 +132,7 @@ module.exports = (
                 const base = config('/baseUrl');
                 reply.view(`reset-password-success`, {
                   title: 'Password Set',
-                  linkUrl: encodeURIComponent(`${base}/op/auth?client_id=${request.query.client_id}&response_type=code id_token token&scope=${request.query.scope}&redirect_uri=${request.query.redirect_uri}&nonce=nonce`),
+                  linkUrl: encodeURI(`${base}/op/auth?client_id=${request.query.client_id}&response_type=code id_token token&scope=${request.query.scope}&redirect_uri=${request.query.redirect_uri}&nonce=nonce`),
                 });
             });
           } else {

@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const Boom = require('boom');
 const config = require('../../../config');
 const uuid = require('uuid');
+const querystring = require('querystring');
 
 module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
   var self = {
@@ -35,8 +36,9 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
         const base = config('/baseUrl');
 
         clientService.findRedirectUriByClientId(clientId).then(client => {
+          const url = encodeURI(`${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${client.attributes.uri}&scope=${scope}`);
           return renderTemplate('email/invite', {
-              url: `${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${client.attributes.uri}&scope=${scope}`,
+              url: url.replace(' ', '%20'),
               appName: appName
             });
           }).then(emailBody => {
@@ -44,7 +46,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
               to: user.get('email'),
               subject: `${appName} Invitation`,
               html: emailBody,
-            });
+            }).then(data => {console.log(data)}).catch(error => {console.log(error)});
         });
         
       });
