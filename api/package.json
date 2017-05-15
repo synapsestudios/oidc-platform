@@ -45,7 +45,6 @@
     "mysql": "^2.13.0",
     "oidc-provider": "^1.8.2",
     "pg": "^6.1.2",
-    "querystring": "^0.2.0",
     "uuid": "^3.0.1",
     "vision": "^4.1.0"
   },

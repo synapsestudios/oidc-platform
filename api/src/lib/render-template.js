@@ -10,7 +10,6 @@ module.exports = (server) => (template, context, options) => {
       }
     });
   }).catch(err => {
-    console.log(err);
     server.methods.reportError(err);
   });
 };
