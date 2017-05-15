@@ -381,7 +381,12 @@ module.exports = (
 
     postForgotPasswordForm: function(request, reply) {
       return userService.findByEmailForOidc(request.payload.email)
-        .then(user => user ? userService.createPasswordResetToken(user.accountId): null)
+        .then(user => {
+          return user ? user.serialize({strictOidc: true}) : null
+        })
+        .then(user => {
+          return user ? userService.createPasswordResetToken(user.accountId): null
+        })
         .then(token => {
           if (token) {
             const base = config('/baseUrl');

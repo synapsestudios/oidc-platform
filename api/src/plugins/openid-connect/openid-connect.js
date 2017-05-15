@@ -121,6 +121,7 @@ exports.register = function (server, options, next) {
               interaction: querystring.stringify(cookie.interaction, ',<br/>', ' = ', {
                 encodeURIComponent: value => value,
               }),
+              forgotPasswordPath: `${issuer}/user/forgot-password?client_id=${cookie.params.client_id}&response_type=${cookie.params.response_type}&scope=${cookie.params.scope}&redirect_uri=${cookie.params.redirect_uri}&nonce=${cookie.params.nonce}`,
             });
           } else {
             reply.view('interaction', {

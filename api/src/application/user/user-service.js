@@ -109,8 +109,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
     },
 
     findByEmailForOidc: function(email) {
-      return bookshelf.model('user').forge({ email }).fetch()
-        .then(user => user ? user.serialize({strictOidc: true}) : null);
+      return bookshelf.model('user').where({ email }).fetch();
     },
 
     findById: function(id) {
