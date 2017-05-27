@@ -16,7 +16,7 @@ module.exports = (bookshelf) => {
 
   return {
     authenticate: function(email, password) {
-      return bookshelf.model('user').where({ email }).fetch()
+      return bookshelf.model('user').where({ email_id: email.toLowerCase() }).fetch()
         .then(user => {
           if (!user) throw new Error('No user found for this email');
           return comparePasswords(password, user)

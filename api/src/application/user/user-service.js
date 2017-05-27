@@ -24,7 +24,7 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       }
 
       if (query.email) {
-        model = model.where('email', query.email);
+        model = model.where('email_id', query.email.toLowerCase());
       }
 
       return model.fetchAll();
@@ -89,7 +89,8 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       return self.encryptPassword(password)
         .then(hashedPass => bookshelf.model('user').forge({
           id : uuid.v4(),
-          email,
+          email: email,
+          email_id: email.toLowerCase(),
           password : hashedPass,
           profile,
           app_metadata
@@ -101,7 +102,7 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
     },
 
     findByEmailForOidc: function(email) {
-      return bookshelf.model('user').forge({ email }).fetch()
+      return bookshelf.model('user').forge({ email_id: email.toLowerCase() }).fetch()
         .then(user => user ? user.serialize({strictOidc: true}) : null);
     },
 
