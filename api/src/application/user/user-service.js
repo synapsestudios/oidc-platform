@@ -31,12 +31,13 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
       return model.fetchAll();
     },
 
-    sendInvite(user, appName, clientId, scope, hoursTillExpiration) {
+    sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration) {
       return self.createPasswordResetToken(user.get('id'), hoursTillExpiration).then(token => {
         const base = config('/baseUrl');
 
-        clientService.findRedirectUriByClientId(clientId).then(client => {
-          const url = encodeURI(`${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${client.attributes.uri}&scope=${scope}`);
+        clientService.findByRedirectUriAndClientId(clientId, redirect_uri).then(clients => {
+          console.log("This is the line you want \n+++++++++++++++++++\n", clients.models);
+          const url = encodeURI(`${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${redirect_uri}&scope=${scope}`);
           return renderTemplate('email/invite', {
               url: url.replace(' ', '%20'),
               appName: appName
@@ -52,13 +53,13 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
       });
     },
 
-    resendUserInvite(userId, appName, clientId, scope, hoursTillExpiration) {
+    resendUserInvite(userId, appName, clientId, redirect_uri, scope, hoursTillExpiration) {
       return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
         if (!user) {
           return Boom.notFound();
         }
 
-        return self.sendInvite(user, appName, clientId, scope, hoursTillExpiration).then(() => user);
+        return self.sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration).then(() => user);
       });
     },
 
@@ -77,6 +78,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
           user,
           payload.app_name,
           payload.client_id,
+          payload.redirect_uri,
           payload.scope,
           payload.hours_till_expiration
         );

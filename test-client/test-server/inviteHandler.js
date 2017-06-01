@@ -12,28 +12,26 @@ const clientId = config.clientId;
 const clientSecret = config.clientSecret;
 const scope = 'openid email app_metadata profile';
 
-let token = '';
-
 function getAccessToken(){
+  console.log('Getting Access Token for user invite.');
   return new Promise((resolve, reject) => {
-    if (token == '') {
-      wreck.post('/op/token', {
-        payload: `grant_type=client_credentials&scope=admin`,
-        headers: {
-          Authorization: 'Basic ' + btoa(`${clientId}:${clientSecret}`),
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-      }, (error, response, payload) => {
-        if (error) {
-          reject(error);
-        } else {
-          token = payload.access_token;
-          resolve(token);
-        }
-      });
-    } else {
-      resolve(token);
-    }
+    wreck.post('/op/token', {
+      payload: `grant_type=client_credentials&scope=admin`,
+      headers: {
+        Authorization: 'Basic ' + btoa(`${clientId}:${clientSecret}`),
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+    }, (error, response, payload) => {
+      if (error) {
+        console.log('Error getting access token.');
+        console.log(error);
+        reject(error);
+      } else {
+        console.log('Access token granted.');
+        token = payload.access_token;
+        resolve(token);
+      }
+    });
   });
 }
 
@@ -42,15 +40,20 @@ module.exports = (request, reply) => {
   options.payload = {};
   options.payload.email = request.payload.email;
   options.payload.client_id = clientId;
+  options.payload.redirect_uri = 'https://sso-client.dev:3000/';
   options.payload.scope = scope;
   options.payload.app_name = 'Test Client';
   options.headers = {};
   getAccessToken().then(tkn => {
     options.headers.Authorization = `Bearer ${tkn}`;
+    console.log('Submitting API request for user invite.');
     wreck.post('/api/invite', options, (error, response, payload) => {
       if (error) {
+        console.log('Error while inviting user.');
+        console.log(error);
         reply(error);
       } else {
+        console.log('User invite successful.');
         reply(payload);
       }
     });

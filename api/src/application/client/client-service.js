@@ -88,8 +88,8 @@ module.exports = (bookshelf) => ({
       .fetch({ withRelated: clientRelationships });
   },
 
-  findRedirectUriByClientId(clientId) {
-    return bookshelf.model('client_redirect_uri').where({ client_id: clientId }).fetch();
+  findByRedirectUriAndClientId(clientId, redirect_uri) {
+    return bookshelf.model('client_redirect_uri').where({ client_id: clientId, uri: redirect_uri }).fetchAll();
   },
 
   update(id, payload) {
