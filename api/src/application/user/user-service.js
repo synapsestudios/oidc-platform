@@ -34,22 +34,25 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
     sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration) {
       return self.createPasswordResetToken(user.get('id'), hoursTillExpiration).then(token => {
         const base = config('/baseUrl');
-
-        clientService.findByRedirectUriAndClientId(clientId, redirect_uri).then(clients => {
-          console.log("This is the line you want \n+++++++++++++++++++\n", clients.models);
-          const url = encodeURI(`${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${redirect_uri}&scope=${scope}`);
-          return renderTemplate('email/invite', {
-              url: url.replace(' ', '%20'),
-              appName: appName
-            });
-          }).then(emailBody => {
-            return emailService.send({
-              to: user.get('email'),
-              subject: `${appName} Invitation`,
-              html: emailBody,
-            }).then(data => {console.log(data)}).catch(error => {console.log(error)});
-        });
-        
+        const url = encodeURI(`${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${redirect_uri}&scope=${scope}`);
+        return renderTemplate('email/invite', {
+          url: url.replace(' ', '%20'),
+          appName: appName
+        }).then(emailBody => {
+          return emailService.send({
+            to: user.get('email'),
+            subject: `${appName} Invitation`,
+            html: emailBody,
+          }).then(data => {
+            return data;
+          }).catch(error => {
+            Boom.badImplementation('Something went wrong', error);
+          });
+        }).catch(error => {
+          Boom.badImplementation('Something went wrong', error);
+        });  
+      }).catch(error => {
+        Boom.badImplementation('Something went wrong', error);
       });
     },
 
@@ -58,31 +61,43 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
         if (!user) {
           return Boom.notFound();
         }
+        return clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri).then(clients => {
+          if (clients.models.length === 0) {
+            return Boom.badData('The provided redirect uri is invalid for the given client id.');
+          }
+          return self.sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration).then(() => user);
+        });
 
-        return self.sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration).then(() => user);
       });
     },
 
     inviteUser(payload) {
       let createdUser;
-      return self.create(
-        payload.email,
-        uuid.v4(),
-        {
-          app_metadata: payload.app_metadata || {},
-          profile : payload.profile || {}
+      return clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri).then(clients => {
+        if (clients.models.length === 0) {
+          return Boom.badData('The provided redirect uri is invalid for the given client id.');
         }
-      ).then(user => {
-        createdUser = user;
-        return self.sendInvite(
-          user,
-          payload.app_name,
-          payload.client_id,
-          payload.redirect_uri,
-          payload.scope,
-          payload.hours_till_expiration
-        );
-      }).then(() => createdUser);
+        return self.create(
+          payload.email,
+          uuid.v4(),
+          {
+            app_metadata: payload.app_metadata || {},
+            profile : payload.profile || {}
+          }
+        ).then(user => {
+          createdUser = user;
+          return self.sendInvite(
+            user,
+            payload.app_name,
+            payload.client_id,
+            payload.redirect_uri,
+            payload.scope,
+            payload.hours_till_expiration
+          );
+        }).then(() => createdUser).catch(error => Boom.badImplementation('Something went wrong', error));
+      }).catch(error => {
+        Boom.badImplementation('Something went wrong', error);
+      });
     },
 
     create: function(email, password, additional) {
