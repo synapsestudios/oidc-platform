@@ -40,7 +40,7 @@ module.exports = (request, reply) => {
   options.payload = {};
   options.payload.email = request.payload.email;
   options.payload.client_id = clientId;
-  options.payload.redirect_uri = 'https://sso.dev:3000/';
+  options.payload.redirect_uri = 'https://sso-client.dev:3000/';
   options.payload.scope = scope;
   options.payload.app_name = 'Test Client';
   options.headers = {};
