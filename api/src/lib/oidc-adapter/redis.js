@@ -7,7 +7,7 @@ const client = new Redis(redisConfig, {
   keyPrefix: 'oidc:',
 });
 
-module.exports = () => {
+module.exports = (userService) => {
   function grantKeyFor(id) {
     return `grant:${id}`;
   }
@@ -39,7 +39,20 @@ module.exports = () => {
         if (_.isEmpty(data)) {
           return undefined;
         } else if (data.dump !== undefined) {
-          return JSON.parse(data.dump);
+          const dump = JSON.parse(data.dump);
+          if (this.name === 'Session') {
+            // make sure the user still exists
+            return userService.findByIdForOidc(id)
+              .then(user => {
+                if (!user) {
+                  this.destroy(id);
+                  return undefined;
+                }
+                return dump;
+              });
+          } else {
+            return dump;
+          }
         }
         return data;
       });
@@ -76,4 +89,4 @@ module.exports = () => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = [];
+module.exports['@require'] = ['user/user-oidc-service'];
