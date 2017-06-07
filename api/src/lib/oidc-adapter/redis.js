@@ -42,14 +42,18 @@ module.exports = (userService) => {
           const dump = JSON.parse(data.dump);
           if (this.name === 'Session') {
             // make sure the user still exists
-            return userService.findByIdForOidc(id)
-              .then(user => {
-                if (!user) {
-                  this.destroy(id);
-                  return undefined;
-                }
-                return dump;
-              });
+            if (dump.account) {
+              return userService.findByIdForOidc(dump.account)
+                .then(user => {
+                  if (!user) {
+                    this.destroy(id);
+                    return undefined;
+                  }
+                  return dump;
+                });
+            }
+
+            return dump;
           } else {
             return dump;
           }
