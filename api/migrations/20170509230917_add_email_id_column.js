@@ -2,7 +2,7 @@
 exports.up = function(knex, Promise) {
 
     return knex.schema.table('SIP_user', table => {
-        table.string('email_id').notNull().defaultTo('');
+        return table.string('email_id').notNull().defaultTo('');
       }).then(() => {
         return knex.select().table('SIP_user').then(userEmails => {
           return Promise.all(
