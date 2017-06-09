@@ -382,9 +382,6 @@ module.exports = (
     postForgotPasswordForm: function(request, reply) {
       return userService.findByEmailForOidc(request.payload.email)
         .then(user => {
-          return user ? user.serialize({strictOidc: true}) : null
-        })
-        .then(user => {
           return user ? userService.createPasswordResetToken(user.accountId): null
         })
         .then(token => {
