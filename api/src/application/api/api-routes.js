@@ -81,6 +81,28 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
         }
       }
     }
+  },
+  {
+    method: 'POST',
+    path: '/api/users',
+    handler: (request, reply) => {
+      const { email, password } = request.payload;
+      reply(userService.create(email, password));
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin'
+      },
+      validate: {
+        payload: mixedValidation({
+          email: Joi.string().email().required(),
+          password: Joi.string(),
+        }, {
+          email: rowNotExists('user', 'email', 'Email already in use')
+        })
+      }
+    }
   }
 ];
 
