@@ -29,7 +29,7 @@ module.exports = (bookshelf) => {
 
     findByIdForOidc: function(id) {
       return bookshelf.model('user').where({ id }).fetch()
-        .then(user => user.serialize({ strictOidc: true }));
+        .then(user => user ? user.serialize({ strictOidc: true }) : false);
     },
   };
 };
