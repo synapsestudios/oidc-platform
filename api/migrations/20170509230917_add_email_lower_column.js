@@ -5,7 +5,7 @@ exports.up = function(knex, Promise) {
     }).then(() => {
       return knex.select().from('SIP_user').then(users => {
         return Promise.all(users.map(user => {
-          return knex('SIP_user').where('id', user.id).update({ email_id: user.email.toLowerCase() });
+          return knex('SIP_user').where('id', user.id).update({ email_lower: user.email.toLowerCase() });
         }));
       });
     }).then(() => {
