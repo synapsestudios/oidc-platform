@@ -43,17 +43,9 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
             to: user.get('email'),
             subject: `${appName} Invitation`,
             html: emailBody,
-          }).then(data => {
-            return data;
-          }).catch(error => {
-            Boom.badImplementation('Something went wrong', error);
           });
-        }).catch(error => {
-          Boom.badImplementation('Something went wrong', error);
-        });  
-      }).catch(error => {
-        Boom.badImplementation('Something went wrong', error);
-      });
+        }) 
+      })
     },
 
     resendUserInvite(userId, appName, clientId, redirect_uri, scope, hoursTillExpiration) {
@@ -63,7 +55,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
         }
         return clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri).then(clients => {
           if (clients.models.length === 0) {
-            return Boom.badData('The provided redirect uri is invalid for the given client id.');
+            throw Boom.badData('The provided redirect uri is invalid for the given client id.');
           }
           return self.sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration).then(() => user);
         });
@@ -75,29 +67,26 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
       let createdUser;
       return clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri).then(clients => {
         if (clients.models.length === 0) {
-          return Boom.badData('The provided redirect uri is invalid for the given client id.');
+          throw Boom.badData('The provided redirect uri is invalid for the given client id.');
         }
-        return self.create(
-          payload.email,
-          uuid.v4(),
-          {
-            app_metadata: payload.app_metadata || {},
-            profile : payload.profile || {}
-          }
-        ).then(user => {
-          createdUser = user;
-          return self.sendInvite(
-            user,
-            payload.app_name,
-            payload.client_id,
-            payload.redirect_uri,
-            payload.scope,
-            payload.hours_till_expiration
-          );
-        }).then(() => createdUser).catch(error => Boom.badImplementation('Something went wrong', error));
-      }).catch(error => {
-        Boom.badImplementation('Something went wrong', error);
-      });
+      }).then(()=> self.create(
+        payload.email,
+        uuid.v4(),
+        {
+          app_metadata: payload.app_metadata || {},
+          profile : payload.profile || {}
+        }
+      )).then(user => {
+        createdUser = user;
+        return self.sendInvite(
+          user,
+          payload.app_name,
+          payload.client_id,
+          payload.redirect_uri,
+          payload.scope,
+          payload.hours_till_expiration
+        );
+      }).then(() => createdUser).catch(error => Boom.badImplementation('Something went wrong', error));
     },
 
     create: function(email, password, additional) {
@@ -128,9 +117,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
 
     findByEmailForOidc: function(email) {
       return bookshelf.model('user').where({ email_id: email.toLowerCase() }).fetch()
-        .then(user => {
-          return user ? user.serialize({strictOidc: true}) : null
-        });
+        .then(user => user ? user.serialize({strictOidc: true}) : null);
     },
 
     findById: function(id) {
