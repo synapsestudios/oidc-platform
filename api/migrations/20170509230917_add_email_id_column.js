@@ -10,13 +10,13 @@ exports.up = function(knex, Promise) {
       });
     }).then(() => {
       return knex.schema.alterTable('SIP_user', (table) => {
-        table.string('email_id').notNullable().alter();
+        table.string('email_lower').notNullable().alter();
       });
     });
 };
 
 exports.down = function(knex, Promise) {
   return knex.schema.table('SIP_user', table => {
-    table.dropColumn('email_id');
+    table.dropColumn('email_lower');
   });
 };
