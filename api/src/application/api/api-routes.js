@@ -7,7 +7,7 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
     method: 'POST',
     path: '/api/invite',
     handler: (request, reply) => {
-      userService.inviteUser(request.payload);
+      reply(userService.inviteUser(request.payload));
     },
     config: {
       auth: {
