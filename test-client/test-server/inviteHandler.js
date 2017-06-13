@@ -2,6 +2,8 @@ const Wreck = require('wreck');
 const boom = require('boom');
 const btoa = require('btoa');
 const config = require('../src/config');
+const fs = require('fs');
+const path = require('path');
 
 const wreck = Wreck.defaults({
   baseUrl: 'http://localhost:9000',
@@ -44,6 +46,9 @@ module.exports = (request, reply) => {
   options.payload.scope = scope;
   options.payload.app_name = 'Test Client';
   options.headers = {};
+  if (request.payload.useTemplate) {
+    options.payload.template = fs.readFileSync(path.join(__dirname, './templates/custom-email.hbs'), 'utf8');
+  }
   getAccessToken().then(tkn => {
     options.headers.Authorization = `Bearer ${tkn}`;
     console.log('Submitting API request for user invite.');
