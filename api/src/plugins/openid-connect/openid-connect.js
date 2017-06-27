@@ -7,7 +7,7 @@ const fs = require('fs');
 const handlebars = require('handlebars');
 
 exports.register = function (server, options, next) {
-  const issuer = options.issuer || 'http://localhost:9000';
+  const issuer = options.issuer || process.env.OIDC_BASE_URL || 'http://localhost:9000';
 
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   const provider = new OidcProvider(issuer, {
@@ -121,6 +121,7 @@ exports.register = function (server, options, next) {
               interaction: querystring.stringify(cookie.interaction, ',<br/>', ' = ', {
                 encodeURIComponent: value => value,
               }),
+              forgotPasswordPath: `${issuer}/user/forgot-password?client_id=${cookie.params.client_id}&response_type=${cookie.params.response_type}&scope=${cookie.params.scope}&redirect_uri=${cookie.params.redirect_uri}&nonce=${cookie.params.nonce}`,
             });
           } else {
             reply.view('interaction', {
