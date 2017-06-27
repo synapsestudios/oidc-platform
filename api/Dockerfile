@@ -1,11 +1,12 @@
-FROM node:6.10.0
+FROM node:8.1.0
 
-ARG PACKAGE_PATH=package.json
+ARG PACKAGE_PATH=
 ARG WORKING_DIR=/src
 
 WORKDIR $WORKING_DIR
 
-ADD $PACKAGE_PATH $WORKING_DIR/package.json
+ADD $PACKAGE_PATH/package.json $WORKING_DIR/package.json
+COPY $PACKAGE_PATH/package-lock.json $WORKING_DIR/package-lock.json
 RUN npm install
 COPY . /src
 
