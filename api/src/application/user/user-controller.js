@@ -108,7 +108,7 @@ module.exports = (
   const getPasswordResetHandler = (method, title) => {
     if (method === 'GET') {
       return (request, reply, source, error) => {
-        const redirectSet = request.query.redirect_uri == undefined;
+        const redirectSet = request.query.token != undefined;
         reply.view('reset-password', {
           title: title,
           returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
@@ -128,13 +128,18 @@ module.exports = (
                 return userService.update(user.get('id'), { password, profile });
               })
               .then(() => userService.destroyPasswordToken(request.query.token))
-              .then(() => reply.view(`reset-password-success`, {
-                title: 'Reset Password',
-              }));
+              .then(() => {
+                const base = config('/baseUrl');
+                reply.view(`reset-password-success`, {
+                  title: 'Password Set',
+                  linkUrl: encodeURI(`${base}/op/auth?client_id=${request.query.client_id}&response_type=code id_token token&scope=${request.query.scope}&redirect_uri=${request.query.redirect_uri}&nonce=nonce`),
+                });
+            });
           } else {
+            const redirectSet = request.query.token != undefined;
             return reply.view('reset-password', {
               title: title,
-              returnTo: `${request.query.redirect_uri}?status=cancelled`,
+              returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
               error: true,
               validationErrorMessages: { token: ['Token is invalid or expired'] },
             });
@@ -376,7 +381,9 @@ module.exports = (
 
     postForgotPasswordForm: function(request, reply) {
       return userService.findByEmailForOidc(request.payload.email)
-        .then(user => user ? userService.createPasswordResetToken(user.accountId): null)
+        .then(user => {
+          return user ? userService.createPasswordResetToken(user.accountId): null
+        })
         .then(token => {
           if (token) {
             const base = config('/baseUrl');
