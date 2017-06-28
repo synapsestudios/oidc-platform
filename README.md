@@ -15,7 +15,7 @@ TBD
 Headers:
 {
     "Content-Type": "application/json",
-    "Authorization": "Bearer synapse1", // common.env -> OIDC_INITIAL_ACCESS_TOKEN value
+    "Authorization": "Bearer token1", // common.env -> OIDC_INITIAL_ACCESS_TOKEN value
 }
 Body:
 {
