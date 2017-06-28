@@ -49,6 +49,7 @@ exports.register = function (server, options, next) {
       clientCredentials: true,
       encryption: true,
       introspection: true,
+      oauthNativeApps: true,
       registration: {
         initialAccessToken: options.initialAccessToken,
       },
