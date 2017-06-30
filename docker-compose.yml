@@ -5,7 +5,7 @@ services:
             context: .
             dockerfile: ./api/Dockerfile
             args:
-                PACKAGE_PATH: ./api/package.json
+                PACKAGE_PATH: ./api
                 WORKING_DIR: /src/api
         env_file:
             - ./common.env
