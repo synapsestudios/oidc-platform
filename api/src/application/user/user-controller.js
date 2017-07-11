@@ -413,20 +413,14 @@ module.exports = (
 
     logout: function(request, reply, source, error) {
       const sessionId = request.state._session;
-      const redirectUri = request.query.post_logout_redirect_uri;
 
       if (!sessionId) {
-        console.error('SessionId cookie not present');
+        console.error('Session id cookie not present');
         throw Boom.notFound();
       }
 
-      if (!redirectUri) {
-        console.error('Missing post_logout_redirect_uri query parameter');
-        throw Boom.badRequest();
-      }
-
       return userService.invalidateSession(sessionId)
-        .then(() => reply.redirect(redirectUri))
+        .then(() => reply.redirect(request.query.post_logout_redirect_uri))
     },
 
     getResetPasswordForm: getPasswordResetHandler('GET', 'Reset Password'),
