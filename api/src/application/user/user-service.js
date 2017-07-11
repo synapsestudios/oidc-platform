@@ -2,10 +2,11 @@ const bcrypt = require('bcrypt');
 const Boom = require('boom');
 const config = require('../../../config');
 const uuid = require('uuid');
-const querystring = require('querystring');
 
-module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
+module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisAdapter) => {
   var self = {
+    redisAdapter: new RedisAdapter('Session'),
+
     encryptPassword: function(password) {
       return new Promise((resolve, reject) => {
         bcrypt.genSalt(10, (err, salt) => {
@@ -152,6 +153,10 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate) => {
         expires_at: expires,
       }).save({}, {method: 'insert'});
     },
+
+    invalidateSession(sessionId) {
+      return self.redisAdapter.destroy(sessionId);
+    },
   };
 
   return self;
@@ -163,4 +168,5 @@ module.exports['@require'] = [
   'email/email-service',
   'client/client-service',
   'render-template',
+  'oidc-adapter/redis',
 ];

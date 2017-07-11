@@ -4,6 +4,7 @@ const get = require('lodash/get');
 const set = require('lodash/set');
 const uuid = require('uuid');
 const config = require('../../../config');
+const Boom = require('boom');
 
 module.exports = (
   userService,
@@ -408,6 +409,18 @@ module.exports = (
             title: 'Forgot Password',
           });
         });
+    },
+
+    logout: function(request, reply, source, error) {
+      const sessionId = request.state._session;
+
+      if (!sessionId) {
+        console.error('Session id cookie not present');
+        throw Boom.notFound();
+      }
+
+      return userService.invalidateSession(sessionId)
+        .then(() => reply.redirect(request.query.post_logout_redirect_uri))
     },
 
     getResetPasswordForm: getPasswordResetHandler('GET', 'Reset Password'),
