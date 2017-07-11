@@ -210,7 +210,7 @@ module.exports = (service, controller, userFormData) => {
       config: {
         validate: {
           query: {
-            redirect_uri: Joi.string().required(),
+            post_logout_redirect_uri: Joi.string().required(),
           },
         },
       },
