@@ -203,6 +203,11 @@ module.exports = (service, controller, userFormData) => {
         },
       },
     },
+    {
+      method: 'GET',
+      path: '/user/logout',
+      handler: controller.logout
+    },
   ];
 };
 
