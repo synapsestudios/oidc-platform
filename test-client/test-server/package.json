@@ -1,0 +1,23 @@
+{
+  "name": "test-server",
+  "version": "1.0.0",
+  "description": "test server for oidc platform",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "boom": "^4.3.1",
+    "btoa": "^1.1.2",
+    "hapi": "^16.1.1",
+    "hapi-auth-jwt2": "^7.2.4",
+    "lodash": "^4.17.4",
+    "wreck": "^12.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}

@@ -9,7 +9,9 @@ module.exports = (server) => (template, context, options) => {
         resolve(rendered);
       }
     });
-  }).catch(err => server.methods.reportError(err));
+  }).catch(err => {
+    server.methods.reportError(err);
+  });
 };
 
 module.exports['@singleton'] = true;
