@@ -336,6 +336,10 @@
       </div>
 
       <div class="auth-help">
+        <a
+        href="/user/forgot-password?client_id={{cookie.params.client_id}}&redirect_uri={{cookie.params.redirect_uri}}&scope={{cookie.params.scope}}&response_type={{cookie.params.response_type}}">
+          [ Forgot password? ]
+        </a>
         <a href="{{cookie.returnTo}}">[ Cancel ]</a>
         {{#if client.tosUri}}<a href="{{client.tosUri}}">[ Terms of Service ]</a>{{/if}}
         {{#if client.policyUri}}<a href="{{client.policyUri}}">[ Privacy Policy ]</a>{{/if}}
