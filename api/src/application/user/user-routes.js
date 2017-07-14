@@ -141,6 +141,9 @@ module.exports = (service, controller, userFormData) => {
           failAction : controller.getResetPasswordForm,
           query : Object.assign({
             token: Joi.string().required(),
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            scope: Joi.string().required(),
           }, queryValidation),
         },
       },
@@ -157,6 +160,9 @@ module.exports = (service, controller, userFormData) => {
           },
           query : Object.assign({
             token: Joi.string().required(),
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            scope: Joi.string().required(),
           }, queryValidation),
           failAction : controller.getResetPasswordForm,
         }
@@ -170,6 +176,9 @@ module.exports = (service, controller, userFormData) => {
         validate: {
           query: {
             token: Joi.string().guid().required(),
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            scope: Joi.string().required(),
           },
         },
       },
@@ -180,8 +189,28 @@ module.exports = (service, controller, userFormData) => {
       handler: controller.postAcceptInviteForm,
       config: {
         validate: {
+          payload : {
+            password : Joi.string().min(8).required(),
+            pass2 : Joi.any().valid(Joi.ref('password')).required(),
+          }, 
           query: {
             token: Joi.string().guid().required(),
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            scope: Joi.string().required(),
+          },
+          failAction: controller.getAcceptInviteForm,
+        },
+      },
+    },
+    {
+      method: 'GET',
+      path: '/user/logout',
+      handler: controller.logout,
+      config: {
+        validate: {
+          query: {
+            post_logout_redirect_uri: Joi.string().required(),
           },
         },
       },

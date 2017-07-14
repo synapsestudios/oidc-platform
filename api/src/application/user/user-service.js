@@ -2,9 +2,12 @@ const bcrypt = require('bcrypt');
 const Boom = require('boom');
 const config = require('../../../config');
 const uuid = require('uuid');
+const handlebars = require('handlebars');
 
-module.exports = (bookshelf, emailService, renderTemplate) => {
+module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisAdapter) => {
   var self = {
+    redisAdapter: new RedisAdapter('Session'),
+
     encryptPassword: function(password) {
       return new Promise((resolve, reject) => {
         bcrypt.genSalt(10, (err, salt) => {
@@ -24,19 +27,30 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       }
 
       if (query.email) {
-        model = model.where('email', query.email);
+        model = model.where('email_lower', query.email.toLowerCase());
       }
 
       return model.fetchAll();
     },
 
-    sendInvite(user, appName, hoursTillExpiration) {
+    sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration, template) {
       return self.createPasswordResetToken(user.get('id'), hoursTillExpiration).then(token => {
         const base = config('/baseUrl');
-        return renderTemplate('email/invite', {
-          url: `${base}/user/accept-invite?token=${token.get('token')}`,
-          appName: appName
-        });
+        const url = encodeURI(`${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${redirect_uri}&scope=${scope}`);
+        if (template) {
+          return new Promise((resolve, reject) => {
+            const emailTemplate = handlebars.compile(template);
+            resolve(emailTemplate({
+              url: url.replace(' ', '%20'),
+              appName: appName
+            }));
+          });
+        } else {
+          return renderTemplate('email/invite', {
+            url: url.replace(' ', '%20'),
+            appName: appName
+          });
+        }
       }).then(emailBody => {
         return emailService.send({
           to: user.get('email'),
@@ -46,33 +60,46 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       });
     },
 
-    resendUserInvite(userId, appName, hoursTillExpiration) {
+    resendUserInvite(userId, appName, clientId, redirectUri, scope, hoursTillExpiration) {
       return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
         if (!user) {
           return Boom.notFound();
         }
+        return clientService.findByRedirectUriAndClientId(clientId, redirectUri).then(clients => {
+          if (clients.models.length === 0) {
+            throw Boom.badData('The provided redirect uri is invalid for the given client id.');
+          }
+          return self.sendInvite(user, appName, clientId, redirectUri, scope, hoursTillExpiration).then(() => user);
+        });
 
-        return self.sendInvite(user, appName, hoursTillExpiration).then(() => user);
       });
     },
 
     inviteUser(payload) {
       let createdUser;
-      return self.create(
+      return clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri).then(clients => {
+        if (clients.models.length === 0) {
+          throw Boom.badData('The provided redirect uri is invalid for the given client id.');
+        }
+      }).then(()=> self.create(
         payload.email,
         uuid.v4(),
         {
           app_metadata: payload.app_metadata || {},
           profile : payload.profile || {}
         }
-      ).then(user => {
+      )).then(user => {
         createdUser = user;
         return self.sendInvite(
           user,
           payload.app_name,
-          payload.hours_till_expiration
+          payload.client_id,
+          payload.redirect_uri,
+          payload.scope,
+          payload.hours_till_expiration,
+          payload.template
         );
-      }).then(() => createdUser);
+      }).then(() => createdUser).catch(error => Boom.badImplementation('Something went wrong', error));
     },
 
     create: function(email, password, additional) {
@@ -89,7 +116,8 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
       return self.encryptPassword(password)
         .then(hashedPass => bookshelf.model('user').forge({
           id : uuid.v4(),
-          email,
+          email: email,
+          email_lower: email.toLowerCase(),
           password : hashedPass,
           profile,
           app_metadata
@@ -101,7 +129,7 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
     },
 
     findByEmailForOidc: function(email) {
-      return bookshelf.model('user').where('email', email).fetch()
+      return bookshelf.model('user').where({ email_lower: email.toLowerCase() }).fetch()
         .then(user => user ? user.serialize({strictOidc: true}) : null);
     },
 
@@ -137,6 +165,10 @@ module.exports = (bookshelf, emailService, renderTemplate) => {
         expires_at: expires,
       }).save({}, {method: 'insert'});
     },
+
+    invalidateSession(sessionId) {
+      return self.redisAdapter.destroy(sessionId);
+    },
   };
 
   return self;
@@ -146,5 +178,7 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'bookshelf',
   'email/email-service',
+  'client/client-service',
   'render-template',
+  'oidc-adapter/redis',
 ];

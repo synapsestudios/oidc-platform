@@ -28,7 +28,6 @@ module.exports = bookshelf => bookshelf.model('user', {
 
   serialize(options) {
     options = options || {};
-
     if (options.strictOidc) {
       return {
         accountId: this.get('id'),

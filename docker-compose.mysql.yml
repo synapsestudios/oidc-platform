@@ -4,9 +4,19 @@ services:
         image: mysql:5.7.16
         env_file:
           - ./common.env
+        environment:
+            - MYSQL_DATABASE=database
+            - MYSQL_ROOT_PASSWORD=root
         ports:
           - "3306:3306"
     api:
+        environment:
+            - OIDC_DB_ADAPTER=mysql
+            - OIDC_DB_USER=root
+            - OIDC_DB_PASSWORD=root
+            - OIDC_DB_NAME=database
+            - OIDC_DB_HOST=mysql
+            - OIDC_DB_PORT=3306
         depends_on:
             - mysql
             - redis
