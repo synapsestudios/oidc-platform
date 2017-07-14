@@ -60,7 +60,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       });
     },
 
-    resendUserInvite(userId, appName, clientId, redirectUri, scope, hoursTillExpiration) {
+    resendUserInvite(userId, appName, clientId, redirectUri, scope, hoursTillExpiration, template) {
       return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
         if (!user) {
           return Boom.notFound();
@@ -69,7 +69,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
           if (clients.models.length === 0) {
             throw Boom.badData('The provided redirect uri is invalid for the given client id.');
           }
-          return self.sendInvite(user, appName, clientId, redirectUri, scope, hoursTillExpiration).then(() => user);
+          return self.sendInvite(user, appName, clientId, redirectUri, scope, hoursTillExpiration, template).then(() => user);
         });
 
       });

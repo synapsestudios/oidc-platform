@@ -45,7 +45,8 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
           request.payload.client_id,
           request.payload.redirect_uri,
           request.payload.scope,
-          request.payload.hours_till_expiration
+          request.payload.hours_till_expiration,
+          request.payload.template
         )
       );
     },
@@ -69,6 +70,7 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
           redirect_uri: Joi.string().required(),
           scope: Joi.string().required(),
           hours_till_expiration: hoursTillExpirationSchema,
+          template: Joi.string(),
         }
       },
     }
