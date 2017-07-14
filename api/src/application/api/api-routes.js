@@ -24,6 +24,7 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
             scope: Joi.string().required(),
             app_metadata: Joi.object(),
             profile: Joi.object(),
+            template: Joi.string(),
             hours_till_expiration: hoursTillExpirationSchema,
           },
           {

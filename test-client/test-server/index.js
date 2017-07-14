@@ -16,6 +16,7 @@ server.route({
       payload: {
         name: Joi.string().required(),
         email: Joi.string().email().required(),
+        useTemplate: Joi.boolean(),
       }
     }
   }
