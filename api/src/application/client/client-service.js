@@ -1,3 +1,5 @@
+const uuid = require('uuid');
+
 module.exports = (bookshelf) => ({
   create(id, payload) {
     const toStore = Object.assign({}, payload);
@@ -96,6 +98,29 @@ module.exports = (bookshelf) => ({
     const toStore = Object.assign({}, payload);
     return bookshelf.model('client').forge({ client_id: id }).save(toStore);
   },
+
+  createResetPasswordTemplate(template, clientId) {
+    return this.findById(clientId)
+      .then(clientRecord => {
+          return bookshelf.model('client_email_template').forge({ template, id: uuid.v4() }).save()
+            .then(newTemplateRecord => {
+              return clientRecord.set('reset_password_template_id', newTemplateRecord.get('id')).save();
+            });
+      });
+  },
+
+  getResetPasswordTemplate(clientId) {
+    return this.findById(clientId)
+      .then(clientRecord => {
+        const resetPasswordTemplateId = clientRecord.get('reset_password_template_id');
+
+        if (resetPasswordTemplateId === null) {
+          return Promise.resolve(null);
+        }
+
+        return bookshelf.model('client_email_template').where('id', resetPasswordTemplateId).fetch();
+      });
+  }
 
 });
 
