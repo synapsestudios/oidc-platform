@@ -43,9 +43,9 @@ manifestPromise.then(manifest => {
     ioc.create('client/client-redirect-uri-model');
     ioc.create('client/client-request-uri-model');
     ioc.create('client/client-response-type-model');
-    ioc.create('client/client-email-template-model');
     ioc.create('user/user-model');
     ioc.create('user/user-password-reset-token-model');
+    ioc.create('templates/template-model');
 
     // Register routes
     return Promise.all([

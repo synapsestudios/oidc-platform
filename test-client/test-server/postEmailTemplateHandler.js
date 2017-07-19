@@ -34,7 +34,7 @@ module.exports = (request, reply) => {
 
     console.log('Posting new email template to API.');
 
-    wreck.post('/api/email-templates', options, (error, response, payload) => {
+    wreck.post('/api/reset-password-templates', options, (error, response, payload) => {
       if (error) {
         console.log('Error while posting email template.');
         console.log(error);

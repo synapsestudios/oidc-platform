@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 
-module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists) => [
+module.exports = (userService, clientService, templateService, mixedValidation, rowNotExists, rowExists) => [
   {
     method: 'POST',
     path: '/api/invite',
@@ -118,10 +118,11 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
   },
   {
     method: 'POST',
-    path: '/api/email-templates',
+    path: '/api/reset-password-templates',
     handler: (request, reply) => {
       const { template, client_id } = request.payload;
-      reply(clientService.createResetPasswordTemplate(template, client_id));
+      templateService.createTemplate(template)
+        .then(templateRecord => reply(clientService.setResetPasswordTemplate(templateRecord, client_id)));
     },
     config: {
       auth: {
@@ -142,6 +143,7 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
   'client/client-service',
+  'templates/template-service',
   'validator/mixed-validation',
   'validator/constraints/row-not-exists',
   'validator/constraints/row-exists',

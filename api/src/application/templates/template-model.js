@@ -1,5 +1,5 @@
-module.exports = (bookshelf) => bookshelf.model('client_email_template', {
-  tableName: 'SIP_client_email_templates',
+module.exports = (bookshelf) => bookshelf.model('template', {
+  tableName: 'SIP_templates',
   idAttribute: false,
 
   serialize(options) {
