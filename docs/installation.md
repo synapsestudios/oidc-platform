@@ -2,6 +2,14 @@
 
 Each release of the Synapse OIDC Platform is built as a docker public docker image on [Docker Hub](https://hub.docker.com/r/synapsestudios/oidc-platform/). The docker image is the recommended way to deploy the OIDC Platform for both development and production purposes. If it is necessary to run the identity platform without docker then you will have to checkout the code from this repo and run the node server on your own boxes.
 
+## App Config
+
+| Environment Variable | Description |
+| -------------------- | ----------- |
+| OIDC_BASE_URL        | The url that the OIDC Provider is hosted at |
+| COOKIE_KEY           | Set this to a long string to be used to encrypt session cookies |
+| OLD_COOKIE_KEY       | When you update COOKIE_KEY make sure to set OLD_COOKIE_KEY to the value that was in COOKIE_KEY. New cookies will be encrypted with the COOKIE_KEY. Old cookies will be decrypted with OLD_COOKIE_KEY to be validated then reencrypted with COOKIE_KEY |
+
 ## Database
 
 The OIDC Platform supports Postgres or MySQL. The database server is not packaged with the OIDC platform. You must create a blank database and provide connection details to the OIDC Platform through environment variables.
@@ -31,14 +39,20 @@ The OIDC platform provides some features that will send emails. In order to send
 
 | Environment Variables | Provider | Description |
 | --------------------- | -------- | ----------- |
-| OIDC_EMAIL_DRIVER | both | Tell the platform which email provider to user. Value can be either 'ses' or 'mailgun' |
-| OIDC_EMAIL_DOMAIN | both | The domain to send emails from |
-| OIDC_EMAIL_WHITELIST | both | A whitelist of domains (comma separated) that emails can be sent to. If OIDC_EMAIL_WHITELIST is not set then the whitelist feature will not be used |
-| OIDC_EMAIL_TRAP | both | If whitelist check fails then the email will be sent to the email specified by OIDC_EMAIL_TRAP |
-| MAILGUN_API_KEY | mailgun | If you're using mailgun you must provide an api key |
-| AWS_ACCESS_KEY | ses | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
-| AWS_SECRET_ACCESS_KEY | ses | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
+| OIDC_EMAIL_DRIVER     | both     | Tell the platform which email provider to user. Value can be either 'ses' or 'mailgun' |
+| OIDC_EMAIL_DOMAIN     | both     | The domain to send emails from |
+| OIDC_EMAIL_WHITELIST  | both     | A whitelist of domains (comma separated) that emails can be sent to. If OIDC_EMAIL_WHITELIST is not set then the whitelist feature will not be used |
+| OIDC_EMAIL_TRAP       | both     | If whitelist check fails then the email will be sent to the email specified by OIDC_EMAIL_TRAP |
+| MAILGUN_API_KEY       | mailgun  | If you're using mailgun you must provide an api key |
+| AWS_ACCESS_KEY        | ses      | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
+| AWS_SECRET_ACCESS_KEY | ses      | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 
 ## Files
 
-## Environment Variable Reference
+Users can upload profile pictures when editing their profile. The platform makes use of [AWS S3](https://aws.amazon.com/s3/) to store files. In order to store files in s3 you will need to configure some values in environment varialbes.
+
+| Environment Variables | Description |
+| --------------------- | ----------- |
+| OIDC_S3_BUCKET        | The bucket in s3 that files will be saved to |
+| AWS_ACCESS_KEY        | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
+| AWS_SECRET_ACCESS_KEY | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
