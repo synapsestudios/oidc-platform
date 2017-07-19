@@ -15,28 +15,32 @@ const clientId = config.clientId;
 const clientSecret = config.clientSecret;
 const scope = 'openid email app_metadata profile';
 
+const template = `
+  <div> Test Client reset password</div>
+  <a href='{{{url}}}'>Click here to reset your password </a>
+`;
+
 module.exports = (request, reply) => {
-  const options = {};
-  options.payload = {};
-  options.payload.email = request.payload.email;
-  options.payload.client_id = clientId;
-  options.payload.redirect_uri = 'https://sso-client.dev:3000/';
-  options.payload.scope = scope;
-  options.payload.app_name = 'Test Client';
-  options.headers = {};
-  if (request.payload.useTemplate) {
-    options.payload.template = fs.readFileSync(path.join(__dirname, './templates/custom-email.hbs'), 'utf8');
-  }
+  const options = {
+    payload: {
+      template : template,
+      client_id : clientId,
+    },
+    headers: {},
+  };
+
   getAccessToken().then(tkn => {
     options.headers.Authorization = `Bearer ${tkn}`;
-    console.log('Submitting API request for user invite.');
-    wreck.post('/api/invite', options, (error, response, payload) => {
+
+    console.log('Posting new email template to API.');
+
+    wreck.post('/api/email-templates', options, (error, response, payload) => {
       if (error) {
-        console.log('Error while inviting user.');
+        console.log('Error while posting email template.');
         console.log(error);
         reply(error);
       } else {
-        console.log('User invite successful.');
+        console.log('Template post successful.');
         reply(payload);
       }
     });
