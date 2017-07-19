@@ -42,28 +42,3 @@ Sessions are persisted by default, a user can manually log out by visiting `${pr
 ## Clients
 
 Clients can be registered dynamically with the `registration` endpoint defined in the OICD provider's Hapi plugin. By default this is `${prefix}/reg`. Any of the [OpenID Client Metadata](http://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) can be supplied. The Bearer token for this request is validated against the `OIDC_INITIAL_ACCESS_TOKEN` environment variable. YOU MUST PROVIDE A STRONG TOKEN in production to prevent unauthorized clients from being added.
-
-## Keystores
-
-node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes YOU SHOULD PROVIDE YOUR OWN KEYS. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but PLEASE DO NOT USE THE DEFAULTS IN PRODUCTION.
-
-### Generating Keys
-
-We provide a script that, if you're using docker-compose, can be run like this:
-
-```
-$ docker-compose exec synapse-oidc npm run generate-keys
-$ docker-compose exec synapse-oidc cat keystores.json > keystores.json
-```
-
-Now you have a `keystores.json` file. Put that in an AWS S3 bucket and provide these environment variables:
-
-```
-KEYSTORE=keystores.json //a file name
-KEYSTORE_BUCKET=bucket-name //a S3 bucket
-
-AWS_ACCESS_KEY_ID=string //standard aws access key env var
-AWS_SECRET_ACCESS_KEY=string //standard aws secret key env var
-```
-
-When `KEYSTORE` and `KEYSTORE_BUCKET` are provided the Synapse OpenID Provider will attempt to pull the keystores from S3 when the node service starts. If you provide the `KEYSTORE` and `KEYSTORE_BUCKET` variables but NOT the AWS credential variables then the provider api will fail to start.

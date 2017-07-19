@@ -10,6 +10,36 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | COOKIE_KEY           | Set this to a long string to be used to encrypt session cookies |
 | OLD_COOKIE_KEY       | When you update COOKIE_KEY make sure to set OLD_COOKIE_KEY to the value that was in COOKIE_KEY. New cookies will be encrypted with the COOKIE_KEY. Old cookies will be decrypted with OLD_COOKIE_KEY to be validated then reencrypted with COOKIE_KEY |
 
+## Keystores
+
+node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes YOU SHOULD PROVIDE YOUR OWN KEYS. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but PLEASE DO NOT USE THE DEFAULTS IN PRODUCTION.
+
+### Generating Keys
+
+We provide a script that will generate a keystore file that can be run like this:
+
+```
+$ npm run generate-keys
+```
+
+If you're running the OIDC platform inside a container with docker-compose you can run it this way:
+
+```
+$ docker-compose exec synapse-oidc npm run generate-keys
+$ docker-compose exec synapse-oidc cat keystores.json > keystores.json
+```
+
+Now you have a `keystores.json` file. Put that in an AWS S3 bucket and configure the required environment variables.
+
+| Environment Variables | Description |
+| --------------------- | ----------- |
+| KEYSTORE              | The name of your keystore file |
+| KEYSTORE_BUCKET       | The bucket your keystore can be found in |
+| AWS_ACCESS_KEY        | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
+| AWS_SECRET_ACCESS_KEY | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
+
+When `KEYSTORE` and `KEYSTORE_BUCKET` are provided the Synapse OpenID Provider will attempt to pull the keystores from S3 when the node service starts. If you provide the `KEYSTORE` and `KEYSTORE_BUCKET` variables but NOT the AWS credential variables then the provider api will fail to start.
+
 ## Database
 
 The OIDC Platform supports Postgres or MySQL. The database server is not packaged with the OIDC platform. You must create a blank database and provide connection details to the OIDC Platform through environment variables.
