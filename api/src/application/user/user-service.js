@@ -171,7 +171,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return self.redisAdapter.destroy(sessionId);
     },
 
-    sendForgotPasswordEmail(query) {
+    sendForgotPasswordEmail(query, token) {
       const base = config('/baseUrl');
       const prevQuery = querystring.stringify(query);
 

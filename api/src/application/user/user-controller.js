@@ -387,7 +387,7 @@ module.exports = (
         })
         .then(token => {
           if (token) {
-            return userService.sendforgotPasswordEmail(request.query);
+            return userService.sendForgotPasswordEmail(request.query, token);
           }
         })
         .then(emailBody => {
