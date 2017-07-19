@@ -4,11 +4,12 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 
 ## App Config
 
-| Environment Variable | Description |
-| -------------------- | ----------- |
-| OIDC_BASE_URL        | The url that the OIDC Provider is hosted at |
-| COOKIE_KEY           | Set this to a long string to be used to encrypt session cookies |
-| OLD_COOKIE_KEY       | When you update COOKIE_KEY make sure to set OLD_COOKIE_KEY to the value that was in COOKIE_KEY. New cookies will be encrypted with the COOKIE_KEY. Old cookies will be decrypted with OLD_COOKIE_KEY to be validated then reencrypted with COOKIE_KEY |
+| Environment Variable      | Description |
+| --------------------      | ----------- |
+| OIDC_BASE_URL             | The url that the OIDC Provider is hosted at |
+| OIDC_INITIAL_ACCESS_TOKEN | A strong token that will be used to create new clients |
+| COOKIE_KEY                | Set this to a long string to be used to encrypt session cookies |
+| OLD_COOKIE_KEY            | When you update COOKIE_KEY make sure to set OLD_COOKIE_KEY to the value that was in COOKIE_KEY. New cookies will be encrypted with the COOKIE_KEY. Old cookies will be decrypted with OLD_COOKIE_KEY to be validated then reencrypted with COOKIE_KEY |
 
 ## Keystores
 
