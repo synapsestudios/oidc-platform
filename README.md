@@ -3,8 +3,8 @@
 The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com/panva/node-oidc-provider) to provide user authentication for our clients' applications. node-oidc-provider is an [OpenID Connect](http://openid.net/connect/) provider library. In order to fully understand the ins and outs of this application understanding OpenID Connect is a must.
 
 ## Usage Documentation
-- [Installation] (/docs/installation.md)
-- [Implementation] (/docs/implementation.md)
+- [Installation] (docs/installation.md)
+- [Implementation] (docs/implementation.md)
 
 ## Setting up for development
 
