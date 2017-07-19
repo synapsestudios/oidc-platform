@@ -8,14 +8,14 @@ The OIDC Platform supports Postgres or MySQL. The database server is not package
 
 ### Configuring the OIDC Platform to use your database
 
-| Variable | Description |
-| -------- | ------ |
-| OIDC_DB_ADAPTER | Tell the platform which database adapter to use. Value can be either 'mysql' or 'postgres' |
-| OIDC_DB_HOST | The host url for the database |
-| OIDC_DB_PORT | The port to connect on |
-| OIDC_DB_NAME | Database Name |
-| OIDC_DB_USER | The user you want the platform to use |
-| OIDC_DB_PASSWORD | The user's password |
+| Environment Variable | Description                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------ |
+| OIDC_DB_ADAPTER      | Tell the platform which database adapter to use. Value can be either 'mysql' or 'postgres' |
+| OIDC_DB_HOST         | The host url for the database                                                              |
+| OIDC_DB_PORT         | The port to connect on                                                                     |
+| OIDC_DB_NAME         | Database Name                                                                              |
+| OIDC_DB_USER         | The user you want the platform to use                                                      |
+| OIDC_DB_PASSWORD     | The user's password                                                                        |
 
 ### Creating tables for the first time
 
@@ -26,5 +26,19 @@ npm run migrate
 ```
 
 ## Email
+
+The OIDC platform provides some features that will send emails. In order to send emails the OIDC Provider needs to be configured to use an email service. Currently the platform only supports [mailgun](https://www.mailgun.com/) and [AWS SES](https://aws.amazon.com/ses/). Configuring your email provider occurs in environment variables.
+
+| Environment Variables | Provider | Description |
+| --------------------- | -------- | ----------- |
+| OIDC_EMAIL_DRIVER | both | Tell the platform which email provider to user. Value can be either 'ses' or 'mailgun' |
+| OIDC_EMAIL_DOMAIN | both | The domain to send emails from |
+| OIDC_EMAIL_WHITELIST | both | A whitelist of domains (comma separated) that emails can be sent to. If OIDC_EMAIL_WHITELIST is not set then the whitelist feature will not be used |
+| OIDC_EMAIL_TRAP | both | If whitelist check fails then the email will be sent to the email specified by OIDC_EMAIL_TRAP |
+| MAILGUN_API_KEY | mailgun | If you're using mailgun you must provide an api key |
+| AWS_ACCESS_KEY | ses | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
+| AWS_SECRET_ACCESS_KEY | ses | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
+
+## Files
 
 ## Environment Variable Reference
