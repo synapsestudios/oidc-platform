@@ -116,7 +116,7 @@ If your users are allowed to create their own accounts then you can send your us
 
 ```
 ${providerDomain}/user/register
-  ?client_id=${config.clientId}
+  ?client_id=${clientId}
   &response_type=${responseType}
   &scope=${scope}
   &redirect_uri=${config.redirectUri}
@@ -127,7 +127,33 @@ When your user has successfully created their account and logged in they will be
 
 ## Logging your users in and getting an authorization token
 
+This is where the rubber hits the road. Once you have a Client configured and your users have been invited or registered then your application will be able to use the OIDC Platform to verify their identity. The OIDC Platform will authenticate the user (your app doesn't have to handle passwords) and give your app an access token in the form of a [jwt](https://jwt.io/). Your app then can use that JWT to validate the users making requests to your application are indead authenticated valid users.
+
+OpenID Connect uses the old familiar OAuth 2.0 login workflows. You should pick one or more workflow for your application based on whether or not your app lives on a server that is capable of keeping secrets or if your app is distributed to untrusted client machines that should not be given your client secret.
+
 ### Authorization workflow
+
+The authorization workflow is what people think of when they think OAuth. Please see the [OpenID specification](http://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth) for more detail.
+1. Your app links the user away to the login form
+2. the OIDC Platform sends them back to your application with an authorization code
+3. You send the authorization code along with your client secret to the token endpoint in the OIDC Platform
+4. The OIDC Platform sends back an access token (in the form of a JWT)
+5. Your application stores the JWT and allows the JWT to be used by the user to authenticate with your service
+
+#### Example login link for Authorization workflow
+```
+${providerDomain}/op/auth
+  ?client_id=${clientId}
+  &response_type=code
+  &scope=${scope}
+  &redirect_uri=${config.redirectUri}
+  &nonce=nonce
+```
+- client_id: returned to you when you created your client
+- response_type: tells the OIDC Platform to return an authorization code
+- scope: [OAuth 2.0 scope](https://tools.ietf.org/html/rfc6749#section-3.3) values. You must at least include the "openid" scope. Other scopes are optional. The scopes defined by OpenID Connect are profile, email, address, phone, and offline_access
+- redirect_uri: one of the redirect_uris allowed by the client you created
+- nonce: this is meant to be a random string. The OIDC Provider will pass this back and you should make sure that the nonce you generated matches the nonce you receive from the OIDC Provider
 
 ### Implicit workflow
 
