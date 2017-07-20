@@ -86,23 +86,60 @@ When a client application redirects their user to the login screen the client ap
 
 A good guide for OAuth 2.0 grant types can be found [here](https://alexbilbie.com/guide-to-oauth-2-grants/). That guide defines grants like this
 
->>> The OAuth 2.0 specification is a flexibile authorization framework that describes a number of grants (“methods”) for a client application to acquire an access token (which represents a user’s permission for the client to access their data) which can be used to authenticate a request to an API endpoint.
+> The OAuth 2.0 specification is a flexibile authorization framework that describes a number of grants (“methods”) for a client application to acquire an access token (which represents a user’s permission for the client to access their data) which can be used to authenticate a request to an API endpoint.
 
 Your client application will tell the OIDC Provider the provider which workflow you're going to use by specifying the grant type and the response_types. The authorization_code grant type is the typical OAuth workflow which requires you to have a server that keeps your client secret, the implicit grant type is for things like mobile apps and single page web apps that can't keep a secret. Those will be the most used, but there are others described in the above guide.
 
-##### post_logout_redirect_uris:
+##### post_logout_redirect_uris
+
+The `post_logout_redirect_uris` key is defined by the [OpenID Connect Session Management](http://openid.net/specs/openid-connect-session-1_0-28.html). When configuring your client you should provide a post_logout_redirect_uri if you plan to use any of the logout features that will log your user out of both your app AND the OIDC Platform. Performing a logout is covered in the Logging your users out section of this document.
 
 ## Creating Users
 
+Methods for creating users is not defined by the OpenID Connect specification. All user creation is done by the OIDC Platform.
+
 ### Inviting Users
 
+The OIDC Platform provides an endpoint that will invite your user to create an account. The invite workflow looks like this:
+
+1. Your application POSTs to the invite endpoing with your new users email address (plus some more information needed to get this user back to your application)
+1. The OIDC Platform sends an email to your user with a link that allows them to click into the OIDC Platform
+1. The user follows the link and is prompted to create a password
+1. Once the user's password is created they are redirected the login screen
+1. If the user logs in they will be redirected back to your application (to the redirect_url you specified when POSTing the invite)
+
+You will also be able to trigger reinvites for users that have not yet responded to their original invite.
+
 ### User Registration
+
+If your users are allowed to create their own accounts then you can send your users to a register url to fill out a form that will create their user. nclude a Register link on your site that looks like this:
+
+```
+${providerDomain}/user/register
+  ?client_id=${config.clientId}
+  &response_type=${responseType}
+  &scope=${scope}
+  &redirect_uri=${config.redirectUri}
+  &nonce=${nonce}
+```
+
+When your user has successfully created their account and logged in they will be redirected back to your application. You can then use the OIDC Provider api coupled with the usrs authorization token to get that users profile information.
 
 ## Logging your users in and getting an authorization token
 
 ### Authorization workflow
 
 ### Implicit workflow
+
+### Client Credentials
+
+### Refresh Token
+
+TODO
+
+### Resource Owner
+
+TODO
 
 ## Using the authentication token
 
