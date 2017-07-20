@@ -226,6 +226,20 @@ ${redirect_uri}
 
 ### Client Credentials
 
+The client credentials workflow is used whe your application is interacting with the authorization server's api, but is not acting on behalf of your users. It's a way for the your client application to get an access token and make api calls without having to authenticate a user. [This guide](https://alexbilbie.com/guide-to-oauth-2-grants/) explains the client credentials grant well. If you're brave you can venture into the [OAuth 2.0](https://tools.ietf.org/html/rfc6749#section-4.4) spec for more detail.
+
+#### Example token request
+
+Calling the token endpoint this way will return an access token, but will not return an id token. The access token is what you will use for machine-to-machine calls with theh OIDC Provider.
+
+```
+POST /op/token
+Host: ${providerDomain}
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic ${base64Encode(clientId:clientSecret)}
+grant_type=client_credentials&scope=admin
+```
+
 ### Refresh Token
 
 TODO
