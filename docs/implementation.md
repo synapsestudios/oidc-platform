@@ -164,8 +164,7 @@ ${redirect_uri}
   ?code=NTJhY2U5NGQtOTQyMS00N2MwLWFjMTYtN2JhMjhmODlhY2Ux5UxOH5eb3zz2seRdBYoaAQJMxLsrGPy_LQsoL8-KiqkB4FZqYTXo1K2QzHodi4yGyMeMesTBJoLHf3e7EHqKZA
   &session_state=546bd29c230d6af5a9704cc46409effa133367f94dc480a96967367ce10b879c.cb44518fa5a9e0c4
 ```
-https://sso-client.dev:3000/?code=MWYyOWEzMjctNTQxZi00ODYyLWFlZGUtMzlhZTZmOGZlZjEx1LhZa4qZwM89-M3egd0q-gZI9s_iCvsXJNPPQdsGQDWEWkOg3jgLMkwCqylly1pOE1ND_0MJ1zIjp12GGVKYSQ
-&session_state=5c14321fb9a57e5c60af1c143f18b3b5b922c6b58a43feef606dba094df5baa5.c323188d4f364260
+
 #### Example token request
 
 Once you've received an authorization code you can use that code to obtain an access token and an id token. The token endopint uses Basic auth. Use your client id as the username and the client secret as the password.
