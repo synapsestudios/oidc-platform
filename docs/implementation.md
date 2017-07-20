@@ -44,7 +44,9 @@ Body:
   "grant_types": [
     "authorization_code",
     "implicit",
-    "client_credentials"
+    "client_credentials",
+    "refresh_token",
+    "password",
   ],
   "id_token_signed_response_alg": "RS256",
   "post_logout_redirect_uris": [
@@ -80,7 +82,13 @@ This is a JSON array of uris that the OIDC Platform will be allowed to return yo
 
 When a client application redirects their user to the login screen the client applictation will include a "response_type" string in the query parameters. The client for that application must be configured explicitly to allow that response_type. Response types can be `code`, `id_token`, `token` OR a [Multiple-Valued Response Type](http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#Combination).
 
-##### grant_types:
+##### grant_types
+
+A good guide for OAuth 2.0 grant types can be found [here](https://alexbilbie.com/guide-to-oauth-2-grants/). That guide defines grants like this
+
+>>> The OAuth 2.0 specification is a flexibile authorization framework that describes a number of grants (“methods”) for a client application to acquire an access token (which represents a user’s permission for the client to access their data) which can be used to authenticate a request to an API endpoint.
+
+Your client application will tell the OIDC Provider the provider which workflow you're going to use by specifying the grant type and the response_types. The authorization_code grant type is the typical OAuth workflow which requires you to have a server that keeps your client secret, the implicit grant type is for things like mobile apps and single page web apps that can't keep a secret. Those will be the most used, but there are others described in the above guide.
 
 ##### post_logout_redirect_uris:
 
