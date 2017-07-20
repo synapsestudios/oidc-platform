@@ -10,9 +10,10 @@ Clients are the applications that make use of the OIDC Platform for identity ser
 
 Currently there is no user interface for managing clients. Clients can be registered dynamically with the registration api endpoint. Any of the [OpenID Client Metadata](http://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) can be supplied. The Bearer token for this request is validated against the OIDC_INITIAL_ACCESS_TOKEN environment variable. YOU MUST PROVIDE A STRONG TOKEN in production to prevent unauthorized clients from being added.
 
+#### Request
+
 Create a client by submitting a POST request to {yourServiceDomain}/op/reg with the following:
 
-#### Request
 ```
 Headers:
 {
@@ -80,6 +81,7 @@ This is a JSON array of uris that the OIDC Platform will be allowed to return yo
 When a client application redirects their user to the login screen the client applictation will include a "response_type" string in the query parameters. The client for that application must be configured explicitly to allow that response_type. Response types can be `code`, `id_token`, `token` OR a [Multiple-Valued Response Type](http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#Combination).
 
 ##### grant_types:
+
 ##### post_logout_redirect_uris:
 
 ## Creating Users
