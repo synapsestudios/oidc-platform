@@ -190,6 +190,40 @@ grant_type=authorization_code&code=MWYyOWEzMjctNTQxZi00ODYyLWFlZGUtMzlhZTZmOGZlZ
 
 ### Implicit workflow
 
+The implicit workflow has fewer steps, but as a tradeoff you lose the ability for the OIDC Platform to authenticate the client. Typically you would use the implicit workflow for things like single page web applications or native applications. Please see the [OpenID specification](http://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth) for more detail.
+1. Your app links the user away to the login form
+2. the OIDC Platform sends them back to your application with an id token and an access token.
+3. Your application stores the JWT and allows the JWT to be used by the user to authenticate with your service
+
+#### Example login link for Implicit workflow
+
+```
+${providerDomain}/op/auth
+  ?client_id=${clientId}
+  &response_type=id_token%20token
+  &scope=${scope}
+  &redirect_uri=${config.redirectUri}
+  &nonce=nonce
+```
+- client_id: returned to you when you created your client
+- response_type: tells the OIDC Platform to return an authorization code
+- scope: [OAuth 2.0 scope](https://tools.ietf.org/html/rfc6749#section-3.3) values. You must at least include the "openid" scope. Other scopes are optional. The scopes defined by OpenID Connect are profile, email, address, phone, and offline_access
+- redirect_uri: one of the redirect_uris allowed by the client you created
+- nonce: this is meant to be a random string. The OIDC Provider will pass this back and you should make sure that the nonce you generated matches the nonce you receive from the OIDC Provider
+
+#### Example response for Implicit workflow
+
+After your user has been authenticated by the OIDC Platform then they will be redirected back to the url that you specify in with redirect_uri.
+
+```
+${redirect_uri}
+  #id_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InNpZy1ycy0wIn0.eyJzdWIiOiJiNmQ4ZmM5MC01ZGE2LTQwNzYtOTUyNC1iMDYxMjFmZDljZmQiLCJhcHBfbWV0YWRhdGEiOltdLCJub25jZSI6Im5vbmNlIiwiYXRfaGFzaCI6IlNjdU9sSml2NmtEbnVYUmlfUU9lUlEiLCJpYXQiOjE1MDA1ODYxODksImV4cCI6MTUwMDU5MzM4OSwiYXVkIjoiNWNkZDI5Y2YtNWJiYy00NGNmLWE1NDEtN2QwMzljOTg1MmUxIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDAwIn0.iFD9mcANO5GGzjHz0zYQ_Jj-UePq3R6qATDEyHrvBFZn0iR5E4NoQw3M25QqNItoTK4FsJEX2eUDKQYIsj-6Esh1-hdSlMUNrtLg6in9eD_Ovk5FgR8uVo9XaEHgP4LQFLietYEU6aYIWE9c_sHNmBjds1ODnJdBi1BMTuDoulAiENArvT2pDjHXMmnzqSpJZmkoaJ8kT_9NErOGqJ5Fm3B5BAvX4iUDbVyNaLRHV9u0Lmc4grvE-pCQTXP7b4mWX_usLIUCOw7lcIJgI_ELhWdjMuAWY89WybPxIaqTzAeAftC0rlLJEOU5by7ydNCwDxkA1v24I0mnUYOd3HuidA
+  &access_token=Nzc3NzA4YzktZDEyZC00OGFlLTkxYTAtNDNjYWUzNmMxY2Iw1NfIByCa1kfgWNApvdQ-dw1xWbuOB7mO3SAu7ybQPHxb0wQsW8aAT800MJMjR4_CxpZvvqVH7Hr61yG3cy9izQ
+  &expires_in=7200
+  &token_type=Bearer
+  &session_state=fe4d8e6badb752671b9357ec17c160fb5045ac84e87d459507df748c9bc3434e.172e7a238010152b
+```
+
 ### Client Credentials
 
 ### Refresh Token
