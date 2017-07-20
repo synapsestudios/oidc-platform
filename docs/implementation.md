@@ -127,17 +127,17 @@ When your user has successfully created their account and logged in they will be
 
 ## Logging your users in and getting an authorization token
 
-This is where the rubber hits the road. Once you have a Client configured and your users have been invited or registered then your application will be able to use the OIDC Platform to verify their identity. The OIDC Platform will authenticate the user (your app doesn't have to handle passwords) and give your app an access token in the form of a [jwt](https://jwt.io/). Your app then can use that JWT to validate the users making requests to your application are indead authenticated valid users.
+This is where the rubber hits the road. Once you have a Client configured and your users have been invited or registered then your application will be able to use the OIDC Platform to verify their identity. The OIDC Platform will authenticate the user (your app doesn't have to handle passwords) and give your app an [id token](http://openid.net/specs/openid-connect-core-1_0.html#IDToken) in the form of a [jwt](https://jwt.io/). Your app then can use that JWT to validate the users making requests to your application are indead authenticated valid users.
 
 OpenID Connect uses the old familiar OAuth 2.0 login workflows. You should pick one or more workflow for your application based on whether or not your app lives on a server that is capable of keeping secrets or if your app is distributed to untrusted client machines that should not be given your client secret.
 
 ### Authorization workflow
 
-The authorization workflow is what people think of when they think OAuth. Please see the [OpenID specification](http://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth) for more detail.
+The authorization workflow is what people think of when they think OAuth. You should use the authorization code if your application can keep secrets since you will need to use your client secret to get an id token. Please see the [OpenID specification](http://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth) for more detail.
 1. Your app links the user away to the login form
 2. the OIDC Platform sends them back to your application with an authorization code
 3. You send the authorization code along with your client secret to the token endpoint in the OIDC Platform
-4. The OIDC Platform sends back an access token (in the form of a JWT)
+4. The OIDC Platform sends back an id token (in the form of a JWT) and an access token. The access token is the traditional OAuth token and in many cases can be discarded. The id token is what your application will use to verify identity.
 5. Your application stores the JWT and allows the JWT to be used by the user to authenticate with your service
 
 #### Example login link for Authorization workflow
@@ -155,6 +155,40 @@ ${providerDomain}/op/auth
 - redirect_uri: one of the redirect_uris allowed by the client you created
 - nonce: this is meant to be a random string. The OIDC Provider will pass this back and you should make sure that the nonce you generated matches the nonce you receive from the OIDC Provider
 
+#### Example response for Authorization workflow
+
+After your user has been authenticated by the OIDC Platform then they will be redirected back to the url that you specify in with redirect_uri.
+
+```
+${redirect_uri}
+  ?code=NTJhY2U5NGQtOTQyMS00N2MwLWFjMTYtN2JhMjhmODlhY2Ux5UxOH5eb3zz2seRdBYoaAQJMxLsrGPy_LQsoL8-KiqkB4FZqYTXo1K2QzHodi4yGyMeMesTBJoLHf3e7EHqKZA
+  &session_state=546bd29c230d6af5a9704cc46409effa133367f94dc480a96967367ce10b879c.cb44518fa5a9e0c4
+```
+https://sso-client.dev:3000/?code=MWYyOWEzMjctNTQxZi00ODYyLWFlZGUtMzlhZTZmOGZlZjEx1LhZa4qZwM89-M3egd0q-gZI9s_iCvsXJNPPQdsGQDWEWkOg3jgLMkwCqylly1pOE1ND_0MJ1zIjp12GGVKYSQ
+&session_state=5c14321fb9a57e5c60af1c143f18b3b5b922c6b58a43feef606dba094df5baa5.c323188d4f364260
+#### Example token request
+
+Once you've received an authorization code you can use that code to obtain an access token and an id token. The token endopint uses Basic auth. Use your client id as the username and the client secret as the password.
+
+```
+POST /op/token
+Host: ${providerDomain}
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic ${base64Encode(clientId:clientSecret)}
+grant_type=authorization_code&code=MWYyOWEzMjctNTQxZi00ODYyLWFlZGUtMzlhZTZmOGZlZjEx1LhZa4qZwM89-M3egd0q-gZI9s_iCvsXJNPPQdsGQDWEWkOg3jgLMkwCqylly1pOE1ND_0MJ1zIjp12GGVKYSQ&redirect_uri=https%3A%2F%2Fsso-client.dev%3A3000%2F
+```
+
+#### Example token response
+
+```
+{
+  "access_token": "OWFjN2NmZGEtOTA1Mi00YzVlLWJjYWEtMmRhMzVjY2ZkMmU0qLpoxZYWAvYyheTh4rxnM_lhqK-5VqLLSFaSyjwxUQZDBh6CepgpYNGEF8NH8iMJfi7dedMkgeAr0QSNjfIBWg",
+  "expires_in": 7200,
+  "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InNpZy1ycy0wIn0.eyJzdWIiOiJiNmQ4ZmM5MC01ZGE2LTQwNzYtOTUyNC1iMDYxMjFmZDljZmQiLCJhcHBfbWV0YWRhdGEiOltdLCJub25jZSI6Im5vbmNlIiwiYXRfaGFzaCI6Imw2VDA4WTM1MTJYS2VKRVJpRUwxWFEiLCJpYXQiOjE1MDA1ODI1MTksImV4cCI6MTUwMDU4OTcxOSwiYXVkIjoiNWNkZDI5Y2YtNWJiYy00NGNmLWE1NDEtN2QwMzljOTg1MmUxIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDAwIn0.T6nnBs8JRkmBorusSfFjShH5A4ZVnPiDsVF1Y3mEhuf9afCw2XXSV3XRTcFaBGrLdyHKsDkQHI-mS0JWTGvEI_tn4AWpUzgNcAN6gO_oq29kUz1u53lSS2-6SM8M8QAEiKO8vZWMYXyaUPmUUt_6Q6pJlEv_FPLFM9_Ye7GVZ2j7-3FNJggfK0W3t85AY_nEb3wf5Vq1LkP6B1qkgUJP1UF4qEnE2hDT2a28aIGplfsIjrTz-3Em5-HqYAzcAJ1-uICla0D5_szuevoQ1kUDnaA1HwdEuFB2sTfxOO_hbjzOb7XOl1q6FyO3OThYF-PE4az7eNULO4UurFr9Q7BXzw",
+  "token_type": "Bearer"
+}
+```
+
 ### Implicit workflow
 
 ### Client Credentials
@@ -167,7 +201,7 @@ TODO
 
 TODO
 
-## Using the authentication token
+## Using the id token for authentication
 
 ## Logging your users out
 
