@@ -123,9 +123,9 @@ ${providerDomain}/user/register
   &nonce=${nonce}
 ```
 
-When your user has successfully created their account and logged in they will be redirected back to your application. You can then use the OIDC Provider api coupled with the usrs authorization token to get that users profile information.
+When your user has successfully created their account and logged in they will be redirected back to your application. You can then use the OIDC Provider api coupled with the usrs access token to get that users profile information.
 
-## Logging your users in and getting an authorization token
+## Logging your users in and getting tokens
 
 This is where the rubber hits the road. Once you have a Client configured and your users have been invited or registered then your application will be able to use the OIDC Platform to verify their identity. The OIDC Platform will authenticate the user (your app doesn't have to handle passwords) and give your app an [id token](http://openid.net/specs/openid-connect-core-1_0.html#IDToken) in the form of a [jwt](https://jwt.io/). Your app then can use that JWT to validate the users making requests to your application are indead authenticated valid users.
 
@@ -249,6 +249,34 @@ TODO
 TODO
 
 ## Using the id token for authentication
+
+Once you have your id token your application must verify that the token is valid. The id token is a JWT so that you don't have to store it on your backend. You can keep it in your users' local storage, or cookies, or anything else client-side. When the user makes api calls to your application they should pass the JWT along and you can verify that the JWT is legitimate.
+
+During [Installation](installation.md) you will have created a keystores.json file. This file contains all of the keys that are used to encrypt and decrypt the id tokens. You should make these keys available to your application so that it can verify the JWT. You _should never_ expose these keys to your users. They should live on your application servers but never in native/browser code.
+
+Here is an example function using node that verifies the JWT using the keystores.json file:
+
+```
+const jose = require('node-jose');
+const atob = require('atob');
+const keystores = require('../path/to/keystore');
+const keystore = jose.JWK.asKeyStore(keystores.certificates);
+
+function verifyJWT(request) {
+  const token = request.headers.authorization;
+  const header = JSON.parse(atob(token.split('.')[0]));
+  const key = keystore.get(header.kid);
+
+  jose.JWS.createVerify(key).verify(token).then(verify => {
+    // succesfully verified!
+  })
+    .catch(e => {
+      // cannot verify
+    });
+}
+```
+
+The above snippet uses the `node-jose` package to interact with the keystore and to verify the validity of the JWT. [JOSE](http://jose.readthedocs.io/en/latest/) is the standard for Javascript Object Signing and Encryption. There are libraries in most languages for interacting with keys and tokens in this format. [jwt.io](https://jwt.io/) has a list of libraries for token signing/verification on the home page.
 
 ## Logging your users out
 
