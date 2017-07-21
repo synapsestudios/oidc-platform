@@ -280,8 +280,46 @@ The above snippet uses the `node-jose` package to interact with the keystore and
 
 ## Logging your users out
 
+Sometimes they just want to leave. You should let them go.
+
 ### Log them out of just your app
+
+When using the OIDC Platform it's important to realize that your users log into the platform and the platform maintains a session for them. If you application maintains a session, or uses stateless sessions with just the id token, you can effectively log your users out of your application by destroying your id token and ending your user's session in your application. Your app can then treat the user like they are not logged in.
+
+If that user then attempts to log back in and your application redirects them to the OIDC Platform for authentication, the OIDC Platform MAY still have their session active from their previous authentication and redirect them right back to your application with access and/or id tokens without the user having to fill out the login form.
+
+If this behavior is undesirable for your application see the next two sections.
 
 ### Log them out of the OIDC provider explicitly
 
+If when your user logs out of your app you want to allow them to optionally log out of the OIDC service you can make use of the [OIDC Logout](http://openid.net/specs/openid-connect-session-1_0.html#RPLogout) which is defined in the OpenID Connect Session Management specification. This logout workflow works like this:
+
+1. Your application redirects the user the the OIDC Platform's logout url (with some optional parameters)
+1. The user is asked whether or not they want to log out of the OIDC Platform
+1. After choosing, the user is (optionally) redirected back to your application
+
+#### Example logout url
+
+```
+${providerDomain}op/session/end
+  ?id_token_hint=${idToken}
+  &post_logout_redirect_uri=${redirectUri}
+```
+- id_token_hint: your user's id token. The OIDC Provider can use this as a hint about the identity of the user that is logging out.
+- post_logout_redirect_uri: where to send your user once they've logged out
+
 ### Log them out of the OIDC provider implicitly
+
+There are cases where your application's end users will have no idea what the OIDC Platform even is. If, for example, you're installiing the OIDC Platform to use with only a single application (instead of as an SSO service) then your user will rightly be confused when they logout of your application and then are presented with a screen asking them of they want to logout of some OpenID Connect service.
+
+The implicit logout link will log the user out of the OIDC Platform without asking them and will redirect them back to your applicaiton.
+
+#### Example logout url
+
+```
+${providerDomain}user/logout
+  ?post_logout_redirect_uri=${postLogoutRedirectUri}
+
+```
+
+- post_logout_redirect_uri: where to send your user once they've been logged out
