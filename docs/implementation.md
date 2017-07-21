@@ -2,6 +2,23 @@
 
 Once you've gone through the [Installation](installation.md) you're ready for Implementation! Following the steps and instructions in this implementation guide will walk you through what it takes to make use of the platform in your apps and assumes that you have a fully functional installation of the OIDC Platform.
 
+- [Clients](#clients)
+  - [Creating a client](#creating-a-client)
+    - [Request](#request)
+    - [Response](#response)
+    - [Important client values](#important-client-values)
+- [Creating Users](#creating-users)
+  - [Inviting Users](#inviting-users)
+  - [User Registration](#user-registration)
+- [Logging your users in and getting tokens](#logging-your-users-in-and-getting-tokens)
+  - [Authorization workflow](authorization-workflow)
+  - [Implicit workflow](#implicit-workflow)
+  - [Client Credentials](#client-credentials)
+- [Logging your users out](#logging-your-users-out)
+  - [Log them out of just your app](#log-them-out-of-just-your-app)
+  - [Log them out of the OIDC provider explicitly](#log-them-out-of-the-oidc-provider-explicitly)
+  - [Log them out of the OIDC provider implicitly](#log-them-out-of-the-oidc-provider-implicitly)
+
 ## Clients
 
 Clients are the applications that make use of the OIDC Platform for identity services. Before your application can use the platform you will need to create and configure a client for your application.
