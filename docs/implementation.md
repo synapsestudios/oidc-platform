@@ -11,7 +11,7 @@ Once you've gone through the [Installation](installation.md) you're ready for Im
   - [Inviting Users](#inviting-users)
   - [User Registration](#user-registration)
 - [Logging your users in and getting tokens](#logging-your-users-in-and-getting-tokens)
-  - [Authorization workflow](authorization-workflow)
+  - [Authorization workflow](#authorization-workflow)
   - [Implicit workflow](#implicit-workflow)
   - [Client Credentials](#client-credentials)
 - [Logging your users out](#logging-your-users-out)
