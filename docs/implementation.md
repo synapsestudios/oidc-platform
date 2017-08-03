@@ -97,13 +97,13 @@ This is a JSON array of uris that the OIDC Platform will be allowed to return yo
 
 ##### response_types
 
-When a client application redirects their user to the login screen the client applictation will include a "response_type" string in the query parameters. The client for that application must be configured explicitly to allow that response_type. Response types can be `code`, `id_token`, `token` OR a [Multiple-Valued Response Type](http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#Combination).
+When a client application redirects their user to the login screen the client application will include a "response_type" string in the query parameters. The client for that application must be configured explicitly to allow that response_type. Response types can be `code`, `id_token`, `token` OR a [Multiple-Valued Response Type](http://openid.net/specs/oauth-v2-multiple-response-types-1_0.html#Combination).
 
 ##### grant_types
 
 A good guide for OAuth 2.0 grant types can be found [here](https://alexbilbie.com/guide-to-oauth-2-grants/). That guide defines grants like this
 
-> The OAuth 2.0 specification is a flexibile authorization framework that describes a number of grants (“methods”) for a client application to acquire an access token (which represents a user’s permission for the client to access their data) which can be used to authenticate a request to an API endpoint.
+> The OAuth 2.0 specification is a flexible authorization framework that describes a number of grants (“methods”) for a client application to acquire an access token (which represents a user’s permission for the client to access their data) which can be used to authenticate a request to an API endpoint.
 
 Your client application will tell the OIDC Provider the provider which workflow you're going to use by specifying the grant type and the response_types. The authorization_code grant type is the typical OAuth workflow which requires you to have a server that keeps your client secret, the implicit grant type is for things like mobile apps and single page web apps that can't keep a secret. Those will be the most used, but there are others described in the above guide.
 
@@ -119,7 +119,7 @@ Methods for creating users is not defined by the OpenID Connect specification. A
 
 The OIDC Platform provides an endpoint that will invite your user to create an account. The invite workflow looks like this:
 
-1. Your application POSTs to the invite endpoing with your new users email address (plus some more information needed to get this user back to your application)
+1. Your application POSTs to the invite endpoint with your new users email address (plus some more information needed to get this user back to your application)
 1. The OIDC Platform sends an email to your user with a link that allows them to click into the OIDC Platform
 1. The user follows the link and is prompted to create a password
 1. Once the user's password is created they are redirected the login screen
@@ -243,7 +243,9 @@ ${redirect_uri}
 
 ### Client Credentials
 
-The client credentials workflow is used whe your application is interacting with the authorization server's api, but is not acting on behalf of your users. It's a way for the your client application to get an access token and make api calls without having to authenticate a user. [This guide](https://alexbilbie.com/guide-to-oauth-2-grants/) explains the client credentials grant well. If you're brave you can venture into the [OAuth 2.0](https://tools.ietf.org/html/rfc6749#section-4.4) spec for more detail.
+The client credentials workflow is used whe your application is interacting with the authorization server's api, but is not acting on behalf of your users. It's a way for your client application to get an access token and make api calls without having to authenticate a user. [This guide](https://alexbilbie.com/guide-to-oauth-2-grants/) explains the client credentials grant well. If you're brave you can venture into the [OAuth 2.0](https://tools.ietf.org/html/rfc6749#section-4.4) spec for more detail.
+
+It is a best practice to not allow the client credentials grant for clients that end users will be using. Instead set up a separate client in the OIDC Platform for your system to use.
 
 #### Example token request
 
@@ -327,7 +329,7 @@ ${providerDomain}op/session/end
 
 ### Log them out of the OIDC provider implicitly
 
-There are cases where your application's end users will have no idea what the OIDC Platform even is. If, for example, you're installiing the OIDC Platform to use with only a single application (instead of as an SSO service) then your user will rightly be confused when they logout of your application and then are presented with a screen asking them of they want to logout of some OpenID Connect service.
+There are cases where your application's end users will have no idea what the OIDC Platform even is. If, for example, you're installing the OIDC Platform to use with only a single application (instead of as an SSO service) then your user will rightly be confused when they logout of your application and then are presented with a screen asking them of they want to logout of some OpenID Connect service.
 
 The implicit logout link will log the user out of the OIDC Platform without asking them and will redirect them back to your applicaiton.
 
