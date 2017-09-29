@@ -5,6 +5,7 @@ const querystring = require('querystring');
 const path = require('path');
 const fs = require('fs');
 const handlebars = require('handlebars');
+const passwordGrant = require('./grants/password');
 
 exports.register = function (server, options, next) {
   const issuer = options.issuer || process.env.OIDC_BASE_URL || 'http://localhost:9000';
@@ -82,38 +83,8 @@ exports.register = function (server, options, next) {
     integrity: options.keystores.integrity,
   })
     .then(() => {
-
-      provider.registerGrantType('password', function passwordGrantTypeFactory(providerInstance) {
-        return function * passwordGrantType(next) {
-          const { username, password } = this.oidc.params;
-          const account = yield options.authenticateUser(username, password);
-
-          if (account) {
-            const AccessToken = providerInstance.AccessToken;
-            const at = new AccessToken({
-              accountId: 'foo',
-              clientId: this.oidc.client.clientId,
-              grantId: this.oidc.uuid,
-            });
-
-            const accessToken = yield at.save();
-            const expiresIn = AccessToken.expiresIn;
-
-            this.body = {
-              access_token: accessToken,
-              expires_in: expiresIn,
-              token_type: 'Bearer',
-            };
-          } else {
-            this.body = {
-              error: 'invalid_grant',
-              error_description: 'invalid credentials provided',
-            };
-          }
-
-          yield next;
-        };
-      }, ['username', 'password']);
+      const { grantTypeFactory, params } = passwordGrant(options);
+      provider.registerGrantType('password', grantTypeFactory, params);
 
       provider.app.use(cors());
       provider.app.keys = options.cookieKeys;
