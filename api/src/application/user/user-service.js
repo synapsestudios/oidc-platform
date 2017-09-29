@@ -3,6 +3,7 @@ const Boom = require('boom');
 const config = require('../../../config');
 const uuid = require('uuid');
 const handlebars = require('handlebars');
+const querystring = require('querystring');
 
 module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisAdapter) => {
   var self = {
@@ -60,7 +61,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       });
     },
 
-    resendUserInvite(userId, appName, clientId, redirectUri, scope, hoursTillExpiration) {
+    resendUserInvite(userId, appName, clientId, redirectUri, scope, hoursTillExpiration, template) {
       return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
         if (!user) {
           return Boom.notFound();
@@ -69,7 +70,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
           if (clients.models.length === 0) {
             throw Boom.badData('The provided redirect uri is invalid for the given client id.');
           }
-          return self.sendInvite(user, appName, clientId, redirectUri, scope, hoursTillExpiration).then(() => user);
+          return self.sendInvite(user, appName, clientId, redirectUri, scope, hoursTillExpiration, template).then(() => user);
         });
 
       });
@@ -168,6 +169,30 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
 
     invalidateSession(sessionId) {
       return self.redisAdapter.destroy(sessionId);
+    },
+
+    sendForgotPasswordEmail(query, token) {
+      const base = config('/baseUrl');
+      const prevQuery = querystring.stringify(query);
+
+      return clientService.getResetPasswordTemplate(query.client_id)
+        .then(templateRecord => {
+          if (templateRecord) {
+            const template = templateRecord.get('template');
+
+            return new Promise((resolve, reject) => {
+              const emailTemplate = handlebars.compile(template);
+
+              resolve(emailTemplate({
+                url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
+              }));
+            });
+          } else {
+            return renderTemplate('email/forgot-password', {
+              url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
+            });
+          }
+        });
     },
   };
 
