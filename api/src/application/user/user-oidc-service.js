@@ -18,10 +18,10 @@ module.exports = (bookshelf) => {
     authenticate: function(email, password) {
       return bookshelf.model('user').where({ email_lower: email.toLowerCase() }).fetch()
         .then(user => {
-          if (!user) throw new Error('No user found for this email');
+          if (!user) return false;
           return comparePasswords(password, user)
             .then(isAuthenticated => {
-              if (!isAuthenticated) throw new Error('Password does not match record');
+              if (!isAuthenticated) return false;
               return user.serialize({strictOidc: true});
             });
         });
