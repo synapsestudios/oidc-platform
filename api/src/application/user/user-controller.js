@@ -387,12 +387,7 @@ module.exports = (
         })
         .then(token => {
           if (token) {
-            const base = config('/baseUrl');
-            const prevQuery = querystring.stringify(request.query);
-
-            return renderTemplate('email/forgot-password', {
-              url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
-            });
+            return userService.sendForgotPasswordEmail(request.query, token);
           }
         })
         .then(emailBody => {

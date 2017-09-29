@@ -1,4 +1,4 @@
-module.exports = (bookshelf) => ({
+module.exports = (bookshelf, templateService) => ({
   create(id, payload) {
     const toStore = Object.assign({}, payload);
     const clientRelationships = Object.keys(bookshelf.model('client').prototype.relationships);
@@ -97,7 +97,28 @@ module.exports = (bookshelf) => ({
     return bookshelf.model('client').forge({ client_id: id }).save(toStore);
   },
 
+  setResetPasswordTemplate(templateRecord, clientId) {
+    return this.findById(clientId)
+      .then(clientRecord => clientRecord.set('reset_password_template_id', templateRecord.get('id')).save());
+  },
+
+  getResetPasswordTemplate(clientId) {
+    return this.findById(clientId)
+      .then(clientRecord => {
+        const resetPasswordTemplateId = clientRecord.get('reset_password_template_id');
+
+        if (resetPasswordTemplateId === null) {
+          return null;
+        }
+
+        return templateService.findById(resetPasswordTemplateId);
+      });
+  }
+
 });
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];
+module.exports['@require'] = [
+  'bookshelf',
+  'templates/template-service',
+];

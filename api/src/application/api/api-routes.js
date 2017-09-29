@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 
-module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
+module.exports = (userService, clientService, templateService, mixedValidation, rowNotExists, rowExists) => [
   {
     method: 'POST',
     path: '/api/invite',
@@ -115,12 +115,35 @@ module.exports = (userService, mixedValidation, rowNotExists, rowExists) => [
         })
       }
     }
+  },
+  {
+    method: 'POST',
+    path: '/api/reset-password-templates',
+    handler: (request, reply) => {
+      const { template, client_id } = request.payload;
+      templateService.createTemplate(template)
+        .then(templateRecord => reply(clientService.setResetPasswordTemplate(templateRecord, client_id)));
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin'
+      },
+      validate: {
+        payload: {
+          template: Joi.string().required(),
+          client_id: Joi.string().required(),
+        }
+      }
+    }
   }
 ];
 
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
+  'client/client-service',
+  'templates/template-service',
   'validator/mixed-validation',
   'validator/constraints/row-not-exists',
   'validator/constraints/row-exists',

@@ -2,6 +2,7 @@ const Hapi = require('hapi');
 const Joi = require('joi');
 
 const inviteHandler = require('./inviteHandler');
+const postEmailTemplateHandler = require('./postEmailTemplateHandler');
 
 const server = new Hapi.Server();
 
@@ -20,6 +21,12 @@ server.route({
       }
     }
   }
+});
+
+server.route({
+  method: 'GET',
+  path: '/test-email-template-post',
+  handler: postEmailTemplateHandler,
 });
 
 server.start((err) => {
