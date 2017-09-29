@@ -5,6 +5,7 @@ const querystring = require('querystring');
 const path = require('path');
 const fs = require('fs');
 const handlebars = require('handlebars');
+const passwordGrant = require('./grants/password');
 
 exports.register = function (server, options, next) {
   const issuer = options.issuer || process.env.OIDC_BASE_URL || 'http://localhost:9000';
@@ -82,10 +83,12 @@ exports.register = function (server, options, next) {
     integrity: options.keystores.integrity,
   })
     .then(() => {
+      const { grantTypeFactory, params } = passwordGrant(options);
+      provider.registerGrantType('password', grantTypeFactory, params);
+
       provider.app.use(cors());
       provider.app.keys = options.cookieKeys;
       provider.app.proxy = true;
-
       server.ext('onRequest', function(request, reply) {
         if (request.path.substring(0, prefix.length) === prefix) {
           provider.callback(request.raw.req, request.raw.res);
@@ -165,34 +168,34 @@ exports.register = function (server, options, next) {
         handler: (request, reply) => {
           options.authenticateUser(request.payload.login, request.payload.password)
             .then(account => {
-              const result = {
-                login: {
-                  account: account.accountId,
-                  acr: 'urn:mace:incommon:iap:bronze',
-                  amr: ['pwd'],
-                  remember: request.payload.remember,
-                  ts: Math.floor(Date.now() / 1000),
-                },
-                consent: {}
-              };
-              provider.interactionFinished(request.raw.req, request.raw.res, result);
-            })
-            .catch(e => {
-              const cookie = provider.interactionDetails(request.raw.req);
-              const client = provider.Client.find(cookie.params.client_id);
-              reply.view('login', {
-                error: 'Invalid email password combination',
-                client,
-                cookie,
-                title: 'Log In',
-                debug: querystring.stringify(cookie.params, ',<br/>', ' = ', {
-                  encodeURIComponent: value => value,
-                }),
-                interaction: querystring.stringify(cookie.interaction, ',<br/>', ' = ', {
-                  encodeURIComponent: value => value,
-                }),
-              });
-
+              if (account) {
+                const result = {
+                  login: {
+                    account: account.accountId,
+                    acr: 'urn:mace:incommon:iap:bronze',
+                    amr: ['pwd'],
+                    remember: request.payload.remember,
+                    ts: Math.floor(Date.now() / 1000),
+                  },
+                  consent: {}
+                };
+                provider.interactionFinished(request.raw.req, request.raw.res, result);
+              } else {
+                const cookie = provider.interactionDetails(request.raw.req);
+                const client = provider.Client.find(cookie.params.client_id);
+                reply.view('login', {
+                  error: 'Invalid email password combination',
+                  client,
+                  cookie,
+                  title: 'Log In',
+                  debug: querystring.stringify(cookie.params, ',<br/>', ' = ', {
+                    encodeURIComponent: value => value,
+                  }),
+                  interaction: querystring.stringify(cookie.interaction, ',<br/>', ' = ', {
+                    encodeURIComponent: value => value,
+                  }),
+                });
+              }
             });
         },
         config: {
