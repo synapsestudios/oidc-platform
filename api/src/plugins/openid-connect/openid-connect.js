@@ -82,10 +82,42 @@ exports.register = function (server, options, next) {
     integrity: options.keystores.integrity,
   })
     .then(() => {
+
+      provider.registerGrantType('password', function passwordGrantTypeFactory(providerInstance) {
+        return function * passwordGrantType(next) {
+          const { username, password } = this.oidc.params;
+          const account = yield options.authenticateUser(username, password);
+
+          if (account) {
+            const AccessToken = providerInstance.AccessToken;
+            const at = new AccessToken({
+              accountId: 'foo',
+              clientId: this.oidc.client.clientId,
+              grantId: this.oidc.uuid,
+            });
+
+            const accessToken = yield at.save();
+            const expiresIn = AccessToken.expiresIn;
+
+            this.body = {
+              access_token: accessToken,
+              expires_in: expiresIn,
+              token_type: 'Bearer',
+            };
+          } else {
+            this.body = {
+              error: 'invalid_grant',
+              error_description: 'invalid credentials provided',
+            };
+          }
+
+          yield next;
+        };
+      }, ['username', 'password']);
+
       provider.app.use(cors());
       provider.app.keys = options.cookieKeys;
       provider.app.proxy = true;
-
       server.ext('onRequest', function(request, reply) {
         if (request.path.substring(0, prefix.length) === prefix) {
           provider.callback(request.raw.req, request.raw.res);
@@ -165,34 +197,34 @@ exports.register = function (server, options, next) {
         handler: (request, reply) => {
           options.authenticateUser(request.payload.login, request.payload.password)
             .then(account => {
-              const result = {
-                login: {
-                  account: account.accountId,
-                  acr: 'urn:mace:incommon:iap:bronze',
-                  amr: ['pwd'],
-                  remember: request.payload.remember,
-                  ts: Math.floor(Date.now() / 1000),
-                },
-                consent: {}
-              };
-              provider.interactionFinished(request.raw.req, request.raw.res, result);
-            })
-            .catch(e => {
-              const cookie = provider.interactionDetails(request.raw.req);
-              const client = provider.Client.find(cookie.params.client_id);
-              reply.view('login', {
-                error: 'Invalid email password combination',
-                client,
-                cookie,
-                title: 'Log In',
-                debug: querystring.stringify(cookie.params, ',<br/>', ' = ', {
-                  encodeURIComponent: value => value,
-                }),
-                interaction: querystring.stringify(cookie.interaction, ',<br/>', ' = ', {
-                  encodeURIComponent: value => value,
-                }),
-              });
-
+              if (account) {
+                const result = {
+                  login: {
+                    account: account.accountId,
+                    acr: 'urn:mace:incommon:iap:bronze',
+                    amr: ['pwd'],
+                    remember: request.payload.remember,
+                    ts: Math.floor(Date.now() / 1000),
+                  },
+                  consent: {}
+                };
+                provider.interactionFinished(request.raw.req, request.raw.res, result);
+              } else {
+                const cookie = provider.interactionDetails(request.raw.req);
+                const client = provider.Client.find(cookie.params.client_id);
+                reply.view('login', {
+                  error: 'Invalid email password combination',
+                  client,
+                  cookie,
+                  title: 'Log In',
+                  debug: querystring.stringify(cookie.params, ',<br/>', ' = ', {
+                    encodeURIComponent: value => value,
+                  }),
+                  interaction: querystring.stringify(cookie.interaction, ',<br/>', ' = ', {
+                    encodeURIComponent: value => value,
+                  }),
+                });
+              }
             });
         },
         config: {
