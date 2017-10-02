@@ -120,10 +120,10 @@ Methods for creating users is not defined by the OpenID Connect specification. A
 The OIDC Platform provides an endpoint that will invite your user to create an account. The invite workflow looks like this:
 
 1. Your application POSTs to the invite endpoint with your new users email address (plus some more information needed to get this user back to your application)
-2. The OIDC Platform sends an email to your user with a link that allows them to click into the OIDC Platform
-3. The user follows the link and is prompted to create a password
-4. Once the user's password is created they are redirected the login screen
-5. If the user logs in they will be redirected back to your application (to the redirect_url you specified when POSTing the invite)
+1. The OIDC Platform sends an email to your user with a link that allows them to click into the OIDC Platform
+1. The user follows the link and is prompted to create a password
+1. Once the user's password is created they are redirected the login screen
+1. If the user logs in they will be redirected back to your application (to the redirect_url you specified when POSTing the invite)
 
 You will also be able to trigger reinvites for users that have not yet responded to their original invite.
 
@@ -328,8 +328,8 @@ If this behavior is undesirable for your application see the next two sections.
 If when your user logs out of your app you want to allow them to optionally log out of the OIDC service you can make use of the [OIDC Logout](http://openid.net/specs/openid-connect-session-1_0.html#RPLogout) which is defined in the OpenID Connect Session Management specification. This logout workflow works like this:
 
 1. Your application redirects the user the the OIDC Platform's logout url (with some optional parameters)
-2. The user is asked whether or not they want to log out of the OIDC Platform
-3. After choosing, the user is (optionally) redirected back to your application
+1. The user is asked whether or not they want to log out of the OIDC Platform
+1. After choosing, the user is (optionally) redirected back to your application
 
 #### Example logout url
 
