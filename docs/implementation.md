@@ -259,6 +259,20 @@ Authorization: Basic ${base64Encode(clientId:clientSecret)}
 grant_type=client_credentials&scope=admin
 ```
 
+### Password Grant
+
+The password grant is used when an application is logging in on behalf of the user _without_ using any of the redirect workflows. This method requires your client app to collect the user's username and password and pass that along to the token endpoint which of course has security implecations. You should only use the password grant if the client app is controlled by you or is otherwise trusted. Make sure to use HTTPS to issue this request.
+
+#### Example token request
+
+```
+POST /op/token
+Host: ${providerDomain}
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic ${base64Encode(clientId:clientSecret)}
+grant_type=password&username=${username}&password={password}
+```
+
 ### Refresh Token
 
 TODO
