@@ -1,9 +1,11 @@
 version: '2'
 services:
     mysql:
-        image: mysql:5.7.16
+        build:
+            context: .
+            dockerfile: Dockerfile.mysql
         env_file:
-          - ./common.env
+            - ./common.env
         environment:
             - MYSQL_DATABASE=database
             - MYSQL_ROOT_PASSWORD=root
