@@ -1,4 +1,4 @@
-FROM node:8.1.0
+FROM node:8.6.0
 
 ARG PACKAGE_PATH=
 ARG WORKING_DIR=/src
