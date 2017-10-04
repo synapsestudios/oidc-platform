@@ -9,20 +9,20 @@ module.exports = (options) => ({
         const AccessToken = providerInstance.AccessToken;
         const at = new AccessToken({
           accountId: 'foo',
-          clientId: this.oidc.client.clientId,
-          grantId: this.oidc.uuid,
+          clientId: ctx.oidc.client.clientId,
+          grantId: ctx.oidc.uuid,
         });
 
         const accessToken = await at.save();
         const expiresIn = AccessToken.expiresIn;
 
-        this.body = {
+        ctx.body = {
           access_token: accessToken,
           expires_in: expiresIn,
           token_type: 'Bearer',
         };
       } else {
-        this.body = {
+        ctx.body = {
           error: 'invalid_grant',
           error_description: 'invalid credentials provided',
         };
