@@ -1,9 +1,9 @@
 module.exports = (options) => ({
   params: ['username', 'password'],
   grantTypeFactory: function passwordGrantTypeFactory(providerInstance) {
-    return function * passwordGrantType(next) {
-      const { username, password } = this.oidc.params;
-      const account = yield options.authenticateUser(username, password);
+    return async function passwordGrantType(ctx, next) {
+      const { username, password } = ctx.oidc.params;
+      const account = await options.authenticateUser(username, password);
 
       if (account) {
         const AccessToken = providerInstance.AccessToken;
@@ -13,7 +13,7 @@ module.exports = (options) => ({
           grantId: this.oidc.uuid,
         });
 
-        const accessToken = yield at.save();
+        const accessToken = await at.save();
         const expiresIn = AccessToken.expiresIn;
 
         this.body = {
@@ -28,7 +28,7 @@ module.exports = (options) => ({
         };
       }
 
-      yield next;
+      await next();
     };
   }
 });
