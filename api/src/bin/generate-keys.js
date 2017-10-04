@@ -37,15 +37,10 @@ Promise.all([
     kid: 'enc-ec5-0',
     use: 'enc',
   }),
-  integrityKeystore.generate('oct', 512, {alg: 'HS512'})
 ]).then(function () {
-  fs.open('./keystores.json', 'w', (err, fd) => {
-    var keystores = {
-      certificates : certificateKeystore.toJSON(true),
-      integrity : integrityKeystore.toJSON(true),
-    };
-
+  fs.open('./keystore.json', 'w', (err, fd) => {
+    const keystores = certificateKeystore.toJSON(true);
     fs.write(fd, JSON.stringify(keystores));
-    console.log('Done! Created keytsores.json\n');
+    console.log('Done! Created keytsore.json\n');
   });
 });

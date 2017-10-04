@@ -1,6 +1,6 @@
 var config = require('./config');
 var formatError = require('./src/lib/format-error');
-var fetchKeystores = require('./src/lib/fetch-keystores');
+var fetchKeystore = require('./src/lib/fetch-keystore');
 
 var ioc = require('electrolyte');
 ioc.use(ioc.dir('src/lib'));
@@ -11,14 +11,14 @@ module.exports = Promise.all([
   ioc.create('user/user-oidc-service'),
   ioc.create('oidc-adapter/redis'),
   ioc.create('oidc-adapter/sql'),
-  fetchKeystores(),
+  fetchKeystore(),
 ])
   .then(values => ({
     bookshelf: values[0],
     userService: values[1],
     redisOidcAdapter: values[2],
     sqlOidcAdapter: values[3],
-    keystores: values[4],
+    keystore: values[4],
   }))
   .then(lib => ({
     server: {
@@ -78,7 +78,7 @@ module.exports = Promise.all([
             adapter: function OidcAdapterFactory(name) {
               return (name === 'Client') ? new lib.sqlOidcAdapter(name): new lib.redisOidcAdapter(name);
             },
-            keystores: lib.keystores,
+            keystore: lib.keystore,
           }
         }
       }

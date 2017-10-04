@@ -76,7 +76,7 @@ exports.register = function (server, options, next) {
 
   provider.initialize({
     adapter: options.adapter,
-    keystore: options.keystores.certificates,
+    keystore: options.keystore,
   })
     .then(() => {
       const { grantTypeFactory, params } = passwordGrant(options);
