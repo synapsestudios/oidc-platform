@@ -1,6 +1,6 @@
 'use strict';
 const OidcProvider = require('oidc-provider');
-const cors = require('koa-cors');
+const cors = require('koa2-cors');
 const querystring = require('querystring');
 const path = require('path');
 const fs = require('fs');
@@ -12,7 +12,6 @@ exports.register = function (server, options, next) {
 
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   const provider = new OidcProvider(issuer, {
-    adapter: options.adapter,
     findById: options.findUserById,
     routes: {
       authorization: `${prefix}/auth`,
@@ -72,15 +71,12 @@ exports.register = function (server, options, next) {
     },
     subjectTypes: ['public', 'pairwise'],
     pairwiseSalt: 'da1c442b365b563dfc121f285a11eedee5bbff7110d55c88',
-    interactionUrl: function interactionUrl(interaction) {
-      // this => koa context;
-      return `/interaction/${this.oidc.uuid}`;
-    },
+    interactionUrl: async (ctx, interaction) => `/interaction/${ctx.oidc.uuid}`,
   });
 
   provider.initialize({
-    keystore: options.keystores.certificates,
-    integrity: options.keystores.integrity,
+    adapter: options.adapter,
+    keystore: options.keystore,
   })
     .then(() => {
       const { grantTypeFactory, params } = passwordGrant(options);
@@ -110,8 +106,8 @@ exports.register = function (server, options, next) {
       server.route({
         method: 'GET',
         path: '/interaction/{grant}',
-        handler: (request, reply) => {
-          const cookie = provider.interactionDetails(request.raw.req);
+        handler: async (request, reply) => {
+          const cookie = await provider.interactionDetails(request.raw.req);
           const client = provider.Client.find(cookie.params.client_id);
 
           if (cookie.interaction.error === 'login_required') {
