@@ -381,7 +381,7 @@ module.exports = (
     },
 
     postForgotPasswordForm: function(request, reply) {
-      return userService.findByEmailForOidc(request.payload.email)
+      userService.findByEmailForOidc(request.payload.email)
         .then(user => {
           return user ? userService.createPasswordResetToken(user.accountId): null
         })
@@ -392,7 +392,7 @@ module.exports = (
         })
         .then(emailBody => {
           if (emailBody) {
-            emailService.send({
+            return emailService.send({
               to: request.payload.email,
               subject: 'Reset your password',
               html: emailBody,
@@ -403,6 +403,9 @@ module.exports = (
           reply.view('forgot-password-success', {
             title: 'Forgot Password',
           });
+        })
+        .catch(e => {
+          reply(e);
         });
     },
 
