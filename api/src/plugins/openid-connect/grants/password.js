@@ -6,7 +6,7 @@ module.exports = (options) => ({
       const account = await options.authenticateUser(username, password);
 
       if (account) {
-        const AccessToken = providerInstance.AccessToken;
+        const { AccessToken, IdToken } = providerInstance;
         const at = new AccessToken({
           accountId: 'foo',
           clientId: ctx.oidc.client.clientId,
@@ -16,10 +16,19 @@ module.exports = (options) => ({
         const accessToken = await at.save();
         const expiresIn = AccessToken.expiresIn;
 
+        const token = new IdToken(
+          Object.assign({}, await Promise.resolve(account.claims())),
+          ctx.oidc.client.sectorIdentifier
+        );
+        token.set('at_hash', accessToken);
+
+        const idToken = await token.sign(ctx.oidc.client);
+
         ctx.body = {
           access_token: accessToken,
           expires_in: expiresIn,
           token_type: 'Bearer',
+          id_token: idToken,
         };
       } else {
         ctx.body = {
