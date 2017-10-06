@@ -44,7 +44,7 @@ exports.register = function (server, options, next) {
         layoutPath: './templates/layout',
       });
 
-      addRoutes(server, provider, issuer, options)
+      addRoutes(server, issuer, options)
       server.expose('provider', provider);
 
       next();
