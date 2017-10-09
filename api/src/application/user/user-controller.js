@@ -6,6 +6,19 @@ const uuid = require('uuid');
 const config = require('../../../config');
 const Boom = require('boom');
 const views = require('./user-views');
+const errorMessages = require('./user-error-messages');
+
+// e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
+const expandDotPaths = function(object) {
+  Object.keys(object).forEach(key => {
+    if (key.indexOf('.') > -1) {
+      const value = object[key];
+      delete(object[key]);
+      set(object, key, value);
+    }
+  });
+  return object;
+};
 
 module.exports = (
   userService,
@@ -16,48 +29,6 @@ module.exports = (
   oidcProvider,
   imageService
 ) => {
-  const errorMessages = {
-    email: {
-      'any.required': 'Email address is required',
-      'any.empty': 'Email address is required',
-      'string.email': 'Must be a valid email address',
-    },
-    password: {
-      'any.empty': 'Password is required',
-      'string.min': 'Password must be at least 8 characters',
-    },
-    pass2: {
-      'any.allowOnly': 'Passwords must match'
-    },
-    redirect_uri: {
-      'any.required': 'Redirect URI is required',
-    },
-    client_id: {
-      'any.required': 'Client ID is required'
-    },
-    response_type: {
-      'any.required': 'Response type is required',
-    },
-    scope: {
-      'any.required': 'Scope is required',
-    },
-    token: {
-      'any.required': 'Token is required',
-    },
-    profile: {
-      'string.uri': 'Must be a valid URL',
-    },
-    picture: {
-      'string.uri': 'Must be a valid URL',
-    },
-    website: {
-      'string.uri': 'Must be a valid URL',
-    },
-    birthdate: {
-      'string.isoDate': 'Must be valid date in YYYY-MM-DD format'
-    }
-  };
-
   const handleRegistrationPost = function(request, reply) {
     userService.create(request.payload.email, request.payload.password)
       .then(user => {
@@ -65,7 +36,8 @@ module.exports = (
       })
       .catch(error => {
         // assume email collision and show validation message
-        reply.view('user-registration', views.userRegistration(request));
+        const viewContext = views.userRegistration(request, {email: ['That email address is already in use']});
+        reply.view('user-registration', viewContext);
       });
   };
 
@@ -88,19 +60,6 @@ module.exports = (
     return validationErrorMessages;
   };
 
-  // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
-  const expandDotPaths = function(object) {
-    Object.keys(object).forEach(key => {
-      if (key.indexOf('.') > -1) {
-        const value = object[key];
-        delete(object[key]);
-        set(object, key, value);
-      }
-    });
-    return object;
-  };
-
-
   const self = {
     registerFormHandler: function(request, reply, source, error) {
       request.payload = request.payload || {};
@@ -108,14 +67,8 @@ module.exports = (
       if (!error && request.method === 'post') {
         handleRegistrationPost(request, reply);
       } else {
-        reply.view('user-registration', {
-          title: 'Sign Up',
-          formAction: `/user/register?${querystring.stringify(request.query)}`,
-          returnTo: `${request.query.redirect_uri}?status=cancelled`,
-          error: !!error,
-          validationErrorMessages: getValidationMessages(error),
-          email: request.payload.email || ''
-        });
+        const viewContext = views.userRegistration(request, error);
+        reply.view('user-registration', viewContext);
       }
     },
 
