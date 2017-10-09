@@ -4,7 +4,6 @@ const cors = require('koa2-cors');
 const querystring = require('querystring');
 const path = require('path');
 const fs = require('fs');
-const handlebars = require('handlebars');
 const passwordGrant = require('./grants/password');
 const getConfig = require('./getConfig');
 const addRoutes = require('./addRoutes');
@@ -34,16 +33,7 @@ exports.register = function (server, options, next) {
         }
       });
 
-      server.views({
-        engines: {
-          hbs: handlebars
-        },
-        relativeTo: __dirname,
-        path: 'templates',
-        layout: true,
-        layoutPath: './templates/layout',
-      });
-
+      server.views(options.vision);
       addRoutes(server, issuer, options)
       server.expose('provider', provider);
 
