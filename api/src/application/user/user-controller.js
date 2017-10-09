@@ -5,6 +5,7 @@ const set = require('lodash/set');
 const uuid = require('uuid');
 const config = require('../../../config');
 const Boom = require('boom');
+const views = require('./user-views');
 
 module.exports = (
   userService,
@@ -64,14 +65,7 @@ module.exports = (
       })
       .catch(error => {
         // assume email collision and show validation message
-        reply.view('user-registration', {
-          title: 'Sign Up',
-          formAction: `/user/register?${querystring.stringify(request.query)}`,
-          returnTo: `${request.query.redirect_uri}?status=cancelled`,
-          error: true,
-          validationErrorMessages: {email: ['That email address is already in use']},
-          email: request.payload.email || ''
-        });
+        reply.view('user-registration', views.userRegistration(request));
       });
   };
 
@@ -106,49 +100,6 @@ module.exports = (
     return object;
   };
 
-  const getPasswordResetHandler = (method, title) => {
-    if (method === 'GET') {
-      return (request, reply, source, error) => {
-        const redirectSet = request.query.token != undefined;
-        reply.view('reset-password', {
-          title: title,
-          returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
-          error: !!error,
-          validationErrorMessages: getValidationMessages(error),
-        });
-      };
-    } else if (method === 'POST') {
-      return (request, reply) => {
-        userService.findByPasswordToken(request.query.token)
-        .then(user => {
-          if (user) {
-            return userService.encryptPassword(request.payload.password)
-              .then(password => {
-                const profile = user.get('profile');
-                profile.email_verified = true;
-                return userService.update(user.get('id'), { password, profile });
-              })
-              .then(() => userService.destroyPasswordToken(request.query.token))
-              .then(() => {
-                const base = config('/baseUrl');
-                reply.view(`reset-password-success`, {
-                  title: 'Password Set',
-                  linkUrl: encodeURI(`${base}/op/auth?client_id=${request.query.client_id}&response_type=code id_token token&scope=${request.query.scope}&redirect_uri=${request.query.redirect_uri}&nonce=nonce`),
-                });
-            });
-          } else {
-            const redirectSet = request.query.token != undefined;
-            return reply.view('reset-password', {
-              title: title,
-              returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
-              error: true,
-              validationErrorMessages: { token: ['Token is invalid or expired'] },
-            });
-          }
-        });
-      };
-    }
-  };
 
   const self = {
     registerFormHandler: function(request, reply, source, error) {
@@ -421,13 +372,45 @@ module.exports = (
         .then(() => reply.redirect(request.query.post_logout_redirect_uri))
     },
 
-    getResetPasswordForm: getPasswordResetHandler('GET', 'Reset Password'),
+    getResetPasswordForm: title => (request, reply, source, error) => {
+      const redirectSet = request.query.token != undefined;
+      reply.view('reset-password', {
+        title: title,
+        returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
+        error: !!error,
+        validationErrorMessages: getValidationMessages(error),
+      });
+    },
 
-    postResetPasswordForm: getPasswordResetHandler('POST', 'Reset Password'),
-
-    getAcceptInviteForm: getPasswordResetHandler('GET', 'Set Password'),
-
-    postAcceptInviteForm: getPasswordResetHandler('POST', 'Set Password'),
+    postResetPasswordForm: title => (request, reply) => {
+      userService.findByPasswordToken(request.query.token)
+        .then(user => {
+          if (user) {
+            return userService.encryptPassword(request.payload.password)
+              .then(password => {
+                const profile = user.get('profile');
+                profile.email_verified = true;
+                return userService.update(user.get('id'), { password, profile });
+              })
+              .then(() => userService.destroyPasswordToken(request.query.token))
+              .then(() => {
+                const base = config('/baseUrl');
+                reply.view(`reset-password-success`, {
+                  title: 'Password Set',
+                  linkUrl: encodeURI(`${base}/op/auth?client_id=${request.query.client_id}&response_type=code id_token token&scope=${request.query.scope}&redirect_uri=${request.query.redirect_uri}&nonce=nonce`),
+                });
+              });
+          } else {
+            const redirectSet = request.query.token != undefined;
+            return reply.view('reset-password', {
+              title: title,
+              returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
+              error: true,
+              validationErrorMessages: { token: ['Token is invalid or expired'] },
+            });
+          }
+        });
+    }
   };
 
   return self;

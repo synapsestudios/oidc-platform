@@ -135,10 +135,10 @@ module.exports = (service, controller, userFormData) => {
     {
       method : 'GET',
       path : '/user/reset-password',
-      handler : controller.getResetPasswordForm,
+      handler : controller.getResetPasswordForm('Reset Password'),
       config : {
         validate : {
-          failAction : controller.getResetPasswordForm,
+          failAction : controller.getResetPasswordForm('Reset Password'),
           query : Object.assign({
             token: Joi.string().required(),
             client_id: Joi.string().required(),
@@ -151,7 +151,7 @@ module.exports = (service, controller, userFormData) => {
     {
       method : 'POST',
       path : '/user/reset-password',
-      handler : controller.postResetPasswordForm,
+      handler : controller.postResetPasswordForm('Reset Password'),
       config : {
         validate : {
           payload : {
@@ -164,14 +164,14 @@ module.exports = (service, controller, userFormData) => {
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
           }, queryValidation),
-          failAction : controller.getResetPasswordForm,
+          failAction : controller.getResetPasswordForm('Reset Password'),
         }
       },
     },
     {
       method: 'GET',
       path: '/user/accept-invite',
-      handler: controller.getAcceptInviteForm,
+      handler: controller.getResetPasswordForm('Set Password'),
       config: {
         validate: {
           query: {
@@ -186,20 +186,20 @@ module.exports = (service, controller, userFormData) => {
     {
       method: 'POST',
       path: '/user/accept-invite',
-      handler: controller.postAcceptInviteForm,
+      handler: controller.postResetPasswordForm('Set Password'),
       config: {
         validate: {
           payload : {
             password : Joi.string().min(8).required(),
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
-          }, 
+          },
           query: {
             token: Joi.string().guid().required(),
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
           },
-          failAction: controller.getAcceptInviteForm,
+          failAction: controller.getResetPasswordForm('Set Password'),
         },
       },
     },
