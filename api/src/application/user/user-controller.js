@@ -91,7 +91,12 @@ module.exports = (
       }
 
       const viewContext = views.userProfile(user, request, error);
-      reply.view('user-profile', viewContext);
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'user-profile', viewContext);
+      if (template) {
+        reply(template);
+      } else {
+        reply.view('user-profile', viewContext);
+      }
     },
 
     getForgotPasswordForm: function(request, reply, source, error) {
