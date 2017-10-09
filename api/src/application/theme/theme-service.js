@@ -1,11 +1,8 @@
 const handlebars = require('handlebars');
+const fs = require('fs');
+const { promisify } = require('util');
 
-const layout = `
-<div>
-  Layout
-  <div>{{{content}}}</div>
-</div>
-`
+const layout =
 
 module.exports = bookshelf => ({
   async renderThemedTemplate(clientId, page, context) {
@@ -20,12 +17,23 @@ module.exports = bookshelf => ({
     const template = client.related('theme').related('templates').find(template => template.get('name') === page);
     if (!template) return false;
 
-    // scenario 3, client has theme and template but null layout
+    let layoutTemplate;
+    if (!template.get('layout')) {
+      // scenario 3, client has theme and template but null layout
+      const readFileAsync = promisify(fs.readFile);
+      const code = await readFileAsync('./templates/layout/default.hbs');
+      layoutTemplate = handlebars.compile(code.toString());
+    } else {
+      // scenario 4, client has theme and template and layout
+      layoutTemplate = handlebars.compile(`
+        <div>
+          Layout
+          <div>{{{content}}}</div>
+        </div>
+      `);
+    }
 
-    // scenario 4, client has theme and template and layout
-    const layoutTemplate = handlebars.compile(layout);
     const pageTemplate = handlebars.compile(template.get('code'));
-
     const layoutContext = Object.assign({}, context, { content: pageTemplate(context) });
     return layoutTemplate(layoutContext);
   }
