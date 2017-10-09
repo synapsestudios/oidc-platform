@@ -24,25 +24,33 @@ const expandDotPaths = function(object) {
 module.exports = (
   userService,
   emailService,
-  imageService
+  imageService,
+  themeService
 ) => {
   const self = {
-    registerFormHandler: function(request, reply, source, error) {
+    registerFormHandler: async function(request, reply, source, error) {
       request.payload = request.payload || {};
+      let viewContext;
 
       if (!error && request.method === 'post') {
-        userService.create(request.payload.email, request.payload.password)
-          .then(user => {
-            reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
-          })
-          .catch(error => {
-            // assume email collision and show validation message
-            const viewContext = views.userRegistration(request, {email: ['That email address is already in use']});
-            reply.view('user-registration', viewContext);
-          });
+        try {
+          const user = userService.create(request.payload.email, request.payload.password)
+          reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
+        } catch (error) {
+          // assume email collision and show validation message
+          viewContext = views.userRegistration(request, {email: ['That email address is already in use']});
+        }
       } else {
-        const viewContext = views.userRegistration(request, error);
-        reply.view('user-registration', viewContext);
+        viewContext = views.userRegistration(request, error);
+      }
+
+      if (viewContext) {
+        const template = await themeService.renderThemedTemplate(request.query.client_id, 'user-registration', viewContext);
+        if (template) {
+          reply(template);
+        } else {
+          reply.view('user-registration', viewContext);
+        }
       }
     },
 
@@ -168,4 +176,5 @@ module.exports['@require'] = [
   'user/user-service',
   'email/email-service',
   'image/image-service',
+  'theme/theme-service',
 ];
