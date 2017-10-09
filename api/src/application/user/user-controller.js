@@ -99,12 +99,17 @@ module.exports = (
       }
     },
 
-    getForgotPasswordForm: function(request, reply, source, error) {
+    getForgotPasswordForm: async function(request, reply, source, error) {
       const viewContext = views.forgotPassword(request, error);
-      reply.view('forgot-password', viewContext);
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password', viewContext);
+      if (template) {
+        reply(template);
+      } else {
+        reply.view('forgot-password', viewContext);
+      }
     },
 
-    postForgotPasswordForm: function(request, reply) {
+    postForgotPasswordForm: async function(request, reply) {
       userService.findByEmailForOidc(request.payload.email)
         .then(user => {
           return user ? userService.createPasswordResetToken(user.accountId): null
@@ -123,10 +128,14 @@ module.exports = (
             });
           }
         })
-        .then(() => {
-          reply.view('forgot-password-success', {
-            title: 'Forgot Password',
-          });
+        .then(async () => {
+          const viewContext = { title: 'Forgot Password' };
+          const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
+          if (template) {
+            reply(template);
+          } else {
+            reply.view('forgot-password-success', viewContext);
+          }
         })
         .catch(e => {
           reply(e);
@@ -145,31 +154,43 @@ module.exports = (
         .then(() => reply.redirect(request.query.post_logout_redirect_uri))
     },
 
-    getResetPasswordForm: title => (request, reply, source, error) => {
+    getResetPasswordForm: title => async (request, reply, source, error) => {
       const viewContext = views.resetPassword(request, error);
-      reply.view('reset-password', redirectSet);
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password', viewContext);
+      if (template) {
+        reply(template);
+      } else {
+        reply.view('reset-password', redirectSet);
+      }
     },
 
-    postResetPasswordForm: title => (request, reply) => {
-      userService.findByPasswordToken(request.query.token)
-        .then(user => {
-          if (user) {
-            return userService.encryptPassword(request.payload.password)
-              .then(password => {
-                const profile = user.get('profile');
-                profile.email_verified = true;
-                return userService.update(user.get('id'), { password, profile });
-              })
-              .then(() => userService.destroyPasswordToken(request.query.token))
-              .then(() => {
-                const viewContext = views.resetPasswordSuccess(request);
-                reply.view('reset-password-success', viewContext);
-              });
-          } else {
-            const viewContext = views.resetPassword(request, { token: ['Token is invalid or expired'] });
-            reply.view('reset-password', viewContext);
-          }
-        });
+    postResetPasswordForm: title => async (request, reply) => {
+      const user = await userService.findByPasswordToken(request.query.token)
+
+      if (user) {
+        const password = userService.encryptPassword(request.payload.password)
+        const profile = user.get('profile');
+        profile.email_verified = true;
+        await userService.update(user.get('id'), { password, profile });
+        await userService.destroyPasswordToken(request.query.token);
+
+        const viewContext = views.resetPasswordSuccess(request);
+        const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
+        if (template) {
+          reply(template);
+        } else {
+          reply.view('reset-password-success', viewContext);
+        }
+      } else {
+        const viewContext = views.resetPassword(request, { token: ['Token is invalid or expired'] });
+        const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password', viewContext);
+
+        if (template) {
+          reply(template);
+        } else {
+          reply.view('reset-password', viewContext);
+        }
+      }
     }
   };
 
