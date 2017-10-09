@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const Readable = require('stream').Readable;
+const userFormData = require('./user-form-data');
 
 const queryValidation = {
   client_id : Joi.string().required(),
@@ -9,7 +10,7 @@ const queryValidation = {
   nonce : Joi.string().optional(),
 };
 
-module.exports = (service, controller, userFormData) => {
+module.exports = (service, controller) => {
   return [
     {
       method : 'GET',
@@ -222,5 +223,4 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
   'user/user-controller',
-  'user/user-form-data',
 ];
