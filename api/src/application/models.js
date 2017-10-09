@@ -11,4 +11,5 @@ module.exports = [
   bookshelf => ({name: 'theme', model: require('./theme/theme-model')(bookshelf)}),
   bookshelf => ({name: 'user', model: require('./user/user-model')(bookshelf)}),
   bookshelf => ({name: 'user_password_reset_token', model: require('./user/user-password-reset-token-model')(bookshelf)}),
+  bookshelf => ({name: 'layout', model: require('./theme/layout-model')(bookshelf)}),
 ]

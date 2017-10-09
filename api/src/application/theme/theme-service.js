@@ -2,13 +2,11 @@ const handlebars = require('handlebars');
 const fs = require('fs');
 const { promisify } = require('util');
 
-const layout =
-
 module.exports = bookshelf => ({
   async renderThemedTemplate(clientId, page, context) {
     const client = await bookshelf.model('client')
       .where({client_id: clientId})
-      .fetch({ withRelated: ['theme.templates'] });
+      .fetch({ withRelated: ['theme.templates.layout'] });
 
     // scenario 1, client has null theme
     if (!client.get('theme_id')) return false;
@@ -18,19 +16,14 @@ module.exports = bookshelf => ({
     if (!template) return false;
 
     let layoutTemplate;
-    if (!template.get('layout')) {
+    if (!template.get('layout_id')) {
       // scenario 3, client has theme and template but null layout
       const readFileAsync = promisify(fs.readFile);
       const code = await readFileAsync('./templates/layout/default.hbs');
       layoutTemplate = handlebars.compile(code.toString());
     } else {
       // scenario 4, client has theme and template and layout
-      layoutTemplate = handlebars.compile(`
-        <div>
-          Layout
-          <div>{{{content}}}</div>
-        </div>
-      `);
+      layoutTemplate = handlebars.compile(template.related('layout').get('code'));
     }
 
     const pageTemplate = handlebars.compile(template.get('code'));
