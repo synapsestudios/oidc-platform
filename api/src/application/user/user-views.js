@@ -29,7 +29,7 @@ module.exports = {
     formAction: `/user/register?${querystring.stringify(request.query)}`,
     returnTo: `${request.query.redirect_uri}?status=cancelled`,
     error: !!error,
-    validationErrorMessages: error.isBoom ? getValidationMessages(error) : error,
+    validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     email: request.payload.email || ''
   }),
   userProfile: (user, request, error) => {
@@ -211,7 +211,7 @@ module.exports = {
       title: title,
       returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
       error: !!error,
-      validationErrorMessages: error.isBoom ? getValidationMessages(error) : error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     };
   },
   resetPasswordSuccess : request => {
