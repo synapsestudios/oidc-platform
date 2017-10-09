@@ -41,6 +41,6 @@ module.exports = bookshelf => ({
   },
 
   theme() {
-    return this.belongsTo('theme')
+    return this.belongsTo('theme', 'theme_id')
   }
 });
