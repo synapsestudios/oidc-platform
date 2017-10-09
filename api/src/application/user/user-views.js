@@ -197,5 +197,33 @@ module.exports = {
       ]
 
     };
+  },
+  forgotPassword : (request, error) => ({
+    title: 'Forgot Password',
+    formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
+    returnTo: `${request.query.redirect_uri}?status=cancelled`,
+    error: !!error,
+    validationErrorMessages: getValidationMessages(error),
+  }),
+  resetPassword : (request, error) => {
+    const redirectSet = request.query.token != undefined;
+    return {
+      title: title,
+      returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
+      error: !!error,
+      validationErrorMessages: error.isBoom ? getValidationMessages(error) : error,
+    };
+  },
+  resetPasswordSuccess : request => {
+    return {
+      title: 'Password Set',
+      linkUrl: `/op/auth?${querystring.stringify({
+        client_id: request.query.client_id,
+        response_type: 'code id_token token',
+        scope: request.query.scope,
+        redirect_uri: request.query.redirect_uri,
+        nonce: 'nonce',
+      })}`
+    };
   }
 };

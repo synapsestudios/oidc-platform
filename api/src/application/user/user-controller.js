@@ -24,30 +24,8 @@ const expandDotPaths = function(object) {
 module.exports = (
   userService,
   emailService,
-  renderTemplate,
-  clientService,
-  oidcProvider,
   imageService
 ) => {
-  const getValidationMessages = function(error) {
-    var validationErrorMessages = {};
-
-    if (error) {
-      error = formatError(error);
-      error.output.payload.validationErrors.forEach(errorObj => {
-        validationErrorMessages[errorObj.key] = validationErrorMessages[errorObj.key] || [];
-
-        if (errorMessages[errorObj.key] && errorMessages[errorObj.key][errorObj.type]) {
-          validationErrorMessages[errorObj.key].push(errorMessages[errorObj.key][errorObj.type]);
-        } else if (errorObj.message) {
-          validationErrorMessages[errorObj.key].push(errorObj.message);
-        }
-      });
-    }
-
-    return validationErrorMessages;
-  };
-
   const self = {
     registerFormHandler: function(request, reply, source, error) {
       request.payload = request.payload || {};
@@ -109,13 +87,8 @@ module.exports = (
     },
 
     getForgotPasswordForm: function(request, reply, source, error) {
-      reply.view('forgot-password', {
-        title: 'Forgot Password',
-        formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
-        returnTo: `${request.query.redirect_uri}?status=cancelled`,
-        error: !!error,
-        validationErrorMessages: getValidationMessages(error),
-      });
+      const viewContext = views.forgotPassword(request, error);
+      reply.view('forgot-password', viewContext);
     },
 
     postForgotPasswordForm: function(request, reply) {
@@ -160,13 +133,8 @@ module.exports = (
     },
 
     getResetPasswordForm: title => (request, reply, source, error) => {
-      const redirectSet = request.query.token != undefined;
-      reply.view('reset-password', {
-        title: title,
-        returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
-        error: !!error,
-        validationErrorMessages: getValidationMessages(error),
-      });
+      const viewContext = views.resetPassword(request, error);
+      reply.view('reset-password', redirectSet);
     },
 
     postResetPasswordForm: title => (request, reply) => {
@@ -181,20 +149,12 @@ module.exports = (
               })
               .then(() => userService.destroyPasswordToken(request.query.token))
               .then(() => {
-                const base = config('/baseUrl');
-                reply.view(`reset-password-success`, {
-                  title: 'Password Set',
-                  linkUrl: encodeURI(`${base}/op/auth?client_id=${request.query.client_id}&response_type=code id_token token&scope=${request.query.scope}&redirect_uri=${request.query.redirect_uri}&nonce=nonce`),
-                });
+                const viewContext = views.resetPasswordSuccess(request);
+                reply.view('reset-password-success', viewContext);
               });
           } else {
-            const redirectSet = request.query.token != undefined;
-            return reply.view('reset-password', {
-              title: title,
-              returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
-              error: true,
-              validationErrorMessages: { token: ['Token is invalid or expired'] },
-            });
+            const viewContext = views.resetPassword(request, { token: ['Token is invalid or expired'] });
+            reply.view('reset-password', viewContext);
           }
         });
     }
@@ -207,8 +167,5 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
   'email/email-service',
-  'render-template',
-  'client/client-service',
-  'oidc-provider',
   'image/image-service',
 ];
