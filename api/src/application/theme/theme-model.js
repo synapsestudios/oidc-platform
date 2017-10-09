@@ -1,7 +1,4 @@
-module.exports = (bookshelf) => bookshelf.model('theme', {
+module.exports = bookshelf => ({
   tableName: 'SIP_theme',
   idAttribute: false,
 });
-
-module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];

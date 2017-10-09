@@ -1,4 +1,4 @@
-module.exports = (bookshelf) => bookshelf.model('client_grant', {
+module.exports = (bookshelf) => ({
   tableName: 'SIP_client_grant',
   idAttribute: false,
 
@@ -9,6 +9,3 @@ module.exports = (bookshelf) => bookshelf.model('client_grant', {
   },
 
 });
-
-module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];

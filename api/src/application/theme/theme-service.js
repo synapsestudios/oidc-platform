@@ -44,6 +44,4 @@ module.exports = ThemeService;
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'bookshelf',
-
-  'theme/theme-model',
 ];

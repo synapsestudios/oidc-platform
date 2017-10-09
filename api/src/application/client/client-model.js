@@ -2,7 +2,8 @@
  * Client field names are specified by the openid connect spec:
  * http://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata
  */
-module.exports = (bookshelf) => bookshelf.model('client', {
+
+module.exports = bookshelf => ({
   tableName: 'SIP_client',
   idAttribute: 'client_id',
 
@@ -43,6 +44,3 @@ module.exports = (bookshelf) => bookshelf.model('client', {
     return this.belongsTo('theme')
   }
 });
-
-module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];

@@ -1,4 +1,4 @@
-module.exports = (bookshelf) => bookshelf.model('client_request_uri', {
+module.exports = (bookshelf) => ({
   tableName: 'SIP_client_request_uri',
   idAttribute: false,
 
@@ -8,6 +8,3 @@ module.exports = (bookshelf) => bookshelf.model('client_request_uri', {
     return options.strictOidc ? serialized.uri : serialized;
   },
 });
-
-module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];

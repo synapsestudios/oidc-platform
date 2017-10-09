@@ -1,4 +1,4 @@
-module.exports = (bookshelf) => bookshelf.model('client_default_acr_value', {
+module.exports = (bookshelf) => ({
   tableName: 'SIP_client_default_acr_value',
   idAttribute: false,
 
@@ -8,6 +8,3 @@ module.exports = (bookshelf) => bookshelf.model('client_default_acr_value', {
     return options.strictOidc ? serialized.value : serialized;
   },
 });
-
-module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];
