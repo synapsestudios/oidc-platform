@@ -8,10 +8,15 @@ module.exports = (server, issuer, options) => {
     handler: async (request, reply) => {
       const provider = server.plugins['open-id-connect'].provider;
       const cookie = await provider.interactionDetails(request.raw.req);
-      const client = provider.Client.find(cookie.params.client_id);
+      const client = await provider.Client.find(cookie.params.client_id);
 
       if (cookie.interaction.error === 'login_required') {
-        reply.view('login', views.login(cookie, client));
+        const template = await options.getTemplate(client.clientId, 'login', views.login(cookie, client));
+        if (template) {
+          reply(template);
+        } else {
+          reply.view('login', views.login(cookie, client));
+        }
       } else {
         reply.view('interaction', views.interaction(cookie, client));
       }
@@ -57,7 +62,7 @@ module.exports = (server, issuer, options) => {
         provider.interactionFinished(request.raw.req, request.raw.res, result);
       } else {
         const cookie = await provider.interactionDetails(request.raw.req);
-        const client = provider.Client.find(cookie.params.client_id);
+        const client = await provider.Client.find(cookie.params.client_id);
         reply.view('login', views.login(cookie, client, 'Invalid email password combination'));
       }
     },

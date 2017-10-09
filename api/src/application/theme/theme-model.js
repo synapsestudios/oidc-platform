@@ -1,5 +1,5 @@
-module.exports = (bookshelf) => bookshelf.model('template', {
-  tableName: 'SIP_template',
+module.exports = (bookshelf) => bookshelf.model('theme', {
+  tableName: 'SIP_theme',
   idAttribute: false,
 });
 

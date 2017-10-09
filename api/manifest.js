@@ -11,6 +11,7 @@ module.exports = Promise.all([
   ioc.create('user/user-oidc-service'),
   ioc.create('oidc-adapter/redis'),
   ioc.create('oidc-adapter/sql'),
+  ioc.create('theme/theme-service'),
   fetchKeystore(),
 ])
   .then(values => ({
@@ -18,7 +19,8 @@ module.exports = Promise.all([
     userService: values[1],
     redisOidcAdapter: values[2],
     sqlOidcAdapter: values[3],
-    keystore: values[4],
+    themeService: values[4],
+    keystore: values[5],
   }))
   .then(lib => ({
     server: {
@@ -71,6 +73,7 @@ module.exports = Promise.all([
           register: './plugins/openid-connect/openid-connect',
           options: {
             prefix: 'op',
+            getTemplate: lib.themeService.renderThemedTemplate,
             authenticateUser: lib.userService.authenticate,
             findUserById: lib.userService.findByIdForOidc,
             cookieKeys: config('/oidc/cookieKeys'),
