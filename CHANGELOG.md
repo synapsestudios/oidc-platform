@@ -1,9 +1,9 @@
 ## [v2.0.0](https://github.com/synapsestudios/oidc-platform/compare/v1.4.0...v2.0.0) - 2017-10-10
 ### Changed
-- Updated to to [node-oidc](https://github.com/panva/node-oidc-provider) v2.3.2
+- [#119](https://github.com/synapsestudios/oidc-platform/issues/119) Updated to to [node-oidc](https://github.com/panva/node-oidc-provider) v2.3.2
 ### Added
-- Theming. See [theming guide](docs/theming.md) for details
-- Password Grant now returns an id token as well as an access token
+- [#115](https://github.com/synapsestudios/oidc-platform/issues/115) Theming. See [theming guide](docs/theming.md) for details
+- [#131](https://github.com/synapsestudios/oidc-platform/issues/131) Password Grant now returns an id token as well as an access token
 
 ## [v1.4.0](https://github.com/synapsestudios/oidc-platform/compare/v1.3.1...v1.4.0) - 2017-10-3
 ### Added
