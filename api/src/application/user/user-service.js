@@ -34,30 +34,29 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return model.fetchAll();
     },
 
-    sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration, template) {
-      return self.createPasswordResetToken(user.get('id'), hoursTillExpiration).then(token => {
-        const base = config('/baseUrl');
-        const url = encodeURI(`${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${redirect_uri}&scope=${scope}`);
-        if (template) {
-          return new Promise((resolve, reject) => {
-            const emailTemplate = handlebars.compile(template);
-            resolve(emailTemplate({
-              url: url.replace(' ', '%20'),
-              appName: appName
-            }));
-          });
-        } else {
-          return renderTemplate('email/invite', {
-            url: url.replace(' ', '%20'),
-            appName: appName
-          });
-        }
-      }).then(emailBody => {
-        return emailService.send({
-          to: user.get('email'),
-          subject: `${appName} Invitation`,
-          html: emailBody,
+    async sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration, template) {
+      const token = self.createPasswordResetToken(user.get('id'), hoursTillExpiration);
+
+      const base = config('/baseUrl');
+      const url = encodeURI(`${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${redirect_uri}&scope=${scope}`);
+      let emailBody;
+      if (template) {
+        const emailTemplate = handlebars.compile(template);
+        emailBody = emailTemplate({
+          url: url.replace(' ', '%20'),
+          appName: appName,
         });
+      } else {
+        emailBody = await renderTemplate('email/invite', {
+          url: url.replace(' ', '%20'),
+          appName: appName
+        });
+      }
+
+      return await emailService.send({
+        to: user.get('email'),
+        subject: `${appName} Invitation`,
+        html: emailBody,
       });
     },
 
