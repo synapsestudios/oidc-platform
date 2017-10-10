@@ -41,6 +41,6 @@ Promise.all([
   fs.open('./keystore.json', 'w', (err, fd) => {
     const keystores = certificateKeystore.toJSON(true);
     fs.write(fd, JSON.stringify(keystores));
-    console.log('Done! Created keytsore.json\n');
+    console.log('Done! Created keystore.json\n');
   });
 });
