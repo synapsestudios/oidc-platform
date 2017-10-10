@@ -2,6 +2,20 @@ const handlebars = require('handlebars');
 const fs = require('fs');
 const { promisify } = require('util');
 
+const defaultLayouts = {
+  'end_session': 'default.hbs',
+  'forgot-password-success': 'default.hbs',
+  'forgot-password': 'default.hbs',
+  'interaction': 'default.hbs',
+  'login': 'default.hbs',
+  'reset-password-success': 'default.hbs',
+  'reset-password': 'default.hbs',
+  'user-profile': 'default.hbs',
+  'user-registration': 'default.hbs',
+  'forgot-password-email': 'email.hbs',
+  'invite-email': 'email.hbs',
+}
+
 module.exports = bookshelf => ({
   async renderThemedTemplate(clientId, page, context) {
     const client = await bookshelf.model('client')
@@ -19,7 +33,8 @@ module.exports = bookshelf => ({
     if (!template.get('layout_id')) {
       // scenario 3, client has theme and template but null layout
       const readFileAsync = promisify(fs.readFile);
-      const code = await readFileAsync('./templates/layout/default.hbs');
+      console.log(defaultLayouts[page]);
+      const code = await readFileAsync(`./templates/layout/${defaultLayouts[page]}`);
       layoutTemplate = handlebars.compile(code.toString());
     } else {
       // scenario 4, client has theme and template and layout
