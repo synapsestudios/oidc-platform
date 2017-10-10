@@ -60,5 +60,6 @@ module.exports = options => {
     subjectTypes: ['public', 'pairwise'],
     pairwiseSalt: 'da1c442b365b563dfc121f285a11eedee5bbff7110d55c88',
     interactionUrl: async (ctx, interaction) => `/interaction/${ctx.oidc.uuid}`,
+    scopes: ['admin'],
   }
 }
