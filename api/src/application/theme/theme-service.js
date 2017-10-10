@@ -33,7 +33,6 @@ module.exports = bookshelf => ({
     if (!template.get('layout_id')) {
       // scenario 3, client has theme and template but null layout
       const readFileAsync = promisify(fs.readFile);
-      console.log(defaultLayouts[page]);
       const code = await readFileAsync(`./templates/layout/${defaultLayouts[page]}`);
       layoutTemplate = handlebars.compile(code.toString());
     } else {
