@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3({apiVersion: '2006-03-01'});
-const defaultKeystores = require('../../keystores');
+const defaultKeystore = require('../../keystore');
 
 module.exports = function() {
   return new Promise((resolve, reject) => {
@@ -19,7 +19,7 @@ module.exports = function() {
         }
       });
     } else {
-      resolve(defaultKeystores);
+      resolve(defaultKeystore);
     }
   });
 };

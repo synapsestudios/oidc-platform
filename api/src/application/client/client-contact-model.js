@@ -1,4 +1,4 @@
-module.exports = (bookshelf) => bookshelf.model('client_contact', {
+module.exports = (bookshelf) => ({
   tableName: 'SIP_client_contact',
   idAttribute: false,
 
@@ -8,6 +8,3 @@ module.exports = (bookshelf) => bookshelf.model('client_contact', {
     return options.strictOidc ? serialized.email : serialized;
   },
 });
-
-module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];

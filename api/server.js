@@ -34,19 +34,6 @@ manifestPromise.then(manifest => {
       layout: 'default',
     });
 
-    // Register models
-    ioc.create('client/client-contact-model');
-    ioc.create('client/client-default-acr-value-model');
-    ioc.create('client/client-grant-model');
-    ioc.create('client/client-model');
-    ioc.create('client/client-post-logout-redirect-uri-model');
-    ioc.create('client/client-redirect-uri-model');
-    ioc.create('client/client-request-uri-model');
-    ioc.create('client/client-response-type-model');
-    ioc.create('user/user-model');
-    ioc.create('user/user-password-reset-token-model');
-    ioc.create('templates/template-model');
-
     // Register routes
     return Promise.all([
       ioc.create('api/api-routes'),
