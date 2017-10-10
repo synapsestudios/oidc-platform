@@ -4,8 +4,9 @@ const config = require('../../../config');
 const uuid = require('uuid');
 const handlebars = require('handlebars');
 const querystring = require('querystring');
+const userViews = require('./user-views');
 
-module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisAdapter) => {
+module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisAdapter, themeService) => {
   var self = {
     redisAdapter: new RedisAdapter('Session'),
 
@@ -34,30 +35,28 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return model.fetchAll();
     },
 
-    sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration, template) {
-      return self.createPasswordResetToken(user.get('id'), hoursTillExpiration).then(token => {
-        const base = config('/baseUrl');
-        const url = encodeURI(`${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${redirect_uri}&scope=${scope}`);
-        if (template) {
-          return new Promise((resolve, reject) => {
-            const emailTemplate = handlebars.compile(template);
-            resolve(emailTemplate({
-              url: url.replace(' ', '%20'),
-              appName: appName
-            }));
-          });
-        } else {
-          return renderTemplate('email/invite', {
-            url: url.replace(' ', '%20'),
-            appName: appName
+    async sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration, templateOverride) {
+      const token = await self.createPasswordResetToken(user.get('id'), hoursTillExpiration);
+      const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), token, clientId, redirect_uri, scope);
+      let emailBody;
+
+      if (templateOverride) {
+        const emailTemplate = handlebars.compile(templateOverride);
+        emailBody = emailTemplate(viewContext);
+      } else {
+        emailBody = await themeService.renderThemedTemplate(clientId, 'invite-email', viewContext);
+
+        if (!emailBody) {
+          emailBody = await renderTemplate('invite-email', viewContext, {
+            layout: 'email',
           });
         }
-      }).then(emailBody => {
-        return emailService.send({
-          to: user.get('email'),
-          subject: `${appName} Invitation`,
-          html: emailBody,
-        });
+      }
+
+      return await emailService.send({
+        to: user.get('email'),
+        subject: `${appName} Invitation`,
+        html: emailBody,
       });
     },
 
@@ -171,32 +170,26 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return self.redisAdapter.destroy(sessionId);
     },
 
-    sendForgotPasswordEmail(query, token) {
+    async sendForgotPasswordEmail(email, query, token) {
       const base = config('/baseUrl');
-      const prevQuery = querystring.stringify(query);
-
-      return renderTemplate('email/forgot-password', {
-        url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
+      const newQuery = querystring.stringify(Object.assign({}, query, { token: token.get('token') }));
+      let template = await themeService.renderThemedTemplate(query.client_id, 'forgot-password-email', {
+        url: `${base}/user/reset-password?${newQuery}`
       });
 
-      // return clientService.getResetPasswordTemplate(query.client_id)
-      //   .then(templateRecord => {
-      //     if (templateRecord) {
-      //       const template = templateRecord.get('template');
+      if (!template) {
+        template = await renderTemplate('forgot-password-email', {
+          url: `${base}/user/reset-password?${newQuery}`,
+        }, {
+          layout: 'email',
+        });
+      }
 
-      //       return new Promise((resolve, reject) => {
-      //         const emailTemplate = handlebars.compile(template);
-
-      //         resolve(emailTemplate({
-      //           url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
-      //         }));
-      //       });
-      //     } else {
-      //       return renderTemplate('email/forgot-password', {
-      //         url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
-      //       });
-      //     }
-      //   });
+      emailService.send({
+        to: email,
+        subject: 'Reset your password',
+        html: template,
+      });
     },
   };
 
@@ -210,4 +203,5 @@ module.exports['@require'] = [
   'client/client-service',
   'render-template',
   'oidc-adapter/redis',
+  'theme/theme-service',
 ];
