@@ -116,16 +116,7 @@ module.exports = (
         })
         .then(token => {
           if (token) {
-            return userService.sendForgotPasswordEmail(request.query, token);
-          }
-        })
-        .then(emailBody => {
-          if (emailBody) {
-            return emailService.send({
-              to: request.payload.email,
-              subject: 'Reset your password',
-              html: emailBody,
-            });
+            return userService.sendForgotPasswordEmail(request.payload.email, request.query, token);
           }
         })
         .then(async () => {
