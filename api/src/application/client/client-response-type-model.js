@@ -1,4 +1,4 @@
-module.exports = (bookshelf) => bookshelf.model('client_response_type', {
+module.exports = (bookshelf) => ({
   tableName: 'SIP_client_response_type',
   idAttribute: false,
 
@@ -8,6 +8,3 @@ module.exports = (bookshelf) => bookshelf.model('client_response_type', {
     return options.strictOidc ? serialized.value : serialized;
   },
 });
-
-module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];

@@ -5,382 +5,111 @@ const set = require('lodash/set');
 const uuid = require('uuid');
 const config = require('../../../config');
 const Boom = require('boom');
+const views = require('./user-views');
+const errorMessages = require('./user-error-messages');
+const userFormData = require('./user-form-data');
+
+// e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
+const expandDotPaths = function(object) {
+  Object.keys(object).forEach(key => {
+    if (key.indexOf('.') > -1) {
+      const value = object[key];
+      delete(object[key]);
+      set(object, key, value);
+    }
+  });
+  return object;
+};
 
 module.exports = (
   userService,
   emailService,
-  renderTemplate,
-  clientService,
-  userFormData,
-  oidcProvider,
-  imageService
+  imageService,
+  themeService
 ) => {
-  const errorMessages = {
-    email: {
-      'any.required': 'Email address is required',
-      'any.empty': 'Email address is required',
-      'string.email': 'Must be a valid email address',
-    },
-    password: {
-      'any.empty': 'Password is required',
-      'string.min': 'Password must be at least 8 characters',
-    },
-    pass2: {
-      'any.allowOnly': 'Passwords must match'
-    },
-    redirect_uri: {
-      'any.required': 'Redirect URI is required',
-    },
-    client_id: {
-      'any.required': 'Client ID is required'
-    },
-    response_type: {
-      'any.required': 'Response type is required',
-    },
-    scope: {
-      'any.required': 'Scope is required',
-    },
-    token: {
-      'any.required': 'Token is required',
-    },
-    profile: {
-      'string.uri': 'Must be a valid URL',
-    },
-    picture: {
-      'string.uri': 'Must be a valid URL',
-    },
-    website: {
-      'string.uri': 'Must be a valid URL',
-    },
-    birthdate: {
-      'string.isoDate': 'Must be valid date in YYYY-MM-DD format'
-    }
-  };
-
-  const handleRegistrationPost = function(request, reply) {
-    userService.create(request.payload.email, request.payload.password)
-      .then(user => {
-        reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
-      })
-      .catch(error => {
-        // assume email collision and show validation message
-        reply.view('user-registration', {
-          title: 'Sign Up',
-          formAction: `/user/register?${querystring.stringify(request.query)}`,
-          returnTo: `${request.query.redirect_uri}?status=cancelled`,
-          error: true,
-          validationErrorMessages: {email: ['That email address is already in use']},
-          email: request.payload.email || ''
-        });
-      });
-  };
-
-  const getValidationMessages = function(error) {
-    var validationErrorMessages = {};
-
-    if (error) {
-      error = formatError(error);
-      error.output.payload.validationErrors.forEach(errorObj => {
-        validationErrorMessages[errorObj.key] = validationErrorMessages[errorObj.key] || [];
-
-        if (errorMessages[errorObj.key] && errorMessages[errorObj.key][errorObj.type]) {
-          validationErrorMessages[errorObj.key].push(errorMessages[errorObj.key][errorObj.type]);
-        } else if (errorObj.message) {
-          validationErrorMessages[errorObj.key].push(errorObj.message);
-        }
-      });
-    }
-
-    return validationErrorMessages;
-  };
-
-  // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
-  const expandDotPaths = function(object) {
-    Object.keys(object).forEach(key => {
-      if (key.indexOf('.') > -1) {
-        const value = object[key];
-        delete(object[key]);
-        set(object, key, value);
-      }
-    });
-    return object;
-  };
-
-  const getPasswordResetHandler = (method, title) => {
-    if (method === 'GET') {
-      return (request, reply, source, error) => {
-        const redirectSet = request.query.token != undefined;
-        reply.view('reset-password', {
-          title: title,
-          returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
-          error: !!error,
-          validationErrorMessages: getValidationMessages(error),
-        });
-      };
-    } else if (method === 'POST') {
-      return (request, reply) => {
-        userService.findByPasswordToken(request.query.token)
-        .then(user => {
-          if (user) {
-            return userService.encryptPassword(request.payload.password)
-              .then(password => {
-                const profile = user.get('profile');
-                profile.email_verified = true;
-                return userService.update(user.get('id'), { password, profile });
-              })
-              .then(() => userService.destroyPasswordToken(request.query.token))
-              .then(() => {
-                const base = config('/baseUrl');
-                reply.view(`reset-password-success`, {
-                  title: 'Password Set',
-                  linkUrl: encodeURI(`${base}/op/auth?client_id=${request.query.client_id}&response_type=code id_token token&scope=${request.query.scope}&redirect_uri=${request.query.redirect_uri}&nonce=nonce`),
-                });
-            });
-          } else {
-            const redirectSet = request.query.token != undefined;
-            return reply.view('reset-password', {
-              title: title,
-              returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
-              error: true,
-              validationErrorMessages: { token: ['Token is invalid or expired'] },
-            });
-          }
-        });
-      };
-    }
-  };
-
   const self = {
-    registerFormHandler: function(request, reply, source, error) {
+    registerFormHandler: async function(request, reply, source, error) {
       request.payload = request.payload || {};
+      let viewContext;
 
       if (!error && request.method === 'post') {
-        handleRegistrationPost(request, reply);
+        try {
+          const user = userService.create(request.payload.email, request.payload.password)
+          reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
+        } catch (error) {
+          // assume email collision and show validation message
+          viewContext = views.userRegistration(request, {email: ['That email address is already in use']});
+        }
       } else {
-        reply.view('user-registration', {
-          title: 'Sign Up',
-          formAction: `/user/register?${querystring.stringify(request.query)}`,
-          returnTo: `${request.query.redirect_uri}?status=cancelled`,
-          error: !!error,
-          validationErrorMessages: getValidationMessages(error),
-          email: request.payload.email || ''
-        });
+        viewContext = views.userRegistration(request, error);
+      }
+
+      if (viewContext) {
+        const template = await themeService.renderThemedTemplate(request.query.client_id, 'user-registration', viewContext);
+        if (template) {
+          reply(template);
+        } else {
+          reply.view('user-registration', viewContext);
+        }
       }
     },
 
-    profileFormHandler: function(request, reply, source, error) {
+    profileFormHandler: async function(request, reply, source, error) {
       const accountId = request.auth.credentials.accountId;
-      userService.findById(accountId).then(user => {
-        if (!user) {
-          return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
+      const user = await userService.findById(accountId);
+
+      if (!user) {
+        return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
+      }
+
+      let validationErrorMessages = {};
+      if (!error && request.method === 'post') {
+        let profile = user.get('profile');
+        const payload = expandDotPaths(request.payload);
+
+        const oldPicture = profile.picture;
+        const pictureMIME = request.payload.picture.hapi.headers['content-type'];
+
+        if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
+          const uuid = uuid();
+          const bucket = uuid.substring(0, 2);
+          const filename = await imageService.uploadImageStream(request.payload.picture, `pictures/${bucket}/${filename}`);
+
+          profile = Object.assign(profile, payload, { picture: filename });
+        } else {
+          delete request.payload.picture;
+          profile = Object.assign(profile, payload);
         }
 
-        let validationErrorMessages = {};
-        if (!error && request.method === 'post') {
-          const profile = user.get('profile');
-          const payload = expandDotPaths(request.payload);
+        await userService.update(user.get('id'), { profile });
 
-          const oldPicture = profile.picture;
-          const pictureMIME = request.payload.picture.hapi.headers['content-type'];
-
-          return new Promise((resolve, reject) => {
-            if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
-              const filename = uuid();
-              const bucket = filename.substring(0, 2);
-              imageService.uploadImageStream(request.payload.picture, `pictures/${bucket}/${filename}`)
-                .then(filename => {
-                  resolve(Object.assign(profile, payload, { picture: filename }));
-                })
-                .catch(err => {
-                  reject(err);
-                });
-            } else {
-              delete request.payload.picture;
-              resolve(Object.assign(profile, payload));
-            }
-          })
-            .then(profile => userService.update(user.get('id'), { profile }))
-            .then(() => {
-              if (oldPicture) {
-                imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
-              }
-            })
-            .then(() => reply.redirect(request.query.redirect_uri));
-        } else if (error) {
-          validationErrorMessages = getValidationMessages(error);
-          if (validationErrorMessages.picture || validationErrorMessages['hapi.headers.content-type']) {
-            validationErrorMessages.picture = ['Must be JPEG or PNG image less than 1MB'];
-          }
+        if (oldPicture) {
+          await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
         }
 
-        const profile = user.get('profile');
-        const getValue = (field) => {
-          return (request.payload && request.payload[field]) || get(profile, field, '');
-        };
-        reply.view('user-profile', {
-          returnTo: request.query.redirect_uri,
-          title: 'User Profile',
-          fields: [
-            {
-              name: 'name',
-              label: 'Name',
-              type: 'text',
-              value: getValue('name'),
-              error: validationErrorMessages.name,
-            },
-            {
-              name: 'given_name',
-              label: 'Given Name',
-              type: 'text',
-              value: getValue('given_name'),
-              error: validationErrorMessages.given_name,
-            },
-            {
-              name: 'family_name',
-              label: 'Family Name',
-              type: 'text',
-              value: getValue('family_name'),
-              error: validationErrorMessages.family_name,
-            },
-            {
-              name: 'middle_name',
-              label: 'Middle Name',
-              type: 'text',
-              value: getValue('middle_name'),
-              error: validationErrorMessages.middle_name,
-            },
-            {
-              name: 'nickname',
-              label: 'Nickname',
-              type: 'text',
-              value: getValue('nickname'),
-              error: validationErrorMessages.nickname,
-            },
-            {
-              name: 'preferred_username',
-              label: 'Preferred Username',
-              type: 'text',
-              value: getValue('preferred_username'),
-              error: validationErrorMessages.preferred_username,
-            },
-            {
-              name: 'profile',
-              label: 'Profile',
-              type: 'text',
-              value: getValue('profile'),
-              error: validationErrorMessages.profile,
-            },
-            {
-              name: 'picture',
-              label: 'Picture',
-              isFile: true,
-              accept: 'image/jpeg, image/png',
-              value: getValue('picture'),
-              error: validationErrorMessages.picture,
-            },
-            {
-              name: 'website',
-              label: 'Website',
-              type: 'text',
-              value: getValue('website'),
-              error: validationErrorMessages.website,
-            },
-            {
-              name: 'gender',
-              label: 'Gender',
-              type: 'text',
-              value: getValue('gender'),
-              error: validationErrorMessages.gender,
-            },
-            {
-              name: 'birthdate',
-              label: 'Birthdate',
-              type: 'text',
-              value: getValue('birthdate'),
-              error: validationErrorMessages.birthdate,
-            },
-            {
-              name: 'zoneinfo',
-              label: 'Timezone',
-              isDropdown: true,
-              options: userFormData.timezones.map(name => ({
-                label: name,
-                value: name,
-                selected: getValue('zoneinfo') === name
-              })),
-              value: getValue('zoneinfo'),
-              error: validationErrorMessages.zoneinfo,
-            },
-            {
-              name: 'locale',
-              label: 'Locale',
-              isDropdown: true,
-              options: Object.keys(userFormData.locales).map((value) => ({
-                label: userFormData.locales[value],
-                value,
-                selected: getValue('locale') === value,
-              })),
-              value: getValue('locale'),
-              error: validationErrorMessages.locale,
-            },
-            {
-              name: 'phone_number',
-              label: 'Phone Number',
-              type: 'text',
-              value: getValue('phone_number'),
-              error: validationErrorMessages.phone_number,
-            },
-            {
-              name: 'address.street_address',
-              label: 'Street Address',
-              type: 'text',
-              value: getValue('address.street_address'),
-              error: validationErrorMessages['address.street_address'],
-            },
-            {
-              name: 'address.locality',
-              label: 'Locality',
-              type: 'text',
-              value: getValue('address.locality'),
-              error: validationErrorMessages['address.locality'],
-            },
-            {
-              name: 'address.region',
-              label: 'Region',
-              type: 'text',
-              value: getValue('address.region'),
-              error: validationErrorMessages['address.region'],
-            },
-            {
-              name: 'address.postal_code',
-              label: 'Postal Code',
-              type: 'text',
-              value: getValue('address.postal_code'),
-              error: validationErrorMessages['address.postal_code'],
-            },
-            {
-              name: 'address.country',
-              label: 'Country',
-              type: 'text',
-              value: getValue('address.country'),
-              error: validationErrorMessages['address.country'],
-            },
-          ]
-        });
-      });
+        reply.redirect(request.query.redirect_uri)
+      }
+
+      const viewContext = views.userProfile(user, request, error);
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'user-profile', viewContext);
+      if (template) {
+        reply(template);
+      } else {
+        reply.view('user-profile', viewContext);
+      }
     },
 
-    getForgotPasswordForm: function(request, reply, source, error) {
-      reply.view('forgot-password', {
-        title: 'Forgot Password',
-        formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
-        returnTo: `${request.query.redirect_uri}?status=cancelled`,
-        error: !!error,
-        validationErrorMessages: getValidationMessages(error),
-      });
+    getForgotPasswordForm: async function(request, reply, source, error) {
+      const viewContext = views.forgotPassword(request, error);
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password', viewContext);
+      if (template) {
+        reply(template);
+      } else {
+        reply.view('forgot-password', viewContext);
+      }
     },
 
-    postForgotPasswordForm: function(request, reply) {
+    postForgotPasswordForm: async function(request, reply) {
       userService.findByEmailForOidc(request.payload.email)
         .then(user => {
           return user ? userService.createPasswordResetToken(user.accountId): null
@@ -399,10 +128,14 @@ module.exports = (
             });
           }
         })
-        .then(() => {
-          reply.view('forgot-password-success', {
-            title: 'Forgot Password',
-          });
+        .then(async () => {
+          const viewContext = { title: 'Forgot Password' };
+          const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
+          if (template) {
+            reply(template);
+          } else {
+            reply.view('forgot-password-success', viewContext);
+          }
         })
         .catch(e => {
           reply(e);
@@ -421,13 +154,44 @@ module.exports = (
         .then(() => reply.redirect(request.query.post_logout_redirect_uri))
     },
 
-    getResetPasswordForm: getPasswordResetHandler('GET', 'Reset Password'),
+    getResetPasswordForm: title => async (request, reply, source, error) => {
+      const viewContext = views.resetPassword(request, error);
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password', viewContext);
+      if (template) {
+        reply(template);
+      } else {
+        reply.view('reset-password', redirectSet);
+      }
+    },
 
-    postResetPasswordForm: getPasswordResetHandler('POST', 'Reset Password'),
+    postResetPasswordForm: title => async (request, reply) => {
+      const user = await userService.findByPasswordToken(request.query.token)
 
-    getAcceptInviteForm: getPasswordResetHandler('GET', 'Set Password'),
+      if (user) {
+        const password = userService.encryptPassword(request.payload.password)
+        const profile = user.get('profile');
+        profile.email_verified = true;
+        await userService.update(user.get('id'), { password, profile });
+        await userService.destroyPasswordToken(request.query.token);
 
-    postAcceptInviteForm: getPasswordResetHandler('POST', 'Set Password'),
+        const viewContext = views.resetPasswordSuccess(request);
+        const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
+        if (template) {
+          reply(template);
+        } else {
+          reply.view('reset-password-success', viewContext);
+        }
+      } else {
+        const viewContext = views.resetPassword(request, { token: ['Token is invalid or expired'] });
+        const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password', viewContext);
+
+        if (template) {
+          reply(template);
+        } else {
+          reply.view('reset-password', viewContext);
+        }
+      }
+    }
   };
 
   return self;
@@ -437,9 +201,6 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
   'email/email-service',
-  'render-template',
-  'client/client-service',
-  'user/user-form-data',
-  'oidc-provider',
   'image/image-service',
+  'theme/theme-service',
 ];

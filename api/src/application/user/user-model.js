@@ -1,4 +1,4 @@
-module.exports = bookshelf => bookshelf.model('user', {
+module.exports = bookshelf => ({
   tableName: 'SIP_user',
 
   parse(attributes) {
@@ -87,6 +87,3 @@ module.exports = bookshelf => bookshelf.model('user', {
     // };
   // }
 // }
-
-module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];

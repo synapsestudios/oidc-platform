@@ -175,24 +175,28 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       const base = config('/baseUrl');
       const prevQuery = querystring.stringify(query);
 
-      return clientService.getResetPasswordTemplate(query.client_id)
-        .then(templateRecord => {
-          if (templateRecord) {
-            const template = templateRecord.get('template');
+      return renderTemplate('email/forgot-password', {
+        url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
+      });
 
-            return new Promise((resolve, reject) => {
-              const emailTemplate = handlebars.compile(template);
+      // return clientService.getResetPasswordTemplate(query.client_id)
+      //   .then(templateRecord => {
+      //     if (templateRecord) {
+      //       const template = templateRecord.get('template');
 
-              resolve(emailTemplate({
-                url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
-              }));
-            });
-          } else {
-            return renderTemplate('email/forgot-password', {
-              url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
-            });
-          }
-        });
+      //       return new Promise((resolve, reject) => {
+      //         const emailTemplate = handlebars.compile(template);
+
+      //         resolve(emailTemplate({
+      //           url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
+      //         }));
+      //       });
+      //     } else {
+      //       return renderTemplate('email/forgot-password', {
+      //         url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
+      //       });
+      //     }
+      //   });
     },
   };
 

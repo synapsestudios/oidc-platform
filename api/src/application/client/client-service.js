@@ -1,9 +1,18 @@
-module.exports = (bookshelf, templateService) => ({
+const oidcRelations = [
+  'default_acr_values',
+  'post_logout_redirect_uris',
+  'request_uris',
+  'response_types',
+  'redirect_uris',
+  'grant_types',
+  'contacts',
+];
+
+module.exports = (bookshelf) => ({
   create(id, payload) {
     const toStore = Object.assign({}, payload);
-    const clientRelationships = Object.keys(bookshelf.model('client').prototype.relationships);
 
-    clientRelationships.forEach(relation => {
+    oidcRelations.forEach(relation => {
       delete toStore[relation];
     });
 
@@ -72,7 +81,7 @@ module.exports = (bookshelf, templateService) => ({
       })
     )
     .then(() => {
-      return bookshelf.model('client').forge({ client_id: id }).fetch({ withRelated: clientRelationships });
+      return bookshelf.model('client').forge({ client_id: id }).fetch({ withRelated: oidcRelations });
     });
   },
 
@@ -81,11 +90,10 @@ module.exports = (bookshelf, templateService) => ({
   },
 
   findById(id) {
-    const clientRelationships = Object.keys(bookshelf.model('client').prototype.relationships);
     return bookshelf
       .model('client')
       .where({ client_id: id })
-      .fetch({ withRelated: clientRelationships });
+      .fetch({ withRelated: oidcRelations });
   },
 
   findByRedirectUriAndClientId(clientId, redirect_uri) {
@@ -102,23 +110,9 @@ module.exports = (bookshelf, templateService) => ({
       .then(clientRecord => clientRecord.set('reset_password_template_id', templateRecord.get('id')).save());
   },
 
-  getResetPasswordTemplate(clientId) {
-    return this.findById(clientId)
-      .then(clientRecord => {
-        const resetPasswordTemplateId = clientRecord.get('reset_password_template_id');
-
-        if (resetPasswordTemplateId === null) {
-          return null;
-        }
-
-        return templateService.findById(resetPasswordTemplateId);
-      });
-  }
-
 });
 
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'bookshelf',
-  'templates/template-service',
 ];
