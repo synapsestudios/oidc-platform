@@ -205,7 +205,7 @@ module.exports = {
     error: !!error,
     validationErrorMessages: getValidationMessages(error),
   }),
-  resetPassword : (request, error) => {
+  resetPassword : (title, request, error) => {
     const redirectSet = request.query.token != undefined;
     return {
       title: title,
@@ -214,7 +214,7 @@ module.exports = {
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     };
   },
-  resetPasswordSuccess : request => {
+  resetPasswordSuccess : (title, request) => {
     return {
       title: 'Password Set',
       linkUrl: `/op/auth?${querystring.stringify({

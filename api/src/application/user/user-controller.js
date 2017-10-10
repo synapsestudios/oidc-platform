@@ -155,12 +155,12 @@ module.exports = (
     },
 
     getResetPasswordForm: title => async (request, reply, source, error) => {
-      const viewContext = views.resetPassword(request, error);
+      const viewContext = views.resetPassword(title, request, error);
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password', viewContext);
       if (template) {
         reply(template);
       } else {
-        reply.view('reset-password', redirectSet);
+        reply.view('reset-password', viewContext);
       }
     },
 
@@ -174,7 +174,7 @@ module.exports = (
         await userService.update(user.get('id'), { password, profile });
         await userService.destroyPasswordToken(request.query.token);
 
-        const viewContext = views.resetPasswordSuccess(request);
+        const viewContext = views.resetPasswordSuccess(title, request);
         const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
         if (template) {
           reply(template);
