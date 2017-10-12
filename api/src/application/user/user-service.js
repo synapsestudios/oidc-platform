@@ -39,8 +39,8 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
     async sendInvite(user, appName, hoursTillExpiration, templateOverride, query) {
       Hoek.assert(Hoek.contain(
         Object.keys(query),
-        ['client_id', 'redirect_uri', 'scope'],
-      ), new Error('query must contain client_id, redirect_uri, and scope'));
+        ['client_id', 'redirect_uri', 'scope', 'response_type'],
+      ), new Error('query must contain client_id, redirect_uri, response_type, and scope'));
 
       const token = await self.createPasswordResetToken(user.get('id'), hoursTillExpiration);
       const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), {...query, token: token.get('token')});
@@ -66,7 +66,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       });
     },
 
-    resendUserInvite(userId, appName, clientId, redirectUri, scope, hoursTillExpiration, template, nonce) {
+    resendUserInvite(userId, appName, clientId, redirectUri, responseType, scope, hoursTillExpiration, template, nonce) {
       return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
         if (!user) {
           return Boom.notFound();
@@ -79,6 +79,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
           const query = {
             client_id: clientId,
             redirect_uri: redirectUri,
+            response_type: responseType,
             scope,
           };
           if (nonce) query.nonce = nonce;

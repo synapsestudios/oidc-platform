@@ -215,15 +215,10 @@ module.exports = {
     };
   },
   resetPasswordSuccess : (title, request) => {
+    const { token, ...query } = request.query;
     return {
       title: 'Password Set',
-      linkUrl: `/op/auth?${querystring.stringify({
-        client_id: request.query.client_id,
-        response_type: 'code id_token token',
-        scope: request.query.scope,
-        redirect_uri: request.query.redirect_uri,
-        nonce: 'nonce',
-      })}`
+      linkUrl: `/op/auth?${querystring.stringify(query)}`
     };
   },
   inviteEmail : (appName, baseUrl, query) => ({
