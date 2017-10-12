@@ -22,6 +22,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
             email: Joi.string().email().required(),
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
+            nonce: Joi.string(),
             app_metadata: Joi.object(),
             profile: Joi.object(),
             template: Joi.string(),
