@@ -22,6 +22,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
             email: Joi.string().email().required(),
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
+            nonce: Joi.string(),
             app_metadata: Joi.object(),
             profile: Joi.object(),
             template: Joi.string(),
@@ -46,7 +47,8 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           request.payload.redirect_uri,
           request.payload.scope,
           request.payload.hours_till_expiration,
-          request.payload.template
+          request.payload.template,
+          request.payload.nonce
         )
       );
     },
@@ -69,6 +71,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           client_id: Joi.string().required(),
           redirect_uri: Joi.string().required(),
           scope: Joi.string().required(),
+          nonce: Joi.string(),
           hours_till_expiration: hoursTillExpirationSchema,
           template: Joi.string(),
         }

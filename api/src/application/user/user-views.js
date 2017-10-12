@@ -226,13 +226,8 @@ module.exports = {
       })}`
     };
   },
-  inviteEmail : (appName, baseUrl, token, clientId, redirect_uri, scope) => ({
-    url: `${baseUrl}/user/accept-invite?${querystring.stringify({
-      token: token.get('token'),
-      client_id: clientId,
-      redirect_uri,
-      scope
-    })}`.replace(' ', '%20'),
+  inviteEmail : (appName, baseUrl, query) => ({
+    url: `${baseUrl}/user/accept-invite?${querystring.stringify(query)}`.replace(' ', '%20'),
     appName: appName,
   }),
 };

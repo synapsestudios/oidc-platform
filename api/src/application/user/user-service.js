@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const Boom = require('boom');
+const Hoek = require('hoek');
 const config = require('../../../config');
 const uuid = require('uuid');
 const handlebars = require('handlebars');
@@ -35,16 +36,21 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return model.fetchAll();
     },
 
-    async sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration, templateOverride) {
+    async sendInvite(user, appName, hoursTillExpiration, templateOverride, query) {
+      Hoek.assert(Hoek.contain(
+        Object.keys(query),
+        ['client_id', 'redirect_uri', 'scope'],
+      ), new Error('query must contain client_id, redirect_uri, and scope'));
+
       const token = await self.createPasswordResetToken(user.get('id'), hoursTillExpiration);
-      const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), token, clientId, redirect_uri, scope);
+      const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), {...query, token: token.get('token')});
       let emailBody;
 
       if (templateOverride) {
         const emailTemplate = handlebars.compile(templateOverride);
         emailBody = emailTemplate(viewContext);
       } else {
-        emailBody = await themeService.renderThemedTemplate(clientId, 'invite-email', viewContext);
+        emailBody = await themeService.renderThemedTemplate(query.client_id, 'invite-email', viewContext);
 
         if (!emailBody) {
           emailBody = await renderTemplate('invite-email', viewContext, {
@@ -60,7 +66,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       });
     },
 
-    resendUserInvite(userId, appName, clientId, redirectUri, scope, hoursTillExpiration, template) {
+    resendUserInvite(userId, appName, clientId, redirectUri, scope, hoursTillExpiration, template, nonce) {
       return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
         if (!user) {
           return Boom.notFound();
@@ -69,37 +75,40 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
           if (clients.models.length === 0) {
             throw Boom.badData('The provided redirect uri is invalid for the given client id.');
           }
-          return self.sendInvite(user, appName, clientId, redirectUri, scope, hoursTillExpiration, template).then(() => user);
+
+          const query = {
+            client_id: clientId,
+            redirect_uri: redirectUri,
+            scope,
+          };
+          if (nonce) query.nonce = nonce;
+          return self.sendInvite(user, appName, hoursTillExpiration, template, query).then(() => user);
         });
 
       });
     },
 
-    inviteUser(payload) {
-      let createdUser;
+    inviteUser({email, app_name, hours_till_expiration, template, app_metadata, profile, ...payload}) {
       return clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri).then(clients => {
         if (clients.models.length === 0) {
           throw Boom.badData('The provided redirect uri is invalid for the given client id.');
         }
       }).then(()=> self.create(
-        payload.email,
+        email,
         uuid.v4(),
         {
-          app_metadata: payload.app_metadata || {},
-          profile : payload.profile || {}
+          app_metadata: app_metadata || {},
+          profile : profile || {}
         }
       )).then(user => {
-        createdUser = user;
         return self.sendInvite(
           user,
-          payload.app_name,
-          payload.client_id,
-          payload.redirect_uri,
-          payload.scope,
-          payload.hours_till_expiration,
-          payload.template
-        );
-      }).then(() => createdUser);
+          app_name,
+          hours_till_expiration,
+          template,
+          payload
+        ).then(() => user);
+      });
     },
 
     create: function(email, password, additional) {
