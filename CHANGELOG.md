@@ -1,5 +1,6 @@
 ## [v2.0.0](https://github.com/synapsestudios/oidc-platform/compare/v1.4.0...v2.0.0) - 2017-10-10
 ### Changed
+- [#138](https://github.com/synapsestudios/oidc-platform/issues/138) Stop hardcoding nonce when resetting passwords
 - [#119](https://github.com/synapsestudios/oidc-platform/issues/119) Updated to to [node-oidc](https://github.com/panva/node-oidc-provider) v2.3.2
 ### Added
 - [#115](https://github.com/synapsestudios/oidc-platform/issues/115) Theming. See [theming guide](docs/theming.md) for details
