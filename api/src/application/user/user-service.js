@@ -99,7 +99,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
           payload.hours_till_expiration,
           payload.template
         );
-      }).then(() => createdUser).catch(error => Boom.badImplementation('Something went wrong', error));
+      }).then(() => createdUser);
     },
 
     create: function(email, password, additional) {
