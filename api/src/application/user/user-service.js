@@ -40,7 +40,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       Hoek.assert(Hoek.contain(
         Object.keys(query),
         ['client_id', 'redirect_uri', 'scope'],
-      ), new Error('query must containe client_id, redirect_uri, and scope'));
+      ), new Error('query must contain client_id, redirect_uri, and scope'));
 
       const token = await self.createPasswordResetToken(user.get('id'), hoursTillExpiration);
       const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), {...query, token: token.get('token')});
