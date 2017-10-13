@@ -53,7 +53,6 @@ module.exports = options => {
       backchannelLogout: false,
     },
     logoutSource: async function renderLogoutSource(ctx, form) {
-      console.log(form);
       const clientId = ctx.oidc.session.logout.clientId;
       const template = await options.getTemplate(clientId, 'end-session', { form });
       if (template) {
