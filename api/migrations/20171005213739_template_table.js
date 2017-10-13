@@ -7,7 +7,7 @@ const mysqlUp = knex => {
       name enum('forgot-password-email','invite-email','forgot-password-success','forgot-password','reset-password-success','reset-password','user-profile','user-registration','login','end_session','interaction') NOT NULL DEFAULT 'login',
       code text NOT NULL,
       PRIMARY KEY (theme_id,name),
-      CONSTRAINT SIP_template_ibfk_1 FOREIGN KEY (theme_id) REFERENCES SIP_theme (id) ON DELETE CASCADE ON UPDATE CASCADE,
+      CONSTRAINT SIP_template_ibfk_1 FOREIGN KEY (theme_id) REFERENCES SIP_theme (id) ON DELETE CASCADE ON UPDATE CASCADE
     )
   `);
 }
