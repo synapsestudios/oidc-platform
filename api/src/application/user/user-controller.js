@@ -55,7 +55,7 @@ module.exports = (
     },
 
     profileFormHandler: async function(request, reply, source, error) {
-      const accountId = request.auth.credentials.accountId;
+      const accountId = request.auth.credentials.accountId();
       const user = await userService.findById(accountId);
 
       if (!user) {

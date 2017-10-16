@@ -42,19 +42,14 @@ module.exports = (service, controller) => {
     {
       method: 'GET',
       path: '/user/profile',
-      // handler: controller.profileFormHandler,
-      handler: (request, reply) => {
-        reply('hey!');
-      },
+      handler: controller.profileFormHandler,
       config: {
         auth: {
           strategy: 'oidc_session',
-          scope: 'profile'
         },
         validate: {
           query: {
             client_id: Joi.string().required(),
-            // access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           },
         }
