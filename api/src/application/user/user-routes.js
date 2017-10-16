@@ -54,18 +54,23 @@ module.exports = (service, controller, mixedValidation, validationError, server)
     },
     {
       method: 'GET',
-      path: '/user/change-password',
+      path: '/user/password',
       handler: async (request, reply) => {
-        // const provider = server.plugins['open-id-connect'].provider;
-        console.log(request.state);
-        console.log(request.headers.cookie);
-
-        // const Session = await request.server.plugins['open-id-connect'].provider.Session.find(request.state._session);
-        const Session = await request.server.plugins['open-id-connect'].provider.Session.find('123345');
-
-        // const client = await provider.Client.find(cookie.params.client_id);
         reply('hi');
       },
+      config: {
+        auth: {
+          strategy: 'oidc_session',
+        },
+        validate: {
+          query: mixedValidation({
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+          }, {
+            client_id: clientValidator(server),
+          }),
+        }
+      }
     },
     {
       method: 'GET',
