@@ -1,6 +1,7 @@
 const Joi = require('joi');
 const Readable = require('stream').Readable;
 const userFormData = require('./user-form-data');
+const Boom = require('boom');
 
 const queryValidation = {
   client_id : Joi.string().required(),
@@ -10,7 +11,19 @@ const queryValidation = {
   nonce : Joi.string().optional(),
 };
 
-module.exports = (service, controller) => {
+const clientValidator = server => async (value, options) => {
+  const provider = server.plugins['open-id-connect'].provider;
+
+  const client = await provider.Client.find(value);
+  if (!client) throw Boom.notFound('Client not found');
+
+  const redirectUri = options.context.values.redirect_uri;
+  if (client.redirectUris.indexOf(redirectUri) < 0) throw Boom.forbidden('redirect_uri not in whitelist');
+
+  return value;
+}
+
+module.exports = (service, controller, mixedValidation, validationError, server) => {
   return [
     {
       method : 'GET',
@@ -48,10 +61,12 @@ module.exports = (service, controller) => {
           strategy: 'oidc_session',
         },
         validate: {
-          query: {
+          query: mixedValidation({
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
-          },
+          }, {
+            client_id: clientValidator(server),
+          }),
         }
       }
     },
@@ -69,15 +84,15 @@ module.exports = (service, controller) => {
         },
         auth: {
           strategy: 'oidc_session',
-          scope: 'profile',
         },
         validate: {
           failAction: controller.profileFormHandler,
-          query: {
+          query: mixedValidation({
             client_id: Joi.string().required(),
-            // access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
-          },
+          }, {
+            client_id: clientValidator(server),
+          }),
           payload: Joi.object().keys({
             name: Joi.string().allow(''),
             given_name: Joi.string().allow(''),
@@ -225,4 +240,7 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
   'user/user-controller',
+  'validator/mixed-validation',
+  'validator/validation-error',
+  'server',
 ];
