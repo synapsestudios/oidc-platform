@@ -15,6 +15,7 @@ manifestPromise.then(manifest => {
 
     server.auth.strategy('access_token', 'access_token', { token_type: 'access_token' });
     server.auth.strategy('client_credentials', 'access_token', { token_type: 'client_credentials' });
+    server.auth.strategy('oidc_session', 'oidc_session');
 
     ioc.use(id => {
       if (id === 'server') {
@@ -33,19 +34,6 @@ manifestPromise.then(manifest => {
       layoutPath: './templates/layout',
       layout: 'default',
     });
-
-    // Register models
-    ioc.create('client/client-contact-model');
-    ioc.create('client/client-default-acr-value-model');
-    ioc.create('client/client-grant-model');
-    ioc.create('client/client-model');
-    ioc.create('client/client-post-logout-redirect-uri-model');
-    ioc.create('client/client-redirect-uri-model');
-    ioc.create('client/client-request-uri-model');
-    ioc.create('client/client-response-type-model');
-    ioc.create('user/user-model');
-    ioc.create('user/user-password-reset-token-model');
-    ioc.create('templates/template-model');
 
     // Register routes
     return Promise.all([

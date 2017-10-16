@@ -1,11 +1,13 @@
 const bcrypt = require('bcrypt');
 const Boom = require('boom');
+const Hoek = require('hoek');
 const config = require('../../../config');
 const uuid = require('uuid');
 const handlebars = require('handlebars');
 const querystring = require('querystring');
+const userViews = require('./user-views');
 
-module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisAdapter) => {
+module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisAdapter, themeService) => {
   var self = {
     redisAdapter: new RedisAdapter('Session'),
 
@@ -34,34 +36,37 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return model.fetchAll();
     },
 
-    sendInvite(user, appName, clientId, redirect_uri, scope, hoursTillExpiration, template) {
-      return self.createPasswordResetToken(user.get('id'), hoursTillExpiration).then(token => {
-        const base = config('/baseUrl');
-        const url = encodeURI(`${base}/user/accept-invite?token=${token.get('token')}&client_id=${clientId}&redirect_uri=${redirect_uri}&scope=${scope}`);
-        if (template) {
-          return new Promise((resolve, reject) => {
-            const emailTemplate = handlebars.compile(template);
-            resolve(emailTemplate({
-              url: url.replace(' ', '%20'),
-              appName: appName
-            }));
-          });
-        } else {
-          return renderTemplate('email/invite', {
-            url: url.replace(' ', '%20'),
-            appName: appName
+    async sendInvite(user, appName, hoursTillExpiration, templateOverride, query) {
+      Hoek.assert(Hoek.contain(
+        Object.keys(query),
+        ['client_id', 'redirect_uri', 'scope', 'response_type'],
+      ), new Error('query must contain client_id, redirect_uri, response_type, and scope'));
+
+      const token = await self.createPasswordResetToken(user.get('id'), hoursTillExpiration);
+      const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), {...query, token: token.get('token')});
+      let emailBody;
+
+      if (templateOverride) {
+        const emailTemplate = handlebars.compile(templateOverride);
+        emailBody = emailTemplate(viewContext);
+      } else {
+        emailBody = await themeService.renderThemedTemplate(query.client_id, 'invite-email', viewContext);
+
+        if (!emailBody) {
+          emailBody = await renderTemplate('invite-email', viewContext, {
+            layout: 'email',
           });
         }
-      }).then(emailBody => {
-        return emailService.send({
-          to: user.get('email'),
-          subject: `${appName} Invitation`,
-          html: emailBody,
-        });
+      }
+
+      return await emailService.send({
+        to: user.get('email'),
+        subject: `${appName} Invitation`,
+        html: emailBody,
       });
     },
 
-    resendUserInvite(userId, appName, clientId, redirectUri, scope, hoursTillExpiration, template) {
+    resendUserInvite(userId, appName, clientId, redirectUri, responseType, scope, hoursTillExpiration, template, nonce) {
       return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
         if (!user) {
           return Boom.notFound();
@@ -70,37 +75,41 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
           if (clients.models.length === 0) {
             throw Boom.badData('The provided redirect uri is invalid for the given client id.');
           }
-          return self.sendInvite(user, appName, clientId, redirectUri, scope, hoursTillExpiration, template).then(() => user);
+
+          const query = {
+            client_id: clientId,
+            redirect_uri: redirectUri,
+            response_type: responseType,
+            scope,
+          };
+          if (nonce) query.nonce = nonce;
+          return self.sendInvite(user, appName, hoursTillExpiration, template, query).then(() => user);
         });
 
       });
     },
 
-    inviteUser(payload) {
-      let createdUser;
+    inviteUser({email, app_name, hours_till_expiration, template, app_metadata, profile, ...payload}) {
       return clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri).then(clients => {
         if (clients.models.length === 0) {
           throw Boom.badData('The provided redirect uri is invalid for the given client id.');
         }
       }).then(()=> self.create(
-        payload.email,
+        email,
         uuid.v4(),
         {
-          app_metadata: payload.app_metadata || {},
-          profile : payload.profile || {}
+          app_metadata: app_metadata || {},
+          profile : profile || {}
         }
       )).then(user => {
-        createdUser = user;
         return self.sendInvite(
           user,
-          payload.app_name,
-          payload.client_id,
-          payload.redirect_uri,
-          payload.scope,
-          payload.hours_till_expiration,
-          payload.template
-        );
-      }).then(() => createdUser).catch(error => Boom.badImplementation('Something went wrong', error));
+          app_name,
+          hours_till_expiration,
+          template,
+          payload
+        ).then(() => user);
+      });
     },
 
     create: function(email, password, additional) {
@@ -171,28 +180,26 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return self.redisAdapter.destroy(sessionId);
     },
 
-    sendForgotPasswordEmail(query, token) {
+    async sendForgotPasswordEmail(email, query, token) {
       const base = config('/baseUrl');
-      const prevQuery = querystring.stringify(query);
+      const newQuery = querystring.stringify(Object.assign({}, query, { token: token.get('token') }));
+      let template = await themeService.renderThemedTemplate(query.client_id, 'forgot-password-email', {
+        url: `${base}/user/reset-password?${newQuery}`
+      });
 
-      return clientService.getResetPasswordTemplate(query.client_id)
-        .then(templateRecord => {
-          if (templateRecord) {
-            const template = templateRecord.get('template');
-
-            return new Promise((resolve, reject) => {
-              const emailTemplate = handlebars.compile(template);
-
-              resolve(emailTemplate({
-                url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
-              }));
-            });
-          } else {
-            return renderTemplate('email/forgot-password', {
-              url: `${base}/user/reset-password?${prevQuery}&token=${token.get('token')}`,
-            });
-          }
+      if (!template) {
+        template = await renderTemplate('forgot-password-email', {
+          url: `${base}/user/reset-password?${newQuery}`,
+        }, {
+          layout: 'email',
         });
+      }
+
+      emailService.send({
+        to: email,
+        subject: 'Reset your password',
+        html: template,
+      });
     },
   };
 
@@ -206,4 +213,5 @@ module.exports['@require'] = [
   'client/client-service',
   'render-template',
   'oidc-adapter/redis',
+  'theme/theme-service',
 ];

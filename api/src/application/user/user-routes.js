@@ -1,5 +1,7 @@
 const Joi = require('joi');
 const Readable = require('stream').Readable;
+const userFormData = require('./user-form-data');
+const Boom = require('boom');
 
 const queryValidation = {
   client_id : Joi.string().required(),
@@ -9,7 +11,19 @@ const queryValidation = {
   nonce : Joi.string().optional(),
 };
 
-module.exports = (service, controller, userFormData) => {
+const clientValidator = server => async (value, options) => {
+  const provider = server.plugins['open-id-connect'].provider;
+
+  const client = await provider.Client.find(value);
+  if (!client) throw Boom.notFound('Client not found');
+
+  const redirectUri = options.context.values.redirect_uri;
+  if (client.redirectUris.indexOf(redirectUri) < 0) throw Boom.forbidden('redirect_uri not in whitelist');
+
+  return value;
+}
+
+module.exports = (service, controller, mixedValidation, validationError, server) => {
   return [
     {
       method : 'GET',
@@ -44,15 +58,15 @@ module.exports = (service, controller, userFormData) => {
       handler: controller.profileFormHandler,
       config: {
         auth: {
-          strategy: 'access_token',
-          scope: 'profile'
+          strategy: 'oidc_session',
         },
         validate: {
-          query: {
+          query: mixedValidation({
             client_id: Joi.string().required(),
-            access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
-          },
+          }, {
+            client_id: clientValidator(server),
+          }),
         }
       }
     },
@@ -69,16 +83,16 @@ module.exports = (service, controller, userFormData) => {
           allow: 'multipart/form-data',
         },
         auth: {
-          strategy: 'access_token',
-          scope: 'profile',
+          strategy: 'oidc_session',
         },
         validate: {
           failAction: controller.profileFormHandler,
-          query: {
+          query: mixedValidation({
             client_id: Joi.string().required(),
-            access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
-          },
+          }, {
+            client_id: clientValidator(server),
+          }),
           payload: Joi.object().keys({
             name: Joi.string().allow(''),
             given_name: Joi.string().allow(''),
@@ -135,10 +149,10 @@ module.exports = (service, controller, userFormData) => {
     {
       method : 'GET',
       path : '/user/reset-password',
-      handler : controller.getResetPasswordForm,
+      handler : controller.getResetPasswordForm('Reset Password'),
       config : {
         validate : {
-          failAction : controller.getResetPasswordForm,
+          failAction : controller.getResetPasswordForm('Reset Password'),
           query : Object.assign({
             token: Joi.string().required(),
             client_id: Joi.string().required(),
@@ -151,7 +165,7 @@ module.exports = (service, controller, userFormData) => {
     {
       method : 'POST',
       path : '/user/reset-password',
-      handler : controller.postResetPasswordForm,
+      handler : controller.postResetPasswordForm('Reset Password'),
       config : {
         validate : {
           payload : {
@@ -164,14 +178,14 @@ module.exports = (service, controller, userFormData) => {
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
           }, queryValidation),
-          failAction : controller.getResetPasswordForm,
+          failAction : controller.getResetPasswordForm('Reset Password'),
         }
       },
     },
     {
       method: 'GET',
       path: '/user/accept-invite',
-      handler: controller.getAcceptInviteForm,
+      handler: controller.getResetPasswordForm('Set Password'),
       config: {
         validate: {
           query: {
@@ -179,6 +193,8 @@ module.exports = (service, controller, userFormData) => {
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
+            response_type: Joi.string().required(),
+            nonce: Joi.string(),
           },
         },
       },
@@ -186,20 +202,22 @@ module.exports = (service, controller, userFormData) => {
     {
       method: 'POST',
       path: '/user/accept-invite',
-      handler: controller.postAcceptInviteForm,
+      handler: controller.postResetPasswordForm('Set Password'),
       config: {
         validate: {
           payload : {
             password : Joi.string().min(8).required(),
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
-          }, 
+          },
           query: {
             token: Joi.string().guid().required(),
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
+            response_type: Joi.string().required(),
+            nonce: Joi.string(),
           },
-          failAction: controller.getAcceptInviteForm,
+          failAction: controller.getResetPasswordForm('Set Password'),
         },
       },
     },
@@ -222,5 +240,7 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
   'user/user-controller',
-  'user/user-form-data',
+  'validator/mixed-validation',
+  'validator/validation-error',
+  'server',
 ];

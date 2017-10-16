@@ -1,4 +1,4 @@
-module.exports = () => ({
+module.exports = {
   locales: {
     af_NA: "Afrikaans (Namibia)",
     af_ZA: "Afrikaans (South Africa)",
@@ -859,6 +859,4 @@ module.exports = () => ({
     "Pacific/Wallis",
     "UTC"
   ]
-});
-
-module.exports['@singleton'] = true;
+};

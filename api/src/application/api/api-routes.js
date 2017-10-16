@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 
-module.exports = (userService, clientService, templateService, mixedValidation, rowNotExists, rowExists) => [
+module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists) => [
   {
     method: 'POST',
     path: '/api/invite',
@@ -21,7 +21,9 @@ module.exports = (userService, clientService, templateService, mixedValidation, 
             client_id: Joi.string().required(),
             email: Joi.string().email().required(),
             redirect_uri: Joi.string().required(),
+            response_type: Joi.string().required(),
             scope: Joi.string().required(),
+            nonce: Joi.string(),
             app_metadata: Joi.object(),
             profile: Joi.object(),
             template: Joi.string(),
@@ -44,9 +46,11 @@ module.exports = (userService, clientService, templateService, mixedValidation, 
           request.payload.app_name,
           request.payload.client_id,
           request.payload.redirect_uri,
+          request.payload.response_type,
           request.payload.scope,
           request.payload.hours_till_expiration,
-          request.payload.template
+          request.payload.template,
+          request.payload.nonce
         )
       );
     },
@@ -68,7 +72,9 @@ module.exports = (userService, clientService, templateService, mixedValidation, 
           app_name: Joi.string().required(),
           client_id: Joi.string().required(),
           redirect_uri: Joi.string().required(),
+          response_type: Joi.string().required(),
           scope: Joi.string().required(),
+          nonce: Joi.string(),
           hours_till_expiration: hoursTillExpirationSchema,
           template: Joi.string(),
         }
@@ -116,34 +122,12 @@ module.exports = (userService, clientService, templateService, mixedValidation, 
       }
     }
   },
-  {
-    method: 'POST',
-    path: '/api/reset-password-templates',
-    handler: (request, reply) => {
-      const { template, client_id } = request.payload;
-      templateService.createTemplate(template)
-        .then(templateRecord => reply(clientService.setResetPasswordTemplate(templateRecord, client_id)));
-    },
-    config: {
-      auth: {
-        strategy: 'client_credentials',
-        scope: 'admin'
-      },
-      validate: {
-        payload: {
-          template: Joi.string().required(),
-          client_id: Joi.string().required(),
-        }
-      }
-    }
-  }
 ];
 
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
   'client/client-service',
-  'templates/template-service',
   'validator/mixed-validation',
   'validator/constraints/row-not-exists',
   'validator/constraints/row-exists',

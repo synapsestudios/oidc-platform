@@ -1,6 +1,7 @@
-var config = require('./config');
-var formatError = require('./src/lib/format-error');
-var fetchKeystores = require('./src/lib/fetch-keystores');
+const config = require('./config');
+const formatError = require('./src/lib/format-error');
+const fetchKeystore = require('./src/lib/fetch-keystore');
+const handlebars = require('handlebars');
 
 var ioc = require('electrolyte');
 ioc.use(ioc.dir('src/lib'));
@@ -11,14 +12,16 @@ module.exports = Promise.all([
   ioc.create('user/user-oidc-service'),
   ioc.create('oidc-adapter/redis'),
   ioc.create('oidc-adapter/sql'),
-  fetchKeystores(),
+  ioc.create('theme/theme-service'),
+  fetchKeystore(),
 ])
   .then(values => ({
     bookshelf: values[0],
     userService: values[1],
     redisOidcAdapter: values[2],
     sqlOidcAdapter: values[3],
-    keystores: values[4],
+    themeService: values[4],
+    keystore: values[5],
   }))
   .then(lib => ({
     server: {
@@ -54,6 +57,11 @@ module.exports = Promise.all([
       },
       {
         plugin: {
+          register: './plugins/oidc-session-scheme',
+        }
+      },
+      {
+        plugin: {
           register: 'good',
           options: {
             reporters: {
@@ -70,15 +78,25 @@ module.exports = Promise.all([
         plugin: {
           register: './plugins/openid-connect/openid-connect',
           options: {
+            vision: {
+              engines: {
+                hbs: handlebars
+              },
+              path: './templates',
+              layout: true,
+              layoutPath: './templates/layout',
+              layout: 'default',
+            },
             prefix: 'op',
+            getTemplate: lib.themeService.renderThemedTemplate,
             authenticateUser: lib.userService.authenticate,
-            findUserById: lib.userService.findByIdForOidc,
+            findUserById: lib.userService.findByIdWithCtx,
             cookieKeys: config('/oidc/cookieKeys'),
             initialAccessToken: config('/oidc/initialAccessToken'),
             adapter: function OidcAdapterFactory(name) {
               return (name === 'Client') ? new lib.sqlOidcAdapter(name): new lib.redisOidcAdapter(name);
             },
-            keystores: lib.keystores,
+            keystore: lib.keystore,
           }
         }
       }
