@@ -57,6 +57,11 @@ module.exports = Promise.all([
       },
       {
         plugin: {
+          register: './plugins/oidc-session-scheme',
+        }
+      },
+      {
+        plugin: {
           register: 'good',
           options: {
             reporters: {
@@ -85,7 +90,7 @@ module.exports = Promise.all([
             prefix: 'op',
             getTemplate: lib.themeService.renderThemedTemplate,
             authenticateUser: lib.userService.authenticate,
-            findUserById: lib.userService.findByIdForOidc,
+            findUserById: lib.userService.findByIdWithCtx,
             cookieKeys: config('/oidc/cookieKeys'),
             initialAccessToken: config('/oidc/initialAccessToken'),
             adapter: function OidcAdapterFactory(name) {

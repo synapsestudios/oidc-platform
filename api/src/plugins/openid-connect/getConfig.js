@@ -1,3 +1,6 @@
+const fs = require('fs');
+const handlebars = require('handlebars');
+
 module.exports = options => {
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   return {
@@ -49,13 +52,19 @@ module.exports = options => {
       sessionManagement: true,
       backchannelLogout: false,
     },
-    logoutSource: function renderLogoutSource(form) {
-      const layout = fs.readFileSync(path.join(__dirname, './templates/layout/layout.hbs'), 'utf8');
-      const logout = fs.readFileSync(path.join(__dirname, './templates/end_session.hbs'), 'utf8');
+    logoutSource: async function renderLogoutSource(ctx, form) {
+      const clientId = ctx.oidc.session.logout.clientId;
+      const template = await options.getTemplate(clientId, 'end-session', { form });
+      if (template) {
+        ctx.body = template;
+      } else {
+        const layout = fs.readFileSync('./templates/layout/default.hbs', 'utf8');
+        const logout = fs.readFileSync('./templates/end_session.hbs', 'utf8');
 
-      this.body = handlebars.compile(layout)({
-        content: handlebars.compile(logout)({ form })
-      });
+        ctx.body = handlebars.compile(layout)({
+          content: handlebars.compile(logout)({ form })
+        });
+      }
     },
     subjectTypes: ['public', 'pairwise'],
     pairwiseSalt: 'da1c442b365b563dfc121f285a11eedee5bbff7110d55c88',

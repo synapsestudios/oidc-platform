@@ -15,6 +15,7 @@ manifestPromise.then(manifest => {
 
     server.auth.strategy('access_token', 'access_token', { token_type: 'access_token' });
     server.auth.strategy('client_credentials', 'access_token', { token_type: 'client_credentials' });
+    server.auth.strategy('oidc_session', 'oidc_session');
 
     ioc.use(id => {
       if (id === 'server') {

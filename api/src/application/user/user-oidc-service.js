@@ -14,6 +14,9 @@ module.exports = (bookshelf) => {
     });
   };
 
+  const findByIdForOidc = id => bookshelf.model('user').where({ id }).fetch()
+    .then(user => user ? user.serialize({ strictOidc: true }) : false);
+
   return {
     authenticate: function(email, password) {
       return bookshelf.model('user').where({ email_lower: email.toLowerCase() }).fetch()
@@ -27,10 +30,11 @@ module.exports = (bookshelf) => {
         });
     },
 
-    findByIdForOidc: function(ctx, id) {
-      return bookshelf.model('user').where({ id }).fetch()
-        .then(user => user ? user.serialize({ strictOidc: true }) : false);
-    },
+    findByIdForOidc: findByIdForOidc,
+
+    findByIdWithCtx: function(ctx, id) {
+      return findByIdForOidc(id);
+    }
   };
 };
 
