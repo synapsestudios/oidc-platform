@@ -41,6 +41,21 @@ module.exports = (service, controller) => {
     },
     {
       method: 'GET',
+      path: '/user/change-password',
+      handler: async (request, reply) => {
+        // const provider = server.plugins['open-id-connect'].provider;
+        console.log(request.state);
+        console.log(request.headers.cookie);
+
+        // const Session = await request.server.plugins['open-id-connect'].provider.Session.find(request.state._session);
+        const Session = await request.server.plugins['open-id-connect'].provider.Session.find('123345');
+
+        // const client = await provider.Client.find(cookie.params.client_id);
+        reply('hi');
+      },
+    },
+    {
+      method: 'GET',
       path: '/user/profile',
       handler: controller.profileFormHandler,
       config: {

@@ -27,7 +27,8 @@ module.exports = (bookshelf) => {
         });
     },
 
-    findByIdForOidc: function(ctx, id) {
+    findByIdForOidc: function(id) {
+    // findByIdForOidc: function(ctx, id) {
       return bookshelf.model('user').where({ id }).fetch()
         .then(user => user ? user.serialize({ strictOidc: true }) : false);
     },
