@@ -205,11 +205,16 @@ module.exports = {
     error: !!error,
     validationErrorMessages: getValidationMessages(error),
   }),
+  changePassword : (request, error) => ({
+    title: 'Change Password',
+    returnTo: `${request.query.redirect_uri}#status=cancelled`,
+    validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+  }),
   resetPassword : (title, request, error) => {
     const redirectSet = request.query.token != undefined;
     return {
       title: title,
-      returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
+      returnTo: (redirectSet) ? false : `${request.query.redirect_uri}#status=cancelled`,
       error: !!error,
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     };

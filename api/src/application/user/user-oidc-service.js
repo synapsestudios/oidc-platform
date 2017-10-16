@@ -34,7 +34,7 @@ module.exports = (bookshelf) => {
 
     findByIdWithCtx: function(ctx, id) {
       return findByIdForOidc(id);
-    }
+    },
   };
 };
 

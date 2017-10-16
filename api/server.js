@@ -59,6 +59,9 @@ manifestPromise.then(manifest => {
         } catch (e) {
           console.log(e);
         }
+      })
+      .catch(e => {
+        server.log(['error'], e);
       });
   });
 });

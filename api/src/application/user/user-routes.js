@@ -54,6 +54,24 @@ module.exports = (service, controller, mixedValidation, validationError, server)
     },
     {
       method: 'GET',
+      path: '/user/password',
+      handler: controller.changePasswordFormHandler,
+      config: {
+        auth: {
+          strategy: 'oidc_session',
+        },
+        validate: {
+          query: mixedValidation({
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+          }, {
+            client_id: clientValidator(server),
+          }),
+        }
+      }
+    },
+    {
+      method: 'GET',
       path: '/user/profile',
       handler: controller.profileFormHandler,
       config: {
