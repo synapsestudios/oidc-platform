@@ -1,9 +1,6 @@
 'use strict';
 const OidcProvider = require('oidc-provider');
 const cors = require('koa2-cors');
-const querystring = require('querystring');
-const path = require('path');
-const fs = require('fs');
 const passwordGrant = require('./grants/password');
 const getConfig = require('./getConfig');
 const addRoutes = require('./addRoutes');

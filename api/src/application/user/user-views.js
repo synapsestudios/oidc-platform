@@ -215,24 +215,14 @@ module.exports = {
     };
   },
   resetPasswordSuccess : (title, request) => {
+    const { token, ...query } = request.query;
     return {
       title: 'Password Set',
-      linkUrl: `/op/auth?${querystring.stringify({
-        client_id: request.query.client_id,
-        response_type: 'code id_token token',
-        scope: request.query.scope,
-        redirect_uri: request.query.redirect_uri,
-        nonce: 'nonce',
-      })}`
+      linkUrl: `/op/auth?${querystring.stringify(query)}`
     };
   },
-  inviteEmail : (appName, baseUrl, token, clientId, redirect_uri, scope) => ({
-    url: `${baseUrl}/user/accept-invite?${querystring.stringify({
-      token: token.get('token'),
-      client_id: clientId,
-      redirect_uri,
-      scope
-    })}`.replace(' ', '%20'),
+  inviteEmail : (appName, baseUrl, query) => ({
+    url: `${baseUrl}/user/accept-invite?${querystring.stringify(query)}`.replace(' ', '%20'),
     appName: appName,
   }),
 };

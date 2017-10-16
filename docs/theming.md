@@ -149,7 +149,7 @@ You'll receive a field object for each of these fields:
 ###### end_session
 ```
 {
-  // nothing
+  form, // An html form with a hidden input. submit this form to log out your user
 }
 ```
 

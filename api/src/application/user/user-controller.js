@@ -55,7 +55,7 @@ module.exports = (
     },
 
     profileFormHandler: async function(request, reply, source, error) {
-      const accountId = request.auth.credentials.accountId;
+      const accountId = request.auth.credentials.accountId();
       const user = await userService.findById(accountId);
 
       if (!user) {
@@ -159,7 +159,7 @@ module.exports = (
       const user = await userService.findByPasswordToken(request.query.token)
 
       if (user) {
-        const password = userService.encryptPassword(request.payload.password)
+        const password = await userService.encryptPassword(request.payload.password)
         const profile = user.get('profile');
         profile.email_verified = true;
         await userService.update(user.get('id'), { password, profile });
