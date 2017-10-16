@@ -57,6 +57,11 @@ module.exports = Promise.all([
       },
       {
         plugin: {
+          register: './plugins/oidc-session-scheme',
+        }
+      },
+      {
+        plugin: {
           register: 'good',
           options: {
             reporters: {

@@ -42,16 +42,19 @@ module.exports = (service, controller) => {
     {
       method: 'GET',
       path: '/user/profile',
-      handler: controller.profileFormHandler,
+      // handler: controller.profileFormHandler,
+      handler: (request, reply) => {
+        reply('hey!');
+      },
       config: {
         auth: {
-          strategy: 'access_token',
+          strategy: 'oidc_session',
           scope: 'profile'
         },
         validate: {
           query: {
             client_id: Joi.string().required(),
-            access_token: Joi.string().required(),
+            // access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           },
         }
@@ -70,14 +73,14 @@ module.exports = (service, controller) => {
           allow: 'multipart/form-data',
         },
         auth: {
-          strategy: 'access_token',
+          strategy: 'oidc_session',
           scope: 'profile',
         },
         validate: {
           failAction: controller.profileFormHandler,
           query: {
             client_id: Joi.string().required(),
-            access_token: Joi.string().required(),
+            // access_token: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           },
           payload: Joi.object().keys({
