@@ -55,9 +55,7 @@ module.exports = (service, controller, mixedValidation, validationError, server)
     {
       method: 'GET',
       path: '/user/password',
-      handler: async (request, reply) => {
-        reply('hi');
-      },
+      handler: controller.changePasswordFormHandler,
       config: {
         auth: {
           strategy: 'oidc_session',

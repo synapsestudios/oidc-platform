@@ -25,7 +25,8 @@ module.exports = (
   userService,
   emailService,
   imageService,
-  themeService
+  themeService,
+  server
 ) => {
   const self = {
     registerFormHandler: async function(request, reply, source, error) {
@@ -96,6 +97,27 @@ module.exports = (
         reply(template);
       } else {
         reply.view('user-profile', viewContext);
+      }
+    },
+
+    changePasswordFormHandler: async function(request, reply) {
+      try {
+        const accountId = request.auth.credentials.accountId();
+        const user = await userService.findById(accountId);
+
+        if (!user) {
+          return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
+        }
+
+        const viewContext = views.changePassword(request);
+        const template = await themeService.renderThemedTemplate(request.query.client_id, 'change-password', viewContext);
+        if (template) {
+          reply(template);
+        } else {
+          reply.view('change-password', viewContext);
+        }
+      } catch(e) {
+        reply(e);
       }
     },
 
@@ -194,4 +216,5 @@ module.exports['@require'] = [
   'email/email-service',
   'image/image-service',
   'theme/theme-service',
+  'server',
 ];
