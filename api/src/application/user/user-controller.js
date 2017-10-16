@@ -25,8 +25,7 @@ module.exports = (
   userService,
   emailService,
   imageService,
-  themeService,
-  server
+  themeService
 ) => {
   const self = {
     registerFormHandler: async function(request, reply, source, error) {
@@ -216,5 +215,4 @@ module.exports['@require'] = [
   'email/email-service',
   'image/image-service',
   'theme/theme-service',
-  'server',
 ];
