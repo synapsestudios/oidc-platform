@@ -27,7 +27,7 @@ module.exports = {
   userRegistration : (request, error) => ({
     title: 'Sign Up',
     formAction: `/user/register?${querystring.stringify(request.query)}`,
-    returnTo: `${request.query.redirect_uri}?status=cancelled`,
+    returnTo: `${request.query.redirect_uri}`,
     error: !!error,
     validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     email: request.payload.email || ''
@@ -47,6 +47,11 @@ module.exports = {
     };
 
     return {
+      changePassUrl: `/user/password?${querystring.stringify({
+        client_id: request.query.client_id,
+        redirect_uri: request.query.redirect_uri,
+        profile: true,
+      })}`,
       returnTo: request.query.redirect_uri,
       title: 'User Profile',
       fields: [
@@ -195,26 +200,32 @@ module.exports = {
           error: validationErrorMessages['address.country'],
         },
       ]
-
     };
   },
   forgotPassword : (request, error) => ({
     title: 'Forgot Password',
     formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
-    returnTo: `${request.query.redirect_uri}?status=cancelled`,
+    returnTo: `${request.query.redirect_uri}`,
     error: !!error,
     validationErrorMessages: getValidationMessages(error),
   }),
-  changePassword : (request, error) => ({
-    title: 'Change Password',
-    returnTo: `${request.query.redirect_uri}#status=cancelled`,
-    validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
-  }),
+  changePassword : (request, error) => {
+    return {
+      title: 'Change Password',
+      returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
+        client_id: request.query.client_id,
+        redirect_uri: request.query.redirect_uri,
+      })}` : `${request.query.redirect_uri}`,
+      success: request.method === 'post' && !error ? true : false,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+    }
+  },
   resetPassword : (title, request, error) => {
     const redirectSet = request.query.token != undefined;
     return {
       title: title,
-      returnTo: (redirectSet) ? false : `${request.query.redirect_uri}#status=cancelled`,
+      returnTo: (redirectSet) ? false : `${request.query.redirect_uri}`,
       error: !!error,
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     };

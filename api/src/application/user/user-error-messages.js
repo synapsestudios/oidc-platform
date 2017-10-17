@@ -37,5 +37,8 @@ module.exports = {
   },
   birthdate: {
     'string.isoDate': 'Must be valid date in YYYY-MM-DD format'
+  },
+  current: {
+    'any.empty': 'Current password is required',
   }
 };
