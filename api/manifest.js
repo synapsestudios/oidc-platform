@@ -3,6 +3,7 @@ const formatError = require('./src/lib/format-error');
 const fetchKeystore = require('./src/lib/fetch-keystore');
 const handlebars = require('handlebars');
 
+
 var ioc = require('electrolyte');
 ioc.use(ioc.dir('src/lib'));
 ioc.use(ioc.dir('src/application'));
@@ -93,6 +94,7 @@ module.exports = Promise.all([
             findUserById: lib.userService.findByIdWithCtx,
             cookieKeys: config('/oidc/cookieKeys'),
             initialAccessToken: config('/oidc/initialAccessToken'),
+            oauthNative: config('/oidc/oauthNative'),
             adapter: function OidcAdapterFactory(name) {
               return (name === 'Client') ? new lib.sqlOidcAdapter(name): new lib.redisOidcAdapter(name);
             },
@@ -101,4 +103,7 @@ module.exports = Promise.all([
         }
       }
     ]
-  }));
+  }))
+  .catch(e => {
+    console.error(e);
+  });

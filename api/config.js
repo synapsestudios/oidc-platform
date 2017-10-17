@@ -1,4 +1,4 @@
-var Confidence = require('confidence');
+const Confidence = require('confidence');
 
 var config = {
   '$filter': 'env',
@@ -19,6 +19,7 @@ var config = {
     oidc: {
       cookieKeys: [process.env.COOKIE_KEY, process.env.OLD_COOKIE_KEY],
       initialAccessToken: process.env.OIDC_INITIAL_ACCESS_TOKEN,
+      oauthNative: process.env.OIDC_OAUTH_NATIVE === 'false' ? false : true,
     },
     baseUrl: process.env.OIDC_BASE_URL,
     aws: {

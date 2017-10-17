@@ -41,7 +41,7 @@ module.exports = options => {
       clientCredentials: true,
       encryption: true,
       introspection: true,
-      oauthNativeApps: true,
+      oauthNativeApps: options.oauthNative === false ? false : true,
       registration: {
         initialAccessToken: options.initialAccessToken,
       },
