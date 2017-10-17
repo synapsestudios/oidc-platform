@@ -3,7 +3,6 @@ const formatError = require('./src/lib/format-error');
 const fetchKeystore = require('./src/lib/fetch-keystore');
 const handlebars = require('handlebars');
 
-
 var ioc = require('electrolyte');
 ioc.use(ioc.dir('src/lib'));
 ioc.use(ioc.dir('src/application'));
