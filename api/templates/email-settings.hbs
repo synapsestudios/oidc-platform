@@ -1,0 +1,73 @@
+<div>
+  <h2>Email Status</h2>
+  <div>
+    {{email}}
+    {{#if email_verified}}
+      verified
+    {{else}}
+      not verified
+      <form action="{{formAction}}" method="post">
+        <button name="reverify" type="submit">Resend Verification</button>
+      </form>
+    {{/if}}
+  </div>
+
+  {{#if new_email}}
+    <div>
+      {{new_email}}
+      {{#if new_email_verified}}
+        verified
+      {{else}}
+        not verified
+        <form action="{{formAction}}" method="post">
+          <button name="new_reverify" type="submit">Resend Verification</button>
+        </form>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  <h2>Change Email</h2>
+  <form action="{{formAction}}" method="post">
+    <div class="input-scaffold">
+      <label>
+        <span class="input-scaffold__label">Current Password</span>
+        <input
+              class="input-scaffold__input"
+              type="password"
+              name="current"
+              />
+      </label>
+      {{#if error}}
+        <div class="input-scaffold__validation">
+          {{#each validationErrorMessages.current}}
+            <div class="validation-error">{{this}}</div>
+          {{/each}}
+        </div>
+      {{/if}}
+    </div>
+    <div class="input-scaffold">
+      <label>
+        <span class="input-scaffold__label">New Email</span>
+        <input
+          class="input-scaffold__input"
+          type="email"
+          name="email"
+        />
+      </label>
+      {{#if error}}
+        <div class="input-scaffold__validation">
+          {{#each validationErrorMessages.email}}
+            <div class="validation-error">{{this}}</div>
+          {{/each}}
+        </div>
+      {{/if}}
+    </div>
+
+    {{#if success}}
+      Email changed Successfully!
+      <a href="{{returnTo}}">Back</a>
+    {{/if}}
+
+    <button type="submit">Submit</button>
+  </form>
+</div>
