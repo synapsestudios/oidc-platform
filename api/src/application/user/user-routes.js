@@ -2,6 +2,7 @@ const Joi = require('joi');
 const Readable = require('stream').Readable;
 const userFormData = require('./user-form-data');
 const Boom = require('boom');
+const views = require('./user-views');
 
 const queryValidation = {
   client_id : Joi.string().required(),
@@ -23,7 +24,7 @@ const clientValidator = server => async (value, options) => {
   return value;
 }
 
-module.exports = (service, controller, mixedValidation, validationError, server) => {
+module.exports = (service, controller, mixedValidation, validationError, server, formHandler) => {
   return [
     {
       method : 'GET',
@@ -55,7 +56,9 @@ module.exports = (service, controller, mixedValidation, validationError, server)
     {
       method: 'GET',
       path: '/user/email-settings',
-      handler: controller.emailSettingsHandler,
+      handler: formHandler('email-settings', views.emailSettings, async (user, client, request, reply) => {
+        // handle post somehow
+      }),
       config: {
         auth: {
           strategy: 'oidc_session',
@@ -306,4 +309,5 @@ module.exports['@require'] = [
   'validator/mixed-validation',
   'validator/validation-error',
   'server',
+  'form-handler',
 ];

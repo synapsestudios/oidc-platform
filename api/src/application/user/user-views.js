@@ -214,7 +214,7 @@ module.exports = {
     error: !!error,
     validationErrorMessages: getValidationMessages(error),
   }),
-  emailSettings : (user, request, error) => {
+  emailSettings : (user, client, request, error) => {
     return {
       title: 'Email Settings',
       returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
