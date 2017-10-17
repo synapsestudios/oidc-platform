@@ -93,6 +93,7 @@ module.exports = Promise.all([
             findUserById: lib.userService.findByIdWithCtx,
             cookieKeys: config('/oidc/cookieKeys'),
             initialAccessToken: config('/oidc/initialAccessToken'),
+            oauthNative: config('/oidc/oauthNative'),
             adapter: function OidcAdapterFactory(name) {
               return (name === 'Client') ? new lib.sqlOidcAdapter(name): new lib.redisOidcAdapter(name);
             },
@@ -101,4 +102,7 @@ module.exports = Promise.all([
         }
       }
     ]
-  }));
+  }))
+  .catch(e => {
+    console.error(e);
+  });
