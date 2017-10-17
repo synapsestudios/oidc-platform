@@ -228,7 +228,7 @@ module.exports = {
       email_verified: user.get('profile').email_verified,
     }
   },
-  changePassword : (request, error) => {
+  changePassword : (user, client, request, error) => {
     return {
       title: 'Change Password',
       returnTo: request.query.profile ? `/user/profile?${querystring.stringify({

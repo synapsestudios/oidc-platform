@@ -25,6 +25,12 @@ const clientValidator = server => async (value, options) => {
 }
 
 module.exports = (service, controller, mixedValidation, validationError, server, formHandler) => {
+  const emailSettingsHandler = formHandler('email-settings', views.emailSettings, async (request, reply, user, client) => {
+    // handle post somehow
+  });
+
+  const changePasswordHandler = formHandler('change-password', views.changePassword, controller.changePassword);
+
   return [
     {
       method : 'GET',
@@ -56,9 +62,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'GET',
       path: '/user/email-settings',
-      handler: formHandler('email-settings', views.emailSettings, async (user, client, request, reply) => {
-        // handle post somehow
-      }),
+      handler: emailSettingsHandler,
       config: {
         auth: {
           strategy: 'oidc_session',
@@ -77,7 +81,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'GET',
       path: '/user/password',
-      handler: controller.changePasswordFormHandler,
+      handler: changePasswordHandler,
       config: {
         auth: {
           strategy: 'oidc_session',
@@ -96,13 +100,13 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'POST',
       path: '/user/password',
-      handler: controller.changePasswordFormHandler,
+      handler: changePasswordHandler,
       config: {
         auth: {
           strategy: 'oidc_session',
         },
         validate: {
-          failAction : controller.changePasswordFormHandler,
+          failAction : changePasswordHandler,
           query: mixedValidation({
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
