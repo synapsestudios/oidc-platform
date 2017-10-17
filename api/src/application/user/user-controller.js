@@ -8,6 +8,7 @@ const Boom = require('boom');
 const views = require('./user-views');
 const errorMessages = require('./user-error-messages');
 const userFormData = require('./user-form-data');
+const comparePasswords = require('../../lib/comparePasswords');
 
 // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
 const expandDotPaths = function(object) {
@@ -25,7 +26,9 @@ module.exports = (
   userService,
   emailService,
   imageService,
-  themeService
+  themeService,
+  validationError,
+  clientService
 ) => {
   const self = {
     registerFormHandler: async function(request, reply, source, error) {
@@ -96,6 +99,42 @@ module.exports = (
         reply(template);
       } else {
         reply.view('user-profile', viewContext);
+      }
+    },
+
+    changePasswordFormHandler: async function(request, reply, source, error) {
+      try {
+        const accountId = request.auth.credentials.accountId();
+        const user = await userService.findById(accountId);
+
+        if (!user) {
+          return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
+        }
+
+        if (!error && request.method === 'post') {
+          const { current, password } = request.payload;
+          const isAuthenticated = await comparePasswords(current, user);
+
+          if (isAuthenticated) {
+            const hashedPassword = await userService.encryptPassword(password);
+            await userService.update(user.get('id'), { password: hashedPassword });
+            const client = await clientService.findById(request.query.client_id);
+
+            await userService.sendPasswordChangeEmail(user.get('email'), client);
+          } else {
+            error = { current: ['Password is incorrect'] };
+          }
+        }
+
+        const viewContext = views.changePassword(request, error);
+        const template = await themeService.renderThemedTemplate(request.query.client_id, 'change-password', viewContext);
+        if (template) {
+          reply(template);
+        } else {
+          reply.view('change-password', viewContext);
+        }
+      } catch(e) {
+        reply(e);
       }
     },
 
@@ -194,4 +233,6 @@ module.exports['@require'] = [
   'email/email-service',
   'image/image-service',
   'theme/theme-service',
+  'validator/validation-error',
+  'client/client-service',
 ];

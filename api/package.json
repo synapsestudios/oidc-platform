@@ -4,7 +4,7 @@
   "description": "OpenID Connect provider for synapse projects",
   "main": "server.js",
   "scripts": {
-    "start-dev": "npm run migrate-seed && nodemon server.js",
+    "start-dev": "npm run migrate-seed && nodemon -e hbs,js,json server.js",
     "start-migrate": "npm run migrate && node server.js",
     "start": "node server.js",
     "drop-tables": "./src/bin/drop-tables.js",

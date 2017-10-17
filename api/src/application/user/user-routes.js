@@ -54,6 +54,50 @@ module.exports = (service, controller, mixedValidation, validationError, server)
     },
     {
       method: 'GET',
+      path: '/user/password',
+      handler: controller.changePasswordFormHandler,
+      config: {
+        auth: {
+          strategy: 'oidc_session',
+        },
+        validate: {
+          query: mixedValidation({
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            profile: Joi.string(),
+          }, {
+            client_id: clientValidator(server),
+          }),
+        }
+      }
+    },
+    {
+      method: 'POST',
+      path: '/user/password',
+      handler: controller.changePasswordFormHandler,
+      config: {
+        auth: {
+          strategy: 'oidc_session',
+        },
+        validate: {
+          failAction : controller.changePasswordFormHandler,
+          query: mixedValidation({
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            profile: Joi.string(),
+          }, {
+            client_id: clientValidator(server),
+          }),
+          payload: {
+            current: Joi.string().required(),
+            password : Joi.string().min(8).required(),
+            pass2 : Joi.any().valid(Joi.ref('password')).required(),
+          }
+        },
+      },
+    },
+    {
+      method: 'GET',
       path: '/user/profile',
       handler: controller.profileFormHandler,
       config: {
