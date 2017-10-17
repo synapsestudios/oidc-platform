@@ -180,6 +180,21 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return self.redisAdapter.destroy(sessionId);
     },
 
+    async sendPasswordResetEmail(email, clientId) {
+      let template = await themeService.renderThemedTemplate(clientId, 'change-password-success-email');
+      if (!template) {
+        template = await renderTemplate('change-password-success-email', {}, {
+          layout: 'email',
+        });
+      }
+
+      emailService.send({
+        to: email,
+        subject: 'Password Changed',
+        html: template,
+      });
+    },
+
     async sendForgotPasswordEmail(email, query, token) {
       const base = config('/baseUrl');
       const newQuery = querystring.stringify(Object.assign({}, query, { token: token.get('token') }));

@@ -117,6 +117,7 @@ module.exports = (
           if (isAuthenticated) {
             const hashedPassword = await userService.encryptPassword(password);
             await userService.update(user.get('id'), { password: hashedPassword });
+            await userService.sendPasswordResetEmail(user.get('email'), request.query.client_id);
           } else {
             error = { current: ['Password is incorrect'] };
           }
