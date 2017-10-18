@@ -24,15 +24,18 @@ const getValidationMessages = function(error) {
 };
 
 module.exports = {
-  userRegistration : (request, error) => ({
-    title: 'Sign Up',
-    formAction: `/user/register?${querystring.stringify(request.query)}`,
-    returnTo: `${request.query.redirect_uri}`,
-    error: !!error,
-    validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
-    email: request.payload.email || ''
-  }),
-  userProfile: (user, request, error) => {
+  userRegistration : (user, client, request, error) => {
+    const payload = request.payload || {};
+    return {
+      title: 'Sign Up',
+      formAction: `/user/register?${querystring.stringify(request.query)}`,
+      returnTo: `${request.query.redirect_uri}`,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+      email: payload.email || ''
+    }
+  },
+  userProfile: (user, client, request, error) => {
     let validationErrorMessages = {};
     if (error) {
       validationErrorMessages = getValidationMessages(error);
@@ -207,14 +210,14 @@ module.exports = {
       ]
     };
   },
-  forgotPassword : (request, error) => ({
+  forgotPassword : (user, client, request, error) => ({
     title: 'Forgot Password',
     formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
     returnTo: `${request.query.redirect_uri}`,
     error: !!error,
     validationErrorMessages: getValidationMessages(error),
   }),
-  emailSettings : (user, request, error) => {
+  emailSettings : (user, client, request, error) => {
     return {
       title: 'Email Settings',
       returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
@@ -228,7 +231,7 @@ module.exports = {
       email_verified: user.get('profile').email_verified,
     }
   },
-  changePassword : (request, error) => {
+  changePassword : (user, client, request, error) => {
     return {
       title: 'Change Password',
       returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
@@ -240,7 +243,7 @@ module.exports = {
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     }
   },
-  resetPassword : (title, request, error) => {
+  resetPassword : title => (user, client, request, error) => {
     const redirectSet = request.query.token != undefined;
     return {
       title: title,
@@ -249,7 +252,7 @@ module.exports = {
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     };
   },
-  resetPasswordSuccess : (title, request) => {
+  resetPasswordSuccess : request => {
     const { token, ...query } = request.query;
     return {
       title: 'Password Set',

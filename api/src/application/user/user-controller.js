@@ -28,210 +28,104 @@ module.exports = (
   imageService,
   themeService,
   validationError,
-  clientService
+  clientService,
+  formHandler
 ) => {
-  const self = {
-    registerFormHandler: async function(request, reply, source, error) {
-      request.payload = request.payload || {};
-      let viewContext;
-
-      if (!error && request.method === 'post') {
-        try {
-          const user = userService.create(request.payload.email, request.payload.password)
-          reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
-        } catch (error) {
-          // assume email collision and show validation message
-          viewContext = views.userRegistration(request, {email: ['That email address is already in use']});
-        }
-      } else {
-        viewContext = views.userRegistration(request, error);
-      }
-
-      if (viewContext) {
-        const template = await themeService.renderThemedTemplate(request.query.client_id, 'user-registration', viewContext);
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('user-registration', viewContext);
-        }
-      }
-    },
-
-    profileFormHandler: async function(request, reply, source, error) {
-      const accountId = request.auth.credentials.accountId();
-      const user = await userService.findById(accountId);
-
-      if (!user) {
-        return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
-      }
-
-      let validationErrorMessages = {};
-      if (!error && request.method === 'post') {
-        let profile = user.get('profile');
-        const payload = expandDotPaths(request.payload);
-
-        const oldPicture = profile.picture;
-        const pictureMIME = request.payload.picture.hapi.headers['content-type'];
-
-        if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
-          const uuid = uuid();
-          const bucket = uuid.substring(0, 2);
-          const filename = await imageService.uploadImageStream(request.payload.picture, `pictures/${bucket}/${filename}`);
-
-          profile = Object.assign(profile, payload, { picture: filename });
-        } else {
-          delete request.payload.picture;
-          profile = Object.assign(profile, payload);
-        }
-
-        await userService.update(user.get('id'), { profile });
-
-        if (oldPicture) {
-          await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
-        }
-
-        reply.redirect(request.query.redirect_uri)
-      }
-
-      const viewContext = views.userProfile(user, request, error);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'user-profile', viewContext);
-      if (template) {
-        reply(template);
-      } else {
-        reply.view('user-profile', viewContext);
-      }
-    },
-
-    emailSettingsHandler: async function(request, reply, source, error) {
+  return {
+    registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
+      let error;
       try {
-        const accountId = request.auth.credentials.accountId();
-        const user = await userService.findById(accountId);
-
-        if (!user) {
-          return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
-        }
-
-        // if (!error && request.method === 'post') {
-        //   const { current, password } = request.payload;
-        //   const isAuthenticated = await comparePasswords(current, user);
-
-        //   if (isAuthenticated) {
-        //     const hashedPassword = await userService.encryptPassword(password);
-        //     await userService.update(user.get('id'), { password: hashedPassword });
-        //     const client = await clientService.findById(request.query.client_id);
-
-        //     await userService.sendPasswordChangeEmail(user.get('email'), client);
-        //   } else {
-        //     error = { current: ['Password is incorrect'] };
-        //   }
-        // }
-
-        const viewContext = views.emailSettings(user, request, error);
-        const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-settings', viewContext);
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('email-settings', viewContext);
-        }
-      } catch(e) {
-        reply(e);
+        const user = await userService.create(request.payload.email, request.payload.password)
+        reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
+      } catch (e) {
+        // assume email collision and show validation message
+        error = { email: ['That email address is already in use'] }
+        await render(error);
       }
-    },
+    }),
 
-    changePasswordFormHandler: async function(request, reply, source, error) {
-      try {
-        const accountId = request.auth.credentials.accountId();
-        const user = await userService.findById(accountId);
-
-        if (!user) {
-          return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
-        }
-
-        if (!error && request.method === 'post') {
-          const { current, password } = request.payload;
-          const isAuthenticated = await comparePasswords(current, user);
-
-          if (isAuthenticated) {
-            const hashedPassword = await userService.encryptPassword(password);
-            await userService.update(user.get('id'), { password: hashedPassword });
-            const client = await clientService.findById(request.query.client_id);
-
-            await userService.sendPasswordChangeEmail(user.get('email'), client);
-          } else {
-            error = { current: ['Password is incorrect'] };
-          }
-        }
-
-        const viewContext = views.changePassword(request, error);
-        const template = await themeService.renderThemedTemplate(request.query.client_id, 'change-password', viewContext);
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('change-password', viewContext);
-        }
-      } catch(e) {
-        reply(e);
+    emailSettingsHandler: formHandler('email-settings', views.emailSettings, async (request, reply, user, client, render) => {
+      switch(request.payload.action) {
+        case 'reverify':
+          console.log('reverify');
+          await userService.sendVerificationEmail(request.payload.email, request.query, client);
+          break;
+        case 'new_reverify':
+          console.log('new reverify');
+          break;
+        case 'change':
+          console.log('change email');
+          break;
       }
-    },
 
-    getForgotPasswordForm: async function(request, reply, source, error) {
-      const viewContext = views.forgotPassword(request, error);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password', viewContext);
+      await render();
+    }),
+
+    changePasswordHandler: formHandler('change-password', views.changePassword, async (request, reply, user, client, render) => {
+      const { current, password } = request.payload;
+      const isAuthenticated = await comparePasswords(current, user);
+      let error;
+
+      if (isAuthenticated) {
+        const hashedPassword = await userService.encryptPassword(password);
+        await userService.update(user.get('id'), { password: hashedPassword });
+        await userService.sendPasswordChangeEmail(user.get('email'), client);
+      } else {
+        error = { current: ['Password is incorrect'] };
+      }
+      await render(error);
+    }),
+
+    profileHandler: formHandler('user-profile', views.userProfile, async (request, reply, user, client) => {
+      let profile = user.get('profile');
+      const payload = expandDotPaths(request.payload);
+
+      const oldPicture = profile.picture;
+      const pictureMIME = request.payload.picture.hapi.headers['content-type'];
+
+      if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
+        const uuid = uuid();
+        const bucket = uuid.substring(0, 2);
+        const filename = await imageService.uploadImageStream(request.payload.picture, `pictures/${bucket}/${filename}`);
+
+        profile = Object.assign(profile, payload, { picture: filename });
+      } else {
+        delete request.payload.picture;
+        profile = Object.assign(profile, payload);
+      }
+
+      await userService.update(user.get('id'), { profile });
+
+      if (oldPicture) {
+        await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
+      }
+
+      reply.redirect(request.query.redirect_uri)
+    }),
+
+    forgotPasswordHandler: formHandler('forgot-password', views.forgotPassword, async (request, reply, user, client, render) => {
+      user = await userService.findByEmailForOidc(request.payload.email);
+
+      let token;
+      if (user) {
+        token = await userService.createPasswordResetToken(user.accountId);
+
+        if (token) {
+          userService.sendForgotPasswordEmail(request.payload.email, request.query, token);
+        }
+      }
+
+      const viewContext = { title: 'Forgot Password' };
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
       if (template) {
         reply(template);
       } else {
-        reply.view('forgot-password', viewContext);
+        reply.view('forgot-password-success', viewContext);
       }
-    },
+    }),
 
-    postForgotPasswordForm: async function(request, reply) {
-      userService.findByEmailForOidc(request.payload.email)
-        .then(user => {
-          return user ? userService.createPasswordResetToken(user.accountId): null
-        })
-        .then(token => {
-          if (token) {
-            return userService.sendForgotPasswordEmail(request.payload.email, request.query, token);
-          }
-        })
-        .then(async () => {
-          const viewContext = { title: 'Forgot Password' };
-          const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
-          if (template) {
-            reply(template);
-          } else {
-            reply.view('forgot-password-success', viewContext);
-          }
-        })
-        .catch(e => {
-          reply(e);
-        });
-    },
-
-    logout: function(request, reply, source, error) {
-      const sessionId = request.state._session;
-
-      if (!sessionId) {
-        console.error('Session id cookie not present');
-        throw Boom.notFound();
-      }
-
-      return userService.invalidateSession(sessionId)
-        .then(() => reply.redirect(request.query.post_logout_redirect_uri))
-    },
-
-    getResetPasswordForm: title => async (request, reply, source, error) => {
-      const viewContext = views.resetPassword(title, request, error);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password', viewContext);
-      if (template) {
-        reply(template);
-      } else {
-        reply.view('reset-password', viewContext);
-      }
-    },
-
-    postResetPasswordForm: title => async (request, reply) => {
-      const user = await userService.findByPasswordToken(request.query.token)
+    resetPassword: async function(request, reply, user, client, render) {
+      user = await userService.findByPasswordToken(request.query.token)
 
       if (user) {
         const password = await userService.encryptPassword(request.payload.password)
@@ -240,7 +134,7 @@ module.exports = (
         await userService.update(user.get('id'), { password, profile });
         await userService.destroyPasswordToken(request.query.token);
 
-        const viewContext = views.resetPasswordSuccess(title, request);
+        const viewContext = views.resetPasswordSuccess(request);
         const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
         if (template) {
           reply(template);
@@ -248,19 +142,24 @@ module.exports = (
           reply.view('reset-password-success', viewContext);
         }
       } else {
-        const viewContext = views.resetPassword(request, { token: ['Token is invalid or expired'] });
-        const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password', viewContext);
-
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('reset-password', viewContext);
-        }
+        await render({ token: ['Token is invalid or expired'] })
       }
-    }
-  };
+    },
 
-  return self;
+    logout: function(request, reply) {
+      const sessionId = request.state._session;
+
+      if (!sessionId) {
+        console.error('Session id cookie not present');
+        reply(Boom.notFound());
+      } else {
+        userService.invalidateSession(sessionId)
+          .then(() => reply.redirect(request.query.post_logout_redirect_uri))
+          .catch(e => reply(e));
+      }
+    },
+
+  };
 };
 
 module.exports['@singleton'] = true;
@@ -271,4 +170,5 @@ module.exports['@require'] = [
   'theme/theme-service',
   'validator/validation-error',
   'client/client-service',
+  'form-handler',
 ];
