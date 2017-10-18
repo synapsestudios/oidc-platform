@@ -85,38 +85,25 @@ module.exports = (
       reply.redirect(request.query.redirect_uri)
     },
 
-    getForgotPasswordForm: async function(request, reply, source, error) {
-      const viewContext = views.forgotPassword(request, error);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password', viewContext);
+    issuePasswordResetToken: async (request, reply, user, client, render) => {
+      user = await userService.findByEmailForOidc(request.payload.email);
+
+      let token;
+      if (user) {
+        token = userService.createPasswordResetToken(user.accountId);
+
+        if (token) {
+          userService.sendForgotPasswordEmail(request.payload.email, request.query, token);
+        }
+      }
+
+      const viewContext = { title: 'Forgot Password' };
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
       if (template) {
         reply(template);
       } else {
-        reply.view('forgot-password', viewContext);
+        reply.view('forgot-password-success', viewContext);
       }
-    },
-
-    postForgotPasswordForm: async function(request, reply) {
-      userService.findByEmailForOidc(request.payload.email)
-        .then(user => {
-          return user ? userService.createPasswordResetToken(user.accountId): null
-        })
-        .then(token => {
-          if (token) {
-            return userService.sendForgotPasswordEmail(request.payload.email, request.query, token);
-          }
-        })
-        .then(async () => {
-          const viewContext = { title: 'Forgot Password' };
-          const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
-          if (template) {
-            reply(template);
-          } else {
-            reply.view('forgot-password-success', viewContext);
-          }
-        })
-        .catch(e => {
-          reply(e);
-        });
     },
 
     logout: function(request, reply, source, error) {

@@ -32,6 +32,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
   const changePasswordHandler = formHandler('change-password', views.changePassword, controller.changePassword);
   const registerHandler = formHandler('user-registration', views.userRegistration, controller.register);
   const profileHandler = formHandler('user-profile', views.userProfile, controller.updateProfile);
+  const forgotPasswordHandler = formHandler('forgot-password', views.forgotPassword, controller.issuePasswordResetToken);
 
   return [
     {
@@ -197,10 +198,9 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method : 'GET',
       path : '/user/forgot-password',
-      handler : controller.getForgotPasswordForm,
+      handler : forgotPasswordHandler,
       config : {
         validate : {
-          failAction : controller.getForgotPasswordForm,
           query : queryValidation,
         },
       },
@@ -208,14 +208,14 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method : 'POST',
       path : '/user/forgot-password',
-      handler : controller.postForgotPasswordForm,
+      handler : forgotPasswordHandler,
       config : {
         validate : {
           payload : {
             email : Joi.string().email().required(),
           },
           query : queryValidation,
-          failAction : controller.getForgotPasswordForm,
+          failAction : forgotPasswordHandler,
         }
       },
     },

@@ -210,7 +210,7 @@ module.exports = {
       ]
     };
   },
-  forgotPassword : (request, error) => ({
+  forgotPassword : (user, client, request, error) => ({
     title: 'Forgot Password',
     formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
     returnTo: `${request.query.redirect_uri}`,
