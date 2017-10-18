@@ -128,16 +128,17 @@ module.exports = (
       }
     },
 
-    logout: function(request, reply, source, error) {
+    logout: function(request, reply) {
       const sessionId = request.state._session;
 
       if (!sessionId) {
         console.error('Session id cookie not present');
-        throw Boom.notFound();
+        reply(Boom.notFound());
+      } else {
+        userService.invalidateSession(sessionId)
+          .then(() => reply.redirect(request.query.post_logout_redirect_uri))
+          .catch(e => reply(e));
       }
-
-      return userService.invalidateSession(sessionId)
-        .then(() => reply.redirect(request.query.post_logout_redirect_uri))
     },
 
   };
