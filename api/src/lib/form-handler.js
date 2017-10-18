@@ -5,18 +5,10 @@ module.exports = (
 ) => {
   return (templateName, getView, postHandler) => async (request, reply, source, error) => {
     try {
-      const accountId = request.auth.credentials.accountId();
-      // const user = await userService.findById(accountId);
-      // const client = await clientService.findById(request.query.client_id);
-
-      const [ user, client ] = await Promise.all([
-        userService.findById(accountId),
-        clientService.findById(request.query.client_id),
-      ]);
-
-      if (!user) {
-        return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
-      }
+      const client = await clientService.findById(request.query.client_id);
+      const user = request.auth.isAuthenticated
+        ? await userService.findById(request.auth.credentials.accountId())
+        : null;
 
       if (!error && request.method === 'post') {
         error = await postHandler(request, reply, user, client);

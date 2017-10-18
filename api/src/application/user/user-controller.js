@@ -31,6 +31,19 @@ module.exports = (
   clientService
 ) => {
   return {
+    register: async function(request, reply, user, client) {
+      let error;
+      try {
+        const user = await userService.create(request.payload.email, request.payload.password)
+        reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
+      } catch (e) {
+        // assume email collision and show validation message
+        error = { email: ['That email address is already in use'] }
+      }
+
+      return error;
+    },
+
     changePassword: async function(request, reply, user, client) {
       const { current, password } = request.payload;
       const isAuthenticated = await comparePasswords(current, user);
@@ -41,32 +54,6 @@ module.exports = (
         await userService.sendPasswordChangeEmail(user.get('email'), client);
       } else {
         return { current: ['Password is incorrect'] };
-      }
-    },
-
-    registerFormHandler: async function(request, reply, source, error) {
-      request.payload = request.payload || {};
-      let viewContext;
-
-      if (!error && request.method === 'post') {
-        try {
-          const user = userService.create(request.payload.email, request.payload.password)
-          reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
-        } catch (error) {
-          // assume email collision and show validation message
-          viewContext = views.userRegistration(request, {email: ['That email address is already in use']});
-        }
-      } else {
-        viewContext = views.userRegistration(request, error);
-      }
-
-      if (viewContext) {
-        const template = await themeService.renderThemedTemplate(request.query.client_id, 'user-registration', viewContext);
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('user-registration', viewContext);
-        }
       }
     },
 

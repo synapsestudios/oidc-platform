@@ -30,15 +30,16 @@ module.exports = (service, controller, mixedValidation, validationError, server,
   });
 
   const changePasswordHandler = formHandler('change-password', views.changePassword, controller.changePassword);
+  const registerHandler = formHandler('user-registration', views.userRegistration, controller.register);
 
   return [
     {
       method : 'GET',
       path : '/user/register',
-      handler : controller.registerFormHandler,
+      handler : registerHandler,
       config : {
         validate : {
-          failAction : controller.registerFormHandler,
+          failAction : registerHandler,
           query : queryValidation,
         }
       },
@@ -46,7 +47,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method : 'POST',
       path : '/user/register',
-      handler : controller.registerFormHandler,
+      handler : registerHandler,
       config : {
         validate : {
           payload : {
@@ -55,7 +56,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
           },
           query : queryValidation,
-          failAction : controller.registerFormHandler,
+          failAction : registerHandler,
         }
       },
     },

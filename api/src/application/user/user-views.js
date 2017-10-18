@@ -24,14 +24,17 @@ const getValidationMessages = function(error) {
 };
 
 module.exports = {
-  userRegistration : (request, error) => ({
-    title: 'Sign Up',
-    formAction: `/user/register?${querystring.stringify(request.query)}`,
-    returnTo: `${request.query.redirect_uri}`,
-    error: !!error,
-    validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
-    email: request.payload.email || ''
-  }),
+  userRegistration : (user, client, request, error) => {
+    const payload = request.payload || {};
+    return {
+      title: 'Sign Up',
+      formAction: `/user/register?${querystring.stringify(request.query)}`,
+      returnTo: `${request.query.redirect_uri}`,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+      email: payload.email || ''
+    }
+  },
   userProfile: (user, request, error) => {
     let validationErrorMessages = {};
     if (error) {
