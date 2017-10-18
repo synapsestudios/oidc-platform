@@ -52,6 +52,11 @@ module.exports = {
         redirect_uri: request.query.redirect_uri,
         profile: true,
       })}`,
+      emailSettingsUrl: `/user/email-settings?${querystring.stringify({
+        client_id: request.query.client_id,
+        redirect_uri: request.query.redirect_uri,
+        profile: true,
+      })}`,
       returnTo: request.query.redirect_uri,
       title: 'User Profile',
       fields: [
@@ -209,6 +214,20 @@ module.exports = {
     error: !!error,
     validationErrorMessages: getValidationMessages(error),
   }),
+  emailSettings : (user, request, error) => {
+    return {
+      title: 'Email Settings',
+      returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
+        client_id: request.query.client_id,
+        redirect_uri: request.query.redirect_uri,
+      })}` : `${request.query.redirect_uri}`,
+      success: request.method === 'post' && !error ? true : false,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+      email: user.get('email'),
+      email_verified: user.get('profile').email_verified,
+    }
+  },
   changePassword : (request, error) => {
     return {
       title: 'Change Password',
