@@ -36,36 +36,6 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return model.fetchAll();
     },
 
-    async sendInvite(user, appName, hoursTillExpiration, templateOverride, query) {
-      Hoek.assert(Hoek.contain(
-        Object.keys(query),
-        ['client_id', 'redirect_uri', 'scope', 'response_type'],
-      ), new Error('query must contain client_id, redirect_uri, response_type, and scope'));
-
-      const token = await self.createPasswordResetToken(user.get('id'), hoursTillExpiration);
-      const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), {...query, token: token.get('token')});
-      let emailBody;
-
-      if (templateOverride) {
-        const emailTemplate = handlebars.compile(templateOverride);
-        emailBody = emailTemplate(viewContext);
-      } else {
-        emailBody = await themeService.renderThemedTemplate(query.client_id, 'invite-email', viewContext);
-
-        if (!emailBody) {
-          emailBody = await renderTemplate('invite-email', viewContext, {
-            layout: 'email',
-          });
-        }
-      }
-
-      return await emailService.send({
-        to: user.get('email'),
-        subject: `${appName} Invitation`,
-        html: emailBody,
-      });
-    },
-
     resendUserInvite(userId, appName, clientId, redirectUri, responseType, scope, hoursTillExpiration, template, nonce) {
       return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
         if (!user) {
@@ -83,7 +53,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
             scope,
           };
           if (nonce) query.nonce = nonce;
-          return self.sendInvite(user, appName, hoursTillExpiration, template, query).then(() => user);
+          return self.sendInviteEmail(user, appName, hoursTillExpiration, template, query).then(() => user);
         });
 
       });
@@ -102,7 +72,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
           profile : profile || {}
         }
       )).then(user => {
-        return self.sendInvite(
+        return self.sendInviteEmail(
           user,
           app_name,
           hours_till_expiration,
@@ -178,6 +148,36 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
 
     invalidateSession(sessionId) {
       return self.redisAdapter.destroy(sessionId);
+    },
+
+    async sendInviteEmail(user, appName, hoursTillExpiration, templateOverride, query) {
+      Hoek.assert(Hoek.contain(
+        Object.keys(query),
+        ['client_id', 'redirect_uri', 'scope', 'response_type'],
+      ), new Error('query must contain client_id, redirect_uri, response_type, and scope'));
+
+      const token = await self.createPasswordResetToken(user.get('id'), hoursTillExpiration);
+      const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), {...query, token: token.get('token')});
+      let emailBody;
+
+      if (templateOverride) {
+        const emailTemplate = handlebars.compile(templateOverride);
+        emailBody = emailTemplate(viewContext);
+      } else {
+        emailBody = await themeService.renderThemedTemplate(query.client_id, 'invite-email', viewContext);
+
+        if (!emailBody) {
+          emailBody = await renderTemplate('invite-email', viewContext, {
+            layout: 'email',
+          });
+        }
+      }
+
+      return await emailService.send({
+        to: user.get('email'),
+        subject: `${appName} Invitation`,
+        html: emailBody,
+      });
     },
 
     async sendPasswordChangeEmail(email, client) {
