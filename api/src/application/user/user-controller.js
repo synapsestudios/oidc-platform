@@ -28,10 +28,11 @@ module.exports = (
   imageService,
   themeService,
   validationError,
-  clientService
+  clientService,
+  formHandler
 ) => {
   return {
-    register: async function(request, reply, user, client, render) {
+    registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
       let error;
       try {
         const user = await userService.create(request.payload.email, request.payload.password)
@@ -41,9 +42,13 @@ module.exports = (
         error = { email: ['That email address is already in use'] }
         await render(error);
       }
-    },
+    }),
 
-    changePassword: async function(request, reply, user, client, render) {
+    emailSettingsHandler: formHandler('email-settings', views.emailSettings, async (request, reply, user, client) => {
+      // handle post somehow
+    }),
+
+    changePasswordHandler: formHandler('change-password', views.changePassword, async (request, reply, user, client, render) => {
       const { current, password } = request.payload;
       const isAuthenticated = await comparePasswords(current, user);
       let error;
@@ -56,9 +61,9 @@ module.exports = (
         error = { current: ['Password is incorrect'] };
       }
       await render(error);
-    },
+    }),
 
-    updateProfile: async function(request, reply, user, client) {
+    profileHandler: formHandler('user-profile', views.userProfile, async (request, reply, user, client) => {
       let profile = user.get('profile');
       const payload = expandDotPaths(request.payload);
 
@@ -83,9 +88,9 @@ module.exports = (
       }
 
       reply.redirect(request.query.redirect_uri)
-    },
+    }),
 
-    issuePasswordResetToken: async (request, reply, user, client, render) => {
+    forgotPasswordHandler: formHandler('forgot-password', views.forgotPassword, async (request, reply, user, client, render) => {
       user = await userService.findByEmailForOidc(request.payload.email);
 
       let token;
@@ -104,9 +109,9 @@ module.exports = (
       } else {
         reply.view('forgot-password-success', viewContext);
       }
-    },
+    }),
 
-    resetPassword: async (request, reply, user, client, render) => {
+    resetPassword: async function(request, reply, user, client, render) {
       user = await userService.findByPasswordToken(request.query.token)
 
       if (user) {
@@ -152,4 +157,5 @@ module.exports['@require'] = [
   'theme/theme-service',
   'validator/validation-error',
   'client/client-service',
+  'form-handler',
 ];

@@ -25,14 +25,6 @@ const clientValidator = server => async (value, options) => {
 }
 
 module.exports = (service, controller, mixedValidation, validationError, server, formHandler) => {
-  const emailSettingsHandler = formHandler('email-settings', views.emailSettings, async (request, reply, user, client) => {
-    // handle post somehow
-  });
-
-  const changePasswordHandler = formHandler('change-password', views.changePassword, controller.changePassword);
-  const registerHandler = formHandler('user-registration', views.userRegistration, controller.register);
-  const profileHandler = formHandler('user-profile', views.userProfile, controller.updateProfile);
-  const forgotPasswordHandler = formHandler('forgot-password', views.forgotPassword, controller.issuePasswordResetToken);
   const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
   const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
 
@@ -40,10 +32,10 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method : 'GET',
       path : '/user/register',
-      handler : registerHandler,
+      handler : controller.registerHandler,
       config : {
         validate : {
-          failAction : registerHandler,
+          failAction : controller.registerHandler,
           query : queryValidation,
         }
       },
@@ -51,7 +43,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method : 'POST',
       path : '/user/register',
-      handler : registerHandler,
+      handler : controller.registerHandler,
       config : {
         validate : {
           payload : {
@@ -60,14 +52,14 @@ module.exports = (service, controller, mixedValidation, validationError, server,
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
           },
           query : queryValidation,
-          failAction : registerHandler,
+          failAction : controller.registerHandler,
         }
       },
     },
     {
       method: 'GET',
       path: '/user/email-settings',
-      handler: emailSettingsHandler,
+      handler: controller.emailSettingsHandler,
       config: {
         auth: {
           strategy: 'oidc_session',
@@ -86,7 +78,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'GET',
       path: '/user/password',
-      handler: changePasswordHandler,
+      handler: controller.changePasswordHandler,
       config: {
         auth: {
           strategy: 'oidc_session',
@@ -105,13 +97,13 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'POST',
       path: '/user/password',
-      handler: changePasswordHandler,
+      handler: controller.changePasswordHandler,
       config: {
         auth: {
           strategy: 'oidc_session',
         },
         validate: {
-          failAction : changePasswordHandler,
+          failAction :controller.changePasswordHandler,
           query: mixedValidation({
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
@@ -130,7 +122,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'GET',
       path: '/user/profile',
-      handler: profileHandler,
+      handler: controller.profileHandler,
       config: {
         auth: {
           strategy: 'oidc_session',
@@ -148,7 +140,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'POST',
       path: '/user/profile',
-      handler: profileHandler,
+      handler: controller.profileHandler,
       config: {
         payload: {
           failAction: 'ignore', // set payload to null if picture is too large
@@ -161,8 +153,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
           strategy: 'oidc_session',
         },
         validate: {
-          // failAction: controller.profileFormHandler,
-          failAction: profileHandler,
+          failAction: controller.profileHandler,
           query: mixedValidation({
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
@@ -200,7 +191,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method : 'GET',
       path : '/user/forgot-password',
-      handler : forgotPasswordHandler,
+      handler : controller.forgotPasswordHandler,
       config : {
         validate : {
           query : queryValidation,
@@ -210,14 +201,14 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method : 'POST',
       path : '/user/forgot-password',
-      handler : forgotPasswordHandler,
+      handler : controller.forgotPasswordHandler,
       config : {
         validate : {
           payload : {
             email : Joi.string().email().required(),
           },
           query : queryValidation,
-          failAction : forgotPasswordHandler,
+          failAction : controller.forgotPasswordHandler,
         }
       },
     },
