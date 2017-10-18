@@ -127,7 +127,6 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'GET',
       path: '/user/profile',
-      // handler: controller.profileFormHandler,
       handler: profileHandler,
       config: {
         auth: {
@@ -146,7 +145,6 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'POST',
       path: '/user/profile',
-      // handler: controller.profileFormHandler,
       handler: profileHandler,
       config: {
         payload: {
