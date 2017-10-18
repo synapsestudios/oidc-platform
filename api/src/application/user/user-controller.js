@@ -44,8 +44,21 @@ module.exports = (
       }
     }),
 
-    emailSettingsHandler: formHandler('email-settings', views.emailSettings, async (request, reply, user, client) => {
-      // handle post somehow
+    emailSettingsHandler: formHandler('email-settings', views.emailSettings, async (request, reply, user, client, render) => {
+      switch(request.payload.action) {
+        case 'reverify':
+          console.log('reverify');
+          await userService.sendVerificationEmail(request.payload.email, request.query, client);
+          break;
+        case 'new_reverify':
+          console.log('new reverify');
+          break;
+        case 'change':
+          console.log('change email');
+          break;
+      }
+
+      await render();
     }),
 
     changePasswordHandler: formHandler('change-password', views.changePassword, async (request, reply, user, client, render) => {

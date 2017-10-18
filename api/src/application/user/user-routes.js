@@ -76,6 +76,30 @@ module.exports = (service, controller, mixedValidation, validationError, server,
       }
     },
     {
+      method: 'POST',
+      path: '/user/email-settings',
+      handler: controller.emailSettingsHandler,
+      config: {
+        auth: {
+          strategy: 'oidc_session',
+        },
+        validate: {
+          failAction: controller.emailSettingsHandler,
+          query: mixedValidation({
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            profile: Joi.string(),
+          }, {
+            client_id: clientValidator(server),
+          }),
+          payload: {
+            action: Joi.any().valid(['reverify', 'new_reverify']).required(),
+            email : Joi.string().email().required(),
+          }
+        },
+      },
+    },
+    {
       method: 'GET',
       path: '/user/password',
       handler: controller.changePasswordHandler,

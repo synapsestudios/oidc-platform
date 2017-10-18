@@ -7,7 +7,9 @@
     {{else}}
       not verified
       <form action="{{formAction}}" method="post">
-        <button name="reverify" type="submit">Resend Verification</button>
+        <input type="hidden" name="action" value="reverify" />
+        <input type="hidden" name="email" value="{{email}}" />
+        <button type="submit">Resend Verification</button>
       </form>
     {{/if}}
   </div>
@@ -20,7 +22,9 @@
       {{else}}
         not verified
         <form action="{{formAction}}" method="post">
-          <button name="new_reverify" type="submit">Resend Verification</button>
+          <input type="hidden" name="action" value="new_reverify" />
+          <input type="hidden" name="email" value="{{new_email}}" />
+          <button type="submit">Resend Verification</button>
         </form>
       {{/if}}
     </div>
