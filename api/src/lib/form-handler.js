@@ -4,6 +4,16 @@ module.exports = (
   clientService
 ) => {
   return (templateName, getView, postHandler) => async (request, reply, source, error) => {
+    const render = async e => {
+      const viewContext = getView(user, client, request, error);
+      const template = await themeService.renderThemedTemplate(request.query.client_id, templateName, viewContext);
+      if (template) {
+        reply(template);
+      } else {
+        reply.view(templateName, viewContext);
+      }
+    }
+
     try {
       const client = await clientService.findById(request.query.client_id);
       const user = request.auth.isAuthenticated
@@ -11,15 +21,9 @@ module.exports = (
         : null;
 
       if (!error && request.method === 'post') {
-        error = await postHandler(request, reply, user, client);
-      }
-
-      const viewContext = getView(user, client, request, error);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, templateName, viewContext);
-      if (template) {
-        reply(template);
+        error = await postHandler(request, reply, user, client, render);
       } else {
-        reply.view(templateName, viewContext);
+        await render(error);
       }
     } catch(e) {
       reply(e);

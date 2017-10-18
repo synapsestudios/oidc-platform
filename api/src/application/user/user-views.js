@@ -35,7 +35,7 @@ module.exports = {
       email: payload.email || ''
     }
   },
-  userProfile: (user, request, error) => {
+  userProfile: (user, client, request, error) => {
     let validationErrorMessages = {};
     if (error) {
       validationErrorMessages = getValidationMessages(error);

@@ -31,6 +31,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
 
   const changePasswordHandler = formHandler('change-password', views.changePassword, controller.changePassword);
   const registerHandler = formHandler('user-registration', views.userRegistration, controller.register);
+  const profileHandler = formHandler('user-profile', views.userProfile, controller.updateProfile);
 
   return [
     {
@@ -126,7 +127,8 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'GET',
       path: '/user/profile',
-      handler: controller.profileFormHandler,
+      // handler: controller.profileFormHandler,
+      handler: profileHandler,
       config: {
         auth: {
           strategy: 'oidc_session',
@@ -144,7 +146,8 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'POST',
       path: '/user/profile',
-      handler: controller.profileFormHandler,
+      // handler: controller.profileFormHandler,
+      handler: profileHandler,
       config: {
         payload: {
           failAction: 'ignore', // set payload to null if picture is too large
@@ -157,7 +160,8 @@ module.exports = (service, controller, mixedValidation, validationError, server,
           strategy: 'oidc_session',
         },
         validate: {
-          failAction: controller.profileFormHandler,
+          // failAction: controller.profileFormHandler,
+          failAction: profileHandler,
           query: mixedValidation({
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),

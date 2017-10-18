@@ -31,7 +31,7 @@ module.exports = (
   clientService
 ) => {
   return {
-    register: async function(request, reply, user, client) {
+    register: async function(request, reply, user, client, render) {
       let error;
       try {
         const user = await userService.create(request.payload.email, request.payload.password)
@@ -39,67 +39,50 @@ module.exports = (
       } catch (e) {
         // assume email collision and show validation message
         error = { email: ['That email address is already in use'] }
+        await render(error);
       }
-
-      return error;
     },
 
-    changePassword: async function(request, reply, user, client) {
+    changePassword: async function(request, reply, user, client, render) {
       const { current, password } = request.payload;
       const isAuthenticated = await comparePasswords(current, user);
+      let error;
 
       if (isAuthenticated) {
         const hashedPassword = await userService.encryptPassword(password);
         await userService.update(user.get('id'), { password: hashedPassword });
         await userService.sendPasswordChangeEmail(user.get('email'), client);
       } else {
-        return { current: ['Password is incorrect'] };
+        error = { current: ['Password is incorrect'] };
       }
+      await render(error);
     },
 
-    profileFormHandler: async function(request, reply, source, error) {
-      const accountId = request.auth.credentials.accountId();
-      const user = await userService.findById(accountId);
+    updateProfile: async function(request, reply, user, client) {
+      let profile = user.get('profile');
+      const payload = expandDotPaths(request.payload);
 
-      if (!user) {
-        return reply.redirect(`${request.query.redirect_uri}?error=user_not_found&error_description=user not found`);
-      }
+      const oldPicture = profile.picture;
+      const pictureMIME = request.payload.picture.hapi.headers['content-type'];
 
-      let validationErrorMessages = {};
-      if (!error && request.method === 'post') {
-        let profile = user.get('profile');
-        const payload = expandDotPaths(request.payload);
+      if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
+        const uuid = uuid();
+        const bucket = uuid.substring(0, 2);
+        const filename = await imageService.uploadImageStream(request.payload.picture, `pictures/${bucket}/${filename}`);
 
-        const oldPicture = profile.picture;
-        const pictureMIME = request.payload.picture.hapi.headers['content-type'];
-
-        if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
-          const uuid = uuid();
-          const bucket = uuid.substring(0, 2);
-          const filename = await imageService.uploadImageStream(request.payload.picture, `pictures/${bucket}/${filename}`);
-
-          profile = Object.assign(profile, payload, { picture: filename });
-        } else {
-          delete request.payload.picture;
-          profile = Object.assign(profile, payload);
-        }
-
-        await userService.update(user.get('id'), { profile });
-
-        if (oldPicture) {
-          await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
-        }
-
-        reply.redirect(request.query.redirect_uri)
-      }
-
-      const viewContext = views.userProfile(user, request, error);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'user-profile', viewContext);
-      if (template) {
-        reply(template);
+        profile = Object.assign(profile, payload, { picture: filename });
       } else {
-        reply.view('user-profile', viewContext);
+        delete request.payload.picture;
+        profile = Object.assign(profile, payload);
       }
+
+      await userService.update(user.get('id'), { profile });
+
+      if (oldPicture) {
+        await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
+      }
+
+      reply.redirect(request.query.redirect_uri)
     },
 
     getForgotPasswordForm: async function(request, reply, source, error) {
