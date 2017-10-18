@@ -243,7 +243,7 @@ module.exports = {
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     }
   },
-  resetPassword : (title, request, error) => {
+  resetPassword : title => (user, client, request, error) => {
     const redirectSet = request.query.token != undefined;
     return {
       title: title,
@@ -252,7 +252,7 @@ module.exports = {
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     };
   },
-  resetPasswordSuccess : (title, request) => {
+  resetPasswordSuccess : request => {
     const { token, ...query } = request.query;
     return {
       title: 'Password Set',

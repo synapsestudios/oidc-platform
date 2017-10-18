@@ -12,7 +12,7 @@ module.exports = (
         : null;
 
       const render = async e => {
-        const viewContext = getView(user, client, request, error);
+        const viewContext = getView(user, client, request, e);
         const template = await themeService.renderThemedTemplate(request.query.client_id, templateName, viewContext);
         if (template) {
           reply(template);

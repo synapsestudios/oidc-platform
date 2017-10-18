@@ -33,6 +33,8 @@ module.exports = (service, controller, mixedValidation, validationError, server,
   const registerHandler = formHandler('user-registration', views.userRegistration, controller.register);
   const profileHandler = formHandler('user-profile', views.userProfile, controller.updateProfile);
   const forgotPasswordHandler = formHandler('forgot-password', views.forgotPassword, controller.issuePasswordResetToken);
+  const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
+  const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
 
   return [
     {
@@ -222,10 +224,9 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method : 'GET',
       path : '/user/reset-password',
-      handler : controller.getResetPasswordForm('Reset Password'),
+      handler : resetPasswordHandler,
       config : {
         validate : {
-          failAction : controller.getResetPasswordForm('Reset Password'),
           query : Object.assign({
             token: Joi.string().required(),
             client_id: Joi.string().required(),
@@ -238,7 +239,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method : 'POST',
       path : '/user/reset-password',
-      handler : controller.postResetPasswordForm('Reset Password'),
+      handler : resetPasswordHandler,
       config : {
         validate : {
           payload : {
@@ -251,14 +252,14 @@ module.exports = (service, controller, mixedValidation, validationError, server,
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
           }, queryValidation),
-          failAction : controller.getResetPasswordForm('Reset Password'),
+          failAction : resetPasswordHandler,
         }
       },
     },
     {
       method: 'GET',
       path: '/user/accept-invite',
-      handler: controller.getResetPasswordForm('Set Password'),
+      handler: setPasswordHandler,
       config: {
         validate: {
           query: {
@@ -275,7 +276,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
     {
       method: 'POST',
       path: '/user/accept-invite',
-      handler: controller.postResetPasswordForm('Set Password'),
+      handler: setPasswordHandler,
       config: {
         validate: {
           payload : {
@@ -290,7 +291,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
             response_type: Joi.string().required(),
             nonce: Joi.string(),
           },
-          failAction: controller.getResetPasswordForm('Set Password'),
+          failAction: setPasswordHandler,
         },
       },
     },

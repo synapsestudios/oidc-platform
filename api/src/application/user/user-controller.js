@@ -90,7 +90,7 @@ module.exports = (
 
       let token;
       if (user) {
-        token = userService.createPasswordResetToken(user.accountId);
+        token = await userService.createPasswordResetToken(user.accountId);
 
         if (token) {
           userService.sendForgotPasswordEmail(request.payload.email, request.query, token);
@@ -106,6 +106,28 @@ module.exports = (
       }
     },
 
+    resetPassword: async (request, reply, user, client, render) => {
+      user = await userService.findByPasswordToken(request.query.token)
+
+      if (user) {
+        const password = await userService.encryptPassword(request.payload.password)
+        const profile = user.get('profile');
+        profile.email_verified = true;
+        await userService.update(user.get('id'), { password, profile });
+        await userService.destroyPasswordToken(request.query.token);
+
+        const viewContext = views.resetPasswordSuccess(request);
+        const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
+        if (template) {
+          reply(template);
+        } else {
+          reply.view('reset-password-success', viewContext);
+        }
+      } else {
+        await render({ token: ['Token is invalid or expired'] })
+      }
+    },
+
     logout: function(request, reply, source, error) {
       const sessionId = request.state._session;
 
@@ -118,44 +140,6 @@ module.exports = (
         .then(() => reply.redirect(request.query.post_logout_redirect_uri))
     },
 
-    getResetPasswordForm: title => async (request, reply, source, error) => {
-      const viewContext = views.resetPassword(title, request, error);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password', viewContext);
-      if (template) {
-        reply(template);
-      } else {
-        reply.view('reset-password', viewContext);
-      }
-    },
-
-    postResetPasswordForm: title => async (request, reply) => {
-      const user = await userService.findByPasswordToken(request.query.token)
-
-      if (user) {
-        const password = await userService.encryptPassword(request.payload.password)
-        const profile = user.get('profile');
-        profile.email_verified = true;
-        await userService.update(user.get('id'), { password, profile });
-        await userService.destroyPasswordToken(request.query.token);
-
-        const viewContext = views.resetPasswordSuccess(title, request);
-        const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('reset-password-success', viewContext);
-        }
-      } else {
-        const viewContext = views.resetPassword(request, { token: ['Token is invalid or expired'] });
-        const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password', viewContext);
-
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('reset-password', viewContext);
-        }
-      }
-    }
   };
 };
 
