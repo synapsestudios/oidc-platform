@@ -29,7 +29,8 @@ module.exports = (
   themeService,
   validationError,
   clientService,
-  formHandler
+  formHandler,
+  userEmails
 ) => {
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
@@ -48,7 +49,7 @@ module.exports = (
       switch(request.payload.action) {
         case 'reverify':
           console.log('reverify');
-          await userService.sendVerificationEmail(request.payload.email, request.query, client);
+          await userEmails.sendVerificationEmail(request.payload.email, request.query, client);
           break;
         case 'new_reverify':
           console.log('new reverify');
@@ -171,4 +172,5 @@ module.exports['@require'] = [
   'validator/validation-error',
   'client/client-service',
   'form-handler',
+  'user/user-emails',
 ];
