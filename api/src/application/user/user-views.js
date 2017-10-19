@@ -243,7 +243,8 @@ module.exports = {
       error: !!error,
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
       email: user.get('email'),
-      email_verified: user.get('profile').email_verified,
+      emailVerified: user.get('profile').email_verified,
+      pendingEmail: user.get('pending_email') || false,
     }
   },
   changePassword : (user, client, request, error) => {

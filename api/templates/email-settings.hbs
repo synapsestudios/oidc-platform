@@ -2,7 +2,7 @@
   <h2>Email Status</h2>
   <div>
     {{email}}
-    {{#if email_verified}}
+    {{#if emailVerified}}
       verified
     {{else}}
       not verified
@@ -14,19 +14,14 @@
     {{/if}}
   </div>
 
-  {{#if new_email}}
+  {{#if pendingEmail}}
     <div>
-      {{new_email}}
-      {{#if new_email_verified}}
-        verified
-      {{else}}
-        not verified
-        <form action="{{formAction}}" method="post">
-          <input type="hidden" name="action" value="new_reverify" />
-          <input type="hidden" name="email" value="{{new_email}}" />
-          <button type="submit">Resend Verification</button>
-        </form>
-      {{/if}}
+      {{pendingEmail}} not verified
+      <form action="{{formAction}}" method="post">
+        <input type="hidden" name="action" value="new_reverify" />
+        <input type="hidden" name="email" value="{{pendingEmail}}" />
+        <button type="submit">Resend Verification</button>
+      </form>
     </div>
   {{/if}}
 
