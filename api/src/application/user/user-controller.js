@@ -61,7 +61,6 @@ module.exports = (
           } else {
             error = { current: ['Password is incorrect'] };
           }
-
           break;
       }
 

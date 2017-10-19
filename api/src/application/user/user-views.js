@@ -218,6 +218,20 @@ module.exports = {
     validationErrorMessages: getValidationMessages(error),
   }),
   emailSettings : (user, client, request, error) => {
+    request.payload = request.payload || {};
+    let successMessage;
+    switch(request.payload.action) {
+      case 'reverify':
+        successMessage = 'Verification email sent';
+        break;
+      case 'change':
+        successMessage = 'A verification email has been sent to the address provided and is required before you can use it to log in.';
+        break;
+      default:
+        successMessage = '';
+        break;
+    }
+
     return {
       title: 'Email Settings',
       returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
@@ -225,6 +239,7 @@ module.exports = {
         redirect_uri: request.query.redirect_uri,
       })}` : `${request.query.redirect_uri}`,
       success: request.method === 'post' && !error ? true : false,
+      successMessage,
       error: !!error,
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
       email: user.get('email'),
