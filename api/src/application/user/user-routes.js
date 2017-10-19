@@ -24,7 +24,18 @@ const clientValidator = server => async (value, options) => {
   return value;
 }
 
-module.exports = (service, controller, mixedValidation, validationError, server, formHandler, rowExists) => {
+
+module.exports = (bookshelf, service, controller, mixedValidation, ValidationError, server, formHandler, rowExists) => {
+  const emailValidator = async (value, options) => {
+    const userCollection = await bookshelf.model('user').where({email_lower: value.toLowerCase()}).fetchAll();
+    if (userCollection.length >= 1) {
+      throw new ValidationError('That email address is already in use');
+    }
+
+    return value;
+  }
+
+
   const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
   const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
 
@@ -46,11 +57,13 @@ module.exports = (service, controller, mixedValidation, validationError, server,
       handler : controller.registerHandler,
       config : {
         validate : {
-          payload : {
+          payload : mixedValidation({
             email : Joi.string().email().required(),
             password : Joi.string().min(8).required(),
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
-          },
+          }, {
+            email: emailValidator,
+          }),
           query : queryValidation,
           failAction : controller.registerHandler,
         }
@@ -109,10 +122,23 @@ module.exports = (service, controller, mixedValidation, validationError, server,
           }, {
             client_id: clientValidator(server),
           }),
-          payload: {
-            action: Joi.any().valid(['reverify', 'new_reverify']).required(),
+          payload: mixedValidation({
+            action: Joi.any().valid(['reverify', 'new_reverify', 'change']).required(),
             email : Joi.string().email().required(),
-          }
+            current : Joi.alternatives().when('action', {
+              is: 'change',
+              then: Joi.string().required(),
+              otherwise: Joi.any().forbidden()
+            }),
+          }, {
+            email: async (value, options) => {
+              if (options.context.values.action === 'change') {
+                return emailValidator(value, options);
+              } else {
+                return value;
+              }
+            },
+          })
         },
       },
     },
@@ -344,6 +370,7 @@ module.exports = (service, controller, mixedValidation, validationError, server,
 
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
+  'bookshelf',
   'user/user-service',
   'user/user-controller',
   'validator/mixed-validation',

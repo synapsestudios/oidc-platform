@@ -35,32 +35,37 @@ module.exports = (
 ) => {
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
-      let error;
-      try {
-        const user = await userService.create(request.payload.email, request.payload.password)
-        await userEmails.sendVerificationEmail(request.payload.email, request.query, user, client);
-        reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
-      } catch (e) {
-        // assume email collision and show validation message
-        error = { email: ['That email address is already in use'] }
-        await render(error);
-      }
+      user = await userService.create(request.payload.email, request.payload.password)
+      await userEmails.sendVerificationEmail(request.payload.email, request.query, user, client);
+      reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
     }),
 
     emailSettingsHandler: formHandler('email-settings', views.emailSettings, async (request, reply, user, client, render) => {
+      let error;
+      const { current, email } = request.payload;
       switch(request.payload.action) {
         case 'reverify':
-          await userEmails.sendVerificationEmail(request.payload.email, request.query, user, client);
+          await userEmails.sendVerificationEmail(email, request.query, user, client);
           break;
         case 'new_reverify':
           console.log('new reverify');
           break;
         case 'change':
-          console.log('change email');
+          const isAuthenticated = await comparePasswords(current, user);
+          if (isAuthenticated) {
+            user.set('pending_email', email);
+            user.set('pending_email_lower', email.toLowerCase());
+            await user.save();
+
+            console.log('user saved!');
+          } else {
+            error = { current: ['Password is incorrect'] };
+          }
+
           break;
       }
 
-      await render();
+      await render(error);
     }),
 
     changePasswordHandler: formHandler('change-password', views.changePassword, async (request, reply, user, client, render) => {
