@@ -48,7 +48,6 @@ module.exports = (
     emailSettingsHandler: formHandler('email-settings', views.emailSettings, async (request, reply, user, client, render) => {
       switch(request.payload.action) {
         case 'reverify':
-          console.log('reverify');
           await userEmails.sendVerificationEmail(request.payload.email, request.query, client);
           break;
         case 'new_reverify':
@@ -70,7 +69,7 @@ module.exports = (
       if (isAuthenticated) {
         const hashedPassword = await userService.encryptPassword(password);
         await userService.update(user.get('id'), { password: hashedPassword });
-        await userService.sendPasswordChangeEmail(user.get('email'), client);
+        await userEmails.sendPasswordChangeEmail(user.get('email'), client);
       } else {
         error = { current: ['Password is incorrect'] };
       }
@@ -112,7 +111,7 @@ module.exports = (
         token = await userService.createPasswordResetToken(user.accountId);
 
         if (token) {
-          userService.sendForgotPasswordEmail(request.payload.email, request.query, token);
+          await userEmails.sendForgotPasswordEmail(request.payload.email, request.query, token);
         }
       }
 

@@ -1,13 +1,12 @@
 const bcrypt = require('bcrypt');
 const Boom = require('boom');
-const Hoek = require('hoek');
 const config = require('../../../config');
 const uuid = require('uuid');
 const handlebars = require('handlebars');
 const querystring = require('querystring');
 const userViews = require('./user-views');
 
-module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisAdapter, themeService) => {
+module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisAdapter, themeService, userEmails) => {
   var self = {
     redisAdapter: new RedisAdapter('Session'),
 
@@ -53,7 +52,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
             scope,
           };
           if (nonce) query.nonce = nonce;
-          return self.sendInviteEmail(user, appName, hoursTillExpiration, template, query).then(() => user);
+          return userEmails.sendInviteEmail(user, appName, hoursTillExpiration, template, query).then(() => user);
         });
 
       });
@@ -72,7 +71,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
           profile : profile || {}
         }
       )).then(user => {
-        return self.sendInviteEmail(
+        return userEmails.sendInviteEmail(
           user,
           app_name,
           hours_till_expiration,
@@ -149,78 +148,6 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
     invalidateSession(sessionId) {
       return self.redisAdapter.destroy(sessionId);
     },
-
-    async sendInviteEmail(user, appName, hoursTillExpiration, templateOverride, query) {
-      Hoek.assert(Hoek.contain(
-        Object.keys(query),
-        ['client_id', 'redirect_uri', 'scope', 'response_type'],
-      ), new Error('query must contain client_id, redirect_uri, response_type, and scope'));
-
-      const token = await self.createPasswordResetToken(user.get('id'), hoursTillExpiration);
-      const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), {...query, token: token.get('token')});
-      let emailBody;
-
-      if (templateOverride) {
-        const emailTemplate = handlebars.compile(templateOverride);
-        emailBody = emailTemplate(viewContext);
-      } else {
-        emailBody = await themeService.renderThemedTemplate(query.client_id, 'invite-email', viewContext);
-
-        if (!emailBody) {
-          emailBody = await renderTemplate('invite-email', viewContext, {
-            layout: 'email',
-          });
-        }
-      }
-
-      return await emailService.send({
-        to: user.get('email'),
-        subject: `${appName} Invitation`,
-        html: emailBody,
-      });
-    },
-
-    async sendPasswordChangeEmail(email, client) {
-      let template = await themeService.renderThemedTemplate(client.get('client_id'), 'change-password-success-email', {
-        appName: client.get('client_name'),
-      });
-
-      if (!template) {
-        template = await renderTemplate('change-password-success-email', {
-          appName: client.get('client_name'),
-        }, {
-          layout: 'email',
-        });
-      }
-
-      emailService.send({
-        to: email,
-        subject: 'Password Changed',
-        html: template,
-      });
-    },
-
-    async sendForgotPasswordEmail(email, query, token) {
-      const base = config('/baseUrl');
-      const newQuery = querystring.stringify(Object.assign({}, query, { token: token.get('token') }));
-      let template = await themeService.renderThemedTemplate(query.client_id, 'forgot-password-email', {
-        url: `${base}/user/reset-password?${newQuery}`
-      });
-
-      if (!template) {
-        template = await renderTemplate('forgot-password-email', {
-          url: `${base}/user/reset-password?${newQuery}`,
-        }, {
-          layout: 'email',
-        });
-      }
-
-      emailService.send({
-        to: email,
-        subject: 'Reset your password',
-        html: template,
-      });
-    },
   };
 
   return self;
@@ -234,4 +161,5 @@ module.exports['@require'] = [
   'render-template',
   'oidc-adapter/redis',
   'theme/theme-service',
+  'user/user-emails',
 ];
