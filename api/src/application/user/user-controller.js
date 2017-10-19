@@ -29,7 +29,9 @@ module.exports = (
   themeService,
   validationError,
   clientService,
-  formHandler
+  formHandler,
+  userEmails,
+  emailTokenService
 ) => {
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
@@ -47,8 +49,7 @@ module.exports = (
     emailSettingsHandler: formHandler('email-settings', views.emailSettings, async (request, reply, user, client, render) => {
       switch(request.payload.action) {
         case 'reverify':
-          console.log('reverify');
-          await userService.sendVerificationEmail(request.payload.email, request.query, client);
+          await userEmails.sendVerificationEmail(request.payload.email, request.query, user, client);
           break;
         case 'new_reverify':
           console.log('new reverify');
@@ -69,7 +70,7 @@ module.exports = (
       if (isAuthenticated) {
         const hashedPassword = await userService.encryptPassword(password);
         await userService.update(user.get('id'), { password: hashedPassword });
-        await userService.sendPasswordChangeEmail(user.get('email'), client);
+        await userEmails.sendPasswordChangeEmail(user.get('email'), client);
       } else {
         error = { current: ['Password is incorrect'] };
       }
@@ -108,11 +109,7 @@ module.exports = (
 
       let token;
       if (user) {
-        token = await userService.createPasswordResetToken(user.accountId);
-
-        if (token) {
-          userService.sendForgotPasswordEmail(request.payload.email, request.query, token);
-        }
+        await userEmails.sendForgotPasswordEmail(request.payload.email, request.query, user.accountId);
       }
 
       const viewContext = { title: 'Forgot Password' };
@@ -125,14 +122,24 @@ module.exports = (
     }),
 
     resetPassword: async function(request, reply, user, client, render) {
-      user = await userService.findByPasswordToken(request.query.token)
+      const token = await emailTokenService.find(request.query.token);
+      if (token) {
+        user = await userService.findById(token.get('user_id'));
+      } else {
+        user = await userService.findByPasswordToken(request.query.token);
+      }
 
       if (user) {
         const password = await userService.encryptPassword(request.payload.password)
         const profile = user.get('profile');
         profile.email_verified = true;
         await userService.update(user.get('id'), { password, profile });
-        await userService.destroyPasswordToken(request.query.token);
+
+        if (token) {
+          await token.destroy();
+        } else {
+          await userService.destroyPasswordToken(request.query.token);
+        }
 
         const viewContext = views.resetPasswordSuccess(request);
         const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
@@ -171,4 +178,6 @@ module.exports['@require'] = [
   'validator/validation-error',
   'client/client-service',
   'form-handler',
+  'user/user-emails',
+  'email-token/email-token-service',
 ];
