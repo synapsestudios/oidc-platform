@@ -48,7 +48,7 @@ module.exports = (
     emailSettingsHandler: formHandler('email-settings', views.emailSettings, async (request, reply, user, client, render) => {
       switch(request.payload.action) {
         case 'reverify':
-          await userEmails.sendVerificationEmail(request.payload.email, request.query, client);
+          await userEmails.sendVerificationEmail(request.payload.email, request.query, user, client);
           break;
         case 'new_reverify':
           console.log('new reverify');

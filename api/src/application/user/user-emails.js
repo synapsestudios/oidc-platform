@@ -5,11 +5,13 @@ const Hoek = require('hoek');
 const userViews = require('./user-views');
 const handlebars = require('handlebars');
 
-module.exports = (emailService, themeService, renderTemplate) => {
+module.exports = (emailService, themeService, renderTemplate, emailTokenService) => {
   return {
-    async sendVerificationEmail(email, query, client) {
+    async sendVerificationEmail(email, query, user, client) {
+      const token = await emailTokenService.create(user.get('id'));
+
       const viewContext = {
-        url: `${base}/user/email-verify`,
+        url: `${base}/user/email-verify?${querystring.stringify({...query, token: token.get('token')})}`,
         appName: client.get('client_name'),
       };
 
@@ -21,7 +23,7 @@ module.exports = (emailService, themeService, renderTemplate) => {
         });
       }
 
-      emailService.send({
+      await emailService.send({
         to: email,
         subject: 'Verify your email address',
         html: template,
@@ -108,4 +110,5 @@ module.exports['@require'] = [
   'email/email-service',
   'theme/theme-service',
   'render-template',
+  'email-token/email-token-service',
 ];
