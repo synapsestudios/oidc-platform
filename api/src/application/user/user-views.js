@@ -225,6 +225,7 @@ module.exports = {
         successMessage = 'Verification email sent';
         break;
       case 'change':
+      case 'new_reverify':
         successMessage = 'A verification email has been sent to the address provided and is required before you can use it to log in.';
         break;
       default:

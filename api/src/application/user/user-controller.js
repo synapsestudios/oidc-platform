@@ -48,7 +48,7 @@ module.exports = (
           await userEmails.sendVerificationEmail(email, request.query, user, client);
           break;
         case 'new_reverify':
-          console.log('new reverify');
+          await userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client);
           break;
         case 'change':
           const isAuthenticated = await comparePasswords(current, user);
