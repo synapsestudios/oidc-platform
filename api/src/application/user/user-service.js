@@ -116,6 +116,9 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return bookshelf.model('user').where({ id }).fetch();
     },
 
+    /**
+     * @deprecated - use email tokens instead
+     */
     findByPasswordToken: function(token) {
       return bookshelf.model('user_password_reset_token')
         .forge({ token })
@@ -129,20 +132,11 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
         });
     },
 
+    /**
+     * @deprecated - use email tokens instead
+     */
     destroyPasswordToken: function(token) {
       return bookshelf.model('user_password_reset_token').forge({ token }).destroy();
-    },
-
-    createPasswordResetToken: function(id, hoursTillExpiration) {
-      hoursTillExpiration = hoursTillExpiration || 1;
-      const expires = new Date();
-      expires.setHours(expires.getHours() + hoursTillExpiration);
-
-      return bookshelf.model('user_password_reset_token').forge({
-        token: uuid.v4(),
-        user_id: id,
-        expires_at: expires,
-      }).save({}, {method: 'insert'});
     },
 
     invalidateSession(sessionId) {

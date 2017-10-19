@@ -30,7 +30,8 @@ module.exports = (
   validationError,
   clientService,
   formHandler,
-  userEmails
+  userEmails,
+  emailTokenService
 ) => {
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
@@ -108,11 +109,7 @@ module.exports = (
 
       let token;
       if (user) {
-        token = await userService.createPasswordResetToken(user.accountId);
-
-        if (token) {
-          await userEmails.sendForgotPasswordEmail(request.payload.email, request.query, token);
-        }
+        await userEmails.sendForgotPasswordEmail(request.payload.email, request.query, user.accountId);
       }
 
       const viewContext = { title: 'Forgot Password' };
@@ -125,14 +122,24 @@ module.exports = (
     }),
 
     resetPassword: async function(request, reply, user, client, render) {
-      user = await userService.findByPasswordToken(request.query.token)
+      const token = await emailTokenService.find(request.query.token);
+      if (token) {
+        user = await userService.findById(token.get('user_id'));
+      } else {
+        user = await userService.findByPasswordToken(request.query.token);
+      }
 
       if (user) {
         const password = await userService.encryptPassword(request.payload.password)
         const profile = user.get('profile');
         profile.email_verified = true;
         await userService.update(user.get('id'), { password, profile });
-        await userService.destroyPasswordToken(request.query.token);
+
+        if (token) {
+          await token.destroy();
+        } else {
+          await userService.destroyPasswordToken(request.query.token);
+        }
 
         const viewContext = views.resetPasswordSuccess(request);
         const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
@@ -172,4 +179,5 @@ module.exports['@require'] = [
   'client/client-service',
   'form-handler',
   'user/user-emails',
+  'email-token/email-token-service',
 ];

@@ -13,6 +13,13 @@ module.exports = bookshelf => {
         expires_at: expires,
       }).save({}, {method: 'insert'});
     },
+
+    find: function(token) {
+      return bookshelf.model('email_token')
+        .forge({ token })
+        .where('expires_at', '>', bookshelf.knex.fn.now())
+        .fetch()
+    }
   };
 };
 
