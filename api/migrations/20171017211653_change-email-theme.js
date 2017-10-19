@@ -17,6 +17,7 @@ exports.up = function(knex, Promise) {
           'change-password',
           'change-password-success-email',
           'email-settings',
+          'email-verify-success',
           'email-verify-email',
           'change-email-verify-email',
           'change-email-alert-email'
@@ -42,6 +43,7 @@ exports.up = function(knex, Promise) {
             'change-password'::text,
             'change-password-success-email'::text,
             'email-settings'::text,
+            'email-verify-success'::text,
             'email-verify-email'::text,
             'change-email-verify-email'::text,
             'change-email-alert-email'::text

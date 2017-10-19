@@ -38,6 +38,7 @@ module.exports = (
       let error;
       try {
         const user = await userService.create(request.payload.email, request.payload.password)
+        await userEmails.sendVerificationEmail(request.payload.email, request.query, user, client);
         reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
       } catch (e) {
         // assume email collision and show validation message
@@ -120,6 +121,28 @@ module.exports = (
         reply.view('forgot-password-success', viewContext);
       }
     }),
+
+    emailVerifySuccessHandler: async (request, reply) => {
+      const token = await emailTokenService.find(request.query.token);
+      const user = await userService.findById(token.get('user_id'));
+
+      const profile = user.get('profile');
+      profile.email_verified = true;
+      await userService.update(user.get('id'), { profile });
+      token.destroy();
+
+      const viewContext = {
+        title: 'Email Verified',
+        returnTo: request.query.redirect_uri,
+      };
+
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
+      if (template) {
+        reply(template);
+      } else {
+        reply.view('email-verify-success', viewContext);
+      }
+    },
 
     resetPassword: async function(request, reply, user, client, render) {
       const token = await emailTokenService.find(request.query.token);

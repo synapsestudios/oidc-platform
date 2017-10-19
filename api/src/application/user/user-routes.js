@@ -24,7 +24,7 @@ const clientValidator = server => async (value, options) => {
   return value;
 }
 
-module.exports = (service, controller, mixedValidation, validationError, server, formHandler) => {
+module.exports = (service, controller, mixedValidation, validationError, server, formHandler, rowExists) => {
   const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
   const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
 
@@ -74,6 +74,23 @@ module.exports = (service, controller, mixedValidation, validationError, server,
           }),
         }
       }
+    },
+    {
+      method: 'GET',
+      path: '/user/email-verify',
+      handler: controller.emailVerifySuccessHandler,
+      config: {
+        validate: {
+          query: mixedValidation({
+            token: Joi.string().guid().required(),
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+          }, {
+            token: rowExists('email_token', 'token', 'Token not found'),
+            client_id: clientValidator(server),
+          }),
+        },
+      },
     },
     {
       method: 'POST',
@@ -333,4 +350,5 @@ module.exports['@require'] = [
   'validator/validation-error',
   'server',
   'form-handler',
+  'validator/constraints/row-exists',
 ];
