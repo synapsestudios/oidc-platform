@@ -57,7 +57,11 @@ module.exports = (
             user.set('pending_email_lower', email.toLowerCase());
             await user.save();
 
-            console.log('user saved!');
+            await Promise.all([
+              userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client),
+              userEmails.sendChangeEmailAlertEmail(user.get('email'), client),
+            ]);
+
           } else {
             error = { current: ['Password is incorrect'] };
           }

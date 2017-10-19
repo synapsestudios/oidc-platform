@@ -7,6 +7,52 @@ const handlebars = require('handlebars');
 
 module.exports = (emailService, themeService, renderTemplate, emailTokenService) => {
   return {
+    async sendChangeEmailVerifyEmail(email, query, user, client) {
+      const token = await emailTokenService.create(user.get('id'));
+
+      const viewContext = {
+        url: `${base}/user/email-verify?${querystring.stringify({
+          client_id: query.client_id,
+          redirect_uri: query.redirect_uri,
+          token: token.get('token')})}`,
+        appName: client.get('client_name'),
+      };
+
+      let template = await themeService.renderThemedTemplate(query.client_id, 'change-email-verify-email', viewContext);
+
+      if (!template) {
+        template = await renderTemplate('change-email-verify-email', viewContext, {
+          layout: 'email',
+        });
+      }
+
+      await emailService.send({
+        to: email,
+        subject: 'Verify your new email address',
+        html: template,
+      });
+    },
+
+    async sendChangeEmailAlertEmail(email, client) {
+      const viewContext = {
+        appName: client.get('client_name'),
+      };
+
+      let template = await themeService.renderThemedTemplate(client.get('client_id'), 'change-email-alert-email', viewContext);
+
+      if (!template) {
+        template = await renderTemplate('change-email-alert-email', viewContext, {
+          layout: 'email',
+        });
+      }
+
+      await emailService.send({
+        to: email,
+        subject: 'Email Updated',
+        html: template,
+      });
+    },
+
     async sendVerificationEmail(email, query, user, client) {
       const token = await emailTokenService.create(user.get('id'));
 
