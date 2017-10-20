@@ -233,8 +233,6 @@ module.exports = {
         break;
     }
 
-    console.log(user.get('pending_email'));
-
     return {
       title: 'Email Settings',
       returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
