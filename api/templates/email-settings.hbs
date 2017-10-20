@@ -22,6 +22,11 @@
         <input type="hidden" name="email" value="{{pendingEmail}}" />
         <button type="submit">Resend Verification</button>
       </form>
+      <form action="{{formAction}}" method="post">
+        <input type="hidden" name="action" value="cancel_new" />
+        <input type="hidden" name="email" value="{{pendingEmail}}" />
+        <button type="submit">Cancel</button>
+      </form>
     </div>
   {{/if}}
 
@@ -65,9 +70,9 @@
 
     {{#if success}}
       {{successMessage}}
-      <a href="{{returnTo}}">Back</a>
     {{/if}}
 
+    <a href="{{returnTo}}">Back</a>
     <button type="submit">Submit</button>
   </form>
 </div>

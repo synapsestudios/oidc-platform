@@ -51,6 +51,11 @@ module.exports = (
         case 'new_reverify':
           await userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client);
           break;
+        case 'cancel_new':
+          user.set('pending_email', null);
+          user.set('pending_email_lower', null);
+          await user.save();
+          break;
         case 'change':
           const isAuthenticated = await comparePasswords(current, user);
           if (isAuthenticated) {
@@ -140,8 +145,8 @@ module.exports = (
       await userService.update(user.get('id'), {
         email: bookshelf.knex.raw('pending_email'),
         email_lower: bookshelf.knex.raw('pending_email_lower'),
-        pending_email: bookshelf.knex.raw('null'),
-        pending_email_lower: bookshelf.knex.raw('null'),
+        pending_email: null,
+        pending_email_lower: null,
         profile
       });
       token.destroy();
