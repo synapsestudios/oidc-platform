@@ -265,6 +265,24 @@ module.exports = {
     }
   },
 
+  completeChangePassword : (request, error) => {
+    return {
+      title : error ? 'Email not verified' : 'Email verified',
+      returnTo : request.query.redirect_uri,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+    }
+  },
+
+  emailVerifySuccess : (request, error) => {
+    return {
+      title: error ? 'Email not verified' :'Email Verified',
+      returnTo: request.query.redirect_uri,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+    }
+  },
+
   resetPassword : title => (user, client, request, error) => {
     const redirectSet = request.query.token != undefined;
     return {

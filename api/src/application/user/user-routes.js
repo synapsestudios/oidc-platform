@@ -131,12 +131,13 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       handler: controller.emailVerifySuccessHandler,
       config: {
         validate: {
+          failAction: controller.emailVerifySuccessHandler,
           query: mixedValidation({
             token: Joi.string().guid().required(),
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
-            token: rowExists('email_token', 'token', 'Token not found'),
+            token: rowExists('email_token', 'token', 'Email link no longer valid.'),
             client_id: clientValidator(server),
           }),
         },
@@ -148,18 +149,18 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       handler: controller.completeEmailUpdateHandler,
       config: {
         validate: {
+          failAction: controller.completeEmailUpdateHandler,
           query: mixedValidation({
             token: Joi.string().guid().required(),
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
-            token: rowExists('email_token', 'token', 'Token not found'),
+            token: rowExists('email_token', 'token', 'Email link no longer valid.'),
             client_id: clientValidator(server),
           }),
         },
       }
     },
-
     {
       method: 'GET',
       path: '/user/password',

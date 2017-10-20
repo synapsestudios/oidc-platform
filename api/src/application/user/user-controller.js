@@ -136,34 +136,30 @@ module.exports = (
       }
     }),
 
-    completeEmailUpdateHandler: async (request, reply) => {
-      const token = await emailTokenService.find(request.query.token);
-      const user = await userService.findById(token.get('user_id'));
+    completeEmailUpdateHandler: async (request, reply, source, error) => {
+      if (!error) {
+        const user = await userService.findById(token.get('user_id'));
+        const token = await emailTokenService.find(request.query.token);
+        const userCollection = await bookshelf.model('user').where({email_lower: user.get('pending_email_lower')}).fetchAll();
 
-      const userCollection = await bookshelf.model('user').where({email_lower: user.get('pending_email_lower')}).fetchAll();
-      let error;
-      let title = 'Email Verified';
-      if (userCollection.length >= 1) {
-        error = 'Sorry that email address is already in use';
-        title = 'Email not Verified';
-      } else {
-        const profile = user.get('profile');
-        profile.email_verified = true;
-        await userService.update(user.get('id'), {
-          email: bookshelf.knex.raw('pending_email'),
-          email_lower: bookshelf.knex.raw('pending_email_lower'),
-          pending_email: null,
-          pending_email_lower: null,
-          profile
-        });
+        if (userCollection.length >= 1) {
+          error = {email: ['Sorry that email address is already in use']};
+        } else {
+          let title = 'Email Verified';
+          const profile = user.get('profile');
+          profile.email_verified = true;
+          await userService.update(user.get('id'), {
+            email: bookshelf.knex.raw('pending_email'),
+            email_lower: bookshelf.knex.raw('pending_email_lower'),
+            pending_email: null,
+            pending_email_lower: null,
+            profile
+          });
+          await token.destroy();
+        }
       }
-      await token.destroy();
 
-      const viewContext = {
-        title,
-        returnTo: request.query.redirect_uri,
-        error
-      };
+      const viewContext = views.completeChangePassword(request, error);
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
       if (template) {
@@ -173,19 +169,18 @@ module.exports = (
       }
     },
 
-    emailVerifySuccessHandler: async (request, reply) => {
-      const token = await emailTokenService.find(request.query.token);
-      const user = await userService.findById(token.get('user_id'));
+    emailVerifySuccessHandler: async (request, reply, source, error) => {
+      if (!error) {
+        const token = await emailTokenService.find(request.query.token);
+        const user = await userService.findById(token.get('user_id'));
 
-      const profile = user.get('profile');
-      profile.email_verified = true;
-      await userService.update(user.get('id'), { profile });
-      token.destroy();
+        const profile = user.get('profile');
+        profile.email_verified = true;
+        await userService.update(user.get('id'), { profile });
+        token.destroy();
+      }
 
-      const viewContext = {
-        title: 'Email Verified',
-        returnTo: request.query.redirect_uri,
-      };
+      const viewContext = views.emailVerifySuccess(request, error);
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
       if (template) {
