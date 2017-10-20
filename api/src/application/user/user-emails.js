@@ -11,7 +11,10 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       const token = await emailTokenService.create(user.get('id'));
 
       const viewContext = {
-        url: `${base}/user/email-verify?${querystring.stringify({...query, token: token.get('token')})}`,
+        url: `${base}/user/email-verify?${querystring.stringify({
+          client_id: query.client_id,
+          redirect_uri: query.redirect_uri,
+          token: token.get('token')})}`,
         appName: client.get('client_name'),
       };
 
