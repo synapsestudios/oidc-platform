@@ -1,6 +1,7 @@
 const handlebars = require('handlebars');
 const fs = require('fs');
 const { promisify } = require('util');
+const Hoek = require('hoek');
 
 const defaultLayouts = {
   'end_session': 'default.hbs',
@@ -12,12 +13,23 @@ const defaultLayouts = {
   'reset-password': 'default.hbs',
   'user-profile': 'default.hbs',
   'user-registration': 'default.hbs',
+  'change-password': 'default.hbs',
+  'email-settings': 'default.hbs',
+  'email-verify-success': 'default.hbs',
+
   'forgot-password-email': 'email.hbs',
   'invite-email': 'email.hbs',
-}
+  'change-password-success-email': 'email.hbs',
+  'email-verify-email': 'email.hbs',
+  'change-email-verify-email': 'email.hbs',
+  'change-email-alert-email': 'email.hbs',
+};
+
 
 module.exports = bookshelf => ({
   async renderThemedTemplate(clientId, page, context) {
+    Hoek.assert(clientId, new Error('clientId is required in ThemeService::renderThemedTemplate'));
+
     const client = await bookshelf.model('client')
       .where({client_id: clientId})
       .fetch({ withRelated: ['theme.templates.layout'] });
