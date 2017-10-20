@@ -106,6 +106,23 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       },
     },
     {
+      method: 'GET',
+      path: '/user/complete-email-update',
+      handler: controller.completeEmailUpdateHandler,
+      config: {
+        validate: {
+          query: mixedValidation({
+            token: Joi.string().guid().required(),
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+          }, {
+            token: rowExists('email_token', 'token', 'Token not found'),
+            client_id: clientValidator(server),
+          }),
+        },
+      }
+    },
+    {
       method: 'POST',
       path: '/user/email-settings',
       handler: controller.emailSettingsHandler,

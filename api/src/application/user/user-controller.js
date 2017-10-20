@@ -31,7 +31,8 @@ module.exports = (
   clientService,
   formHandler,
   userEmails,
-  emailTokenService
+  emailTokenService,
+  bookshelf
 ) => {
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
@@ -130,6 +131,34 @@ module.exports = (
       }
     }),
 
+    completeEmailUpdateHandler: async (request, reply) => {
+      const token = await emailTokenService.find(request.query.token);
+      const user = await userService.findById(token.get('user_id'));
+
+      const profile = user.get('profile');
+      profile.email_verified = true;
+      await userService.update(user.get('id'), {
+        email: bookshelf.knex.raw('pending_email'),
+        email_lower: bookshelf.knex.raw('pending_email_lower'),
+        pending_email: bookshelf.knex.raw('null'),
+        pending_email_lower: bookshelf.knex.raw('null'),
+        profile
+      });
+      token.destroy();
+
+      const viewContext = {
+        title: 'Email Verified',
+        returnTo: request.query.redirect_uri,
+      };
+
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
+      if (template) {
+        reply(template);
+      } else {
+        reply.view('email-verify-success', viewContext);
+      }
+    },
+
     emailVerifySuccessHandler: async (request, reply) => {
       const token = await emailTokenService.find(request.query.token);
       const user = await userService.findById(token.get('user_id'));
@@ -211,4 +240,5 @@ module.exports['@require'] = [
   'form-handler',
   'user/user-emails',
   'email-token/email-token-service',
+  'bookshelf',
 ];
