@@ -35,6 +35,7 @@ module.exports = {
       email: payload.email || ''
     }
   },
+
   userProfile: (user, client, request, error) => {
     let validationErrorMessages = {};
     if (error) {
@@ -210,6 +211,7 @@ module.exports = {
       ]
     };
   },
+
   forgotPassword : (user, client, request, error) => ({
     title: 'Forgot Password',
     formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
@@ -217,6 +219,7 @@ module.exports = {
     error: !!error,
     validationErrorMessages: getValidationMessages(error),
   }),
+
   emailSettings : (user, client, request, error) => {
     request.payload = request.payload || {};
     let successMessage;
@@ -248,6 +251,7 @@ module.exports = {
       pendingEmail: user.get('pending_email') || false,
     }
   },
+
   changePassword : (user, client, request, error) => {
     return {
       title: 'Change Password',
@@ -260,6 +264,7 @@ module.exports = {
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     }
   },
+
   resetPassword : title => (user, client, request, error) => {
     const redirectSet = request.query.token != undefined;
     return {
@@ -269,6 +274,7 @@ module.exports = {
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     };
   },
+
   resetPasswordSuccess : request => {
     const { token, ...query } = request.query;
     return {
@@ -276,6 +282,7 @@ module.exports = {
       linkUrl: `/op/auth?${querystring.stringify(query)}`
     };
   },
+
   inviteEmail : (appName, baseUrl, query) => ({
     url: `${baseUrl}/user/accept-invite?${querystring.stringify(query)}`.replace(' ', '%20'),
     appName: appName,

@@ -89,6 +89,43 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       }
     },
     {
+      method: 'POST',
+      path: '/user/email-settings',
+      handler: controller.emailSettingsHandler,
+      config: {
+        auth: {
+          strategy: 'oidc_session',
+        },
+        validate: {
+          failAction: controller.emailSettingsHandler,
+          query: mixedValidation({
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            profile: Joi.string(),
+          }, {
+            client_id: clientValidator(server),
+          }),
+          payload: mixedValidation({
+            action: Joi.any().valid(['reverify', 'new_reverify', 'change', 'cancel_new']).required(),
+            email : Joi.string().email().required(),
+            current : Joi.alternatives().when('action', {
+              is: 'change',
+              then: Joi.string().required(),
+              otherwise: Joi.any().forbidden()
+            }),
+          }, {
+            email: async (value, options) => {
+              if (options.context.values.action === 'change') {
+                return emailValidator(value, options);
+              } else {
+                return value;
+              }
+            },
+          })
+        },
+      },
+    },
+    {
       method: 'GET',
       path: '/user/email-verify',
       handler: controller.emailVerifySuccessHandler,
@@ -122,43 +159,7 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
         },
       }
     },
-    {
-      method: 'POST',
-      path: '/user/email-settings',
-      handler: controller.emailSettingsHandler,
-      config: {
-        auth: {
-          strategy: 'oidc_session',
-        },
-        validate: {
-          failAction: controller.emailSettingsHandler,
-          query: mixedValidation({
-            client_id: Joi.string().required(),
-            redirect_uri: Joi.string().required(),
-            profile: Joi.string(),
-          }, {
-            client_id: clientValidator(server),
-          }),
-          payload: mixedValidation({
-            action: Joi.any().valid(['reverify', 'new_reverify', 'change']).required(),
-            email : Joi.string().email().required(),
-            current : Joi.alternatives().when('action', {
-              is: 'change',
-              then: Joi.string().required(),
-              otherwise: Joi.any().forbidden()
-            }),
-          }, {
-            email: async (value, options) => {
-              if (options.context.values.action === 'change') {
-                return emailValidator(value, options);
-              } else {
-                return value;
-              }
-            },
-          })
-        },
-      },
-    },
+
     {
       method: 'GET',
       path: '/user/password',

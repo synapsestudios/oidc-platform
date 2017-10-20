@@ -51,6 +51,11 @@ module.exports = (
         case 'new_reverify':
           await userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client);
           break;
+        case 'cancel_new':
+          user.set('pending_email', null);
+          user.set('pending_email_lower', null);
+          await user.save();
+          break;
         case 'change':
           const isAuthenticated = await comparePasswords(current, user);
           if (isAuthenticated) {
@@ -135,20 +140,29 @@ module.exports = (
       const token = await emailTokenService.find(request.query.token);
       const user = await userService.findById(token.get('user_id'));
 
-      const profile = user.get('profile');
-      profile.email_verified = true;
-      await userService.update(user.get('id'), {
-        email: bookshelf.knex.raw('pending_email'),
-        email_lower: bookshelf.knex.raw('pending_email_lower'),
-        pending_email: bookshelf.knex.raw('null'),
-        pending_email_lower: bookshelf.knex.raw('null'),
-        profile
-      });
-      token.destroy();
+      const userCollection = await bookshelf.model('user').where({email_lower: user.get('pending_email_lower')}).fetchAll();
+      let error;
+      let title = 'Email Verified';
+      if (userCollection.length >= 1) {
+        error = 'Sorry that email address is already in use';
+        title = 'Email not Verified';
+      } else {
+        const profile = user.get('profile');
+        profile.email_verified = true;
+        await userService.update(user.get('id'), {
+          email: bookshelf.knex.raw('pending_email'),
+          email_lower: bookshelf.knex.raw('pending_email_lower'),
+          pending_email: null,
+          pending_email_lower: null,
+          profile
+        });
+      }
+      await token.destroy();
 
       const viewContext = {
-        title: 'Email Verified',
+        title,
         returnTo: request.query.redirect_uri,
+        error
       };
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
