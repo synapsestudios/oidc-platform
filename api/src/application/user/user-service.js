@@ -58,30 +58,32 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       });
     },
 
-    inviteUser({email, app_name, hours_till_expiration, template, app_metadata, profile, ...payload}) {
-      return clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri).then(clients => {
-        if (clients.models.length === 0) {
-          throw Boom.badData('The provided redirect uri is invalid for the given client id.');
-        }
-      }).then(()=> self.create(
-        email,
-        uuid.v4(),
-        {
+    async inviteUser({email, app_name, hours_till_expiration, template, app_metadata, profile, ...payload}) {
+      const clients = await clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri);
+      if (clients.models.length === 0) {
+        throw Boom.badData('The provided redirect uri is invalid for the given client id.');
+      }
+
+      return bookshelf.transaction(async trx => {
+        const user = await self.create(email, uuid.v4(), {
           app_metadata: app_metadata || {},
           profile : profile || {}
-        }
-      )).then(user => {
-        return userEmails.sendInviteEmail(
+        }, { transacting: trx });
+
+        await userEmails.sendInviteEmail(
           user,
           app_name,
           hours_till_expiration,
           template,
-          payload
-        ).then(() => user);
+          payload,
+          { transacting: trx }
+        );
+
+        return user;
       });
     },
 
-    create: function(email, password, additional) {
+    create: function(email, password, additional, saveOptions) {
       additional = additional || {};
       const app_metadata = additional.app_metadata || [];
       const profile = Object.assign(
@@ -100,7 +102,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
           password : hashedPass,
           profile,
           app_metadata
-        }).save({}, {method: 'insert'}));
+        }).save({}, Object.assign({method: 'insert'}, saveOptions)));
     },
 
     update: function(id, payload) {

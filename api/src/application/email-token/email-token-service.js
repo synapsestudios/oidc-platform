@@ -2,7 +2,7 @@ const uuid = require('uuid');
 
 module.exports = bookshelf => {
   return {
-    create: function(userId, hoursTilExpiration) {
+    create: function(userId, hoursTilExpiration, saveOptions) {
       hoursTilExpiration = hoursTilExpiration || 1;
       const expires = new Date();
       expires.setHours(expires.getHours() + hoursTilExpiration);
@@ -11,7 +11,7 @@ module.exports = bookshelf => {
         token: uuid.v4(),
         user_id: userId,
         expires_at: expires,
-      }).save({}, {method: 'insert'});
+      }).save({}, Object.assign({method: 'insert'}, saveOptions));
     },
 
     find: function(token) {

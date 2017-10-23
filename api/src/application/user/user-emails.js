@@ -121,13 +121,13 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       });
     },
 
-    async sendInviteEmail(user, appName, hoursTilExpiration, templateOverride, query) {
+    async sendInviteEmail(user, appName, hoursTilExpiration, templateOverride, query, saveOptions) {
       Hoek.assert(Hoek.contain(
         Object.keys(query),
         ['client_id', 'redirect_uri', 'scope', 'response_type'],
       ), new Error('query must contain client_id, redirect_uri, response_type, and scope'));
 
-      const token = await emailTokenService.create(user.get('id'), hoursTilExpiration);
+      const token = await emailTokenService.create(user.get('id'), hoursTilExpiration, saveOptions);
       const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), {...query, token: token.get('token')});
       let emailBody;
 
