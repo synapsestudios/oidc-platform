@@ -1,3 +1,8 @@
+## [v2.0.1](https://github.com/synapsestudios/oidc-platform/compare/v2.0.0...v2.1.0) - 2017-10-23
+### Changed
+- [#142](https://github.com/synapsestudios/oidc-platform/issues/142) Remove deprecated template schema
+- [#59](https://github.com/synapsestudios/oidc-platform/issues/59) Change password
+- [#114](https://github.com/synapsestudios/oidc-platform/issues/114) Email Settings
 ## [v2.0.0](https://github.com/synapsestudios/oidc-platform/compare/v1.4.0...v2.0.0) - 2017-10-10
 ### Changed
 - [#162](https://github.com/synapsestudios/oidc-platform/issues/162) Stop allowing the access token for auth on the profile screen
