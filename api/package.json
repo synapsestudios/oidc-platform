@@ -17,7 +17,7 @@
     "type": "git",
     "url": "git+https://github.com/synapsestudios/hapi-api-template.git"
   },
-  "author": "Synapse Studios, LLC",
+  "author": "Synapse Studios, LLC (http://synapsestudios.com)",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/synapsestudios/hapi-api-template/issues"
