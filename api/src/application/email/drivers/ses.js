@@ -2,6 +2,7 @@ const AWS = require('aws-sdk');
 AWS.config.update({region: 'us-west-2'});
 const ses = new AWS.SES({apiVersion: '2010-12-01'});
 const checkWhitelist = require('../check-whitelist');
+const Boom = require('boom');
 
 class SesDriver {
   send(emailObject) {
@@ -38,11 +39,10 @@ class SesDriver {
       };
 
       ses.sendEmail(params).promise().then(result => {
-        console.log(result);
         resolve(result);
       })
         .catch(err => {
-          reject(err);
+          reject(Boom.wrap(err, err.statusCode));
         });
     });
   }
