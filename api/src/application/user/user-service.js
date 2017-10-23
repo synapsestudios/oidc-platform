@@ -58,27 +58,26 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       });
     },
 
-    inviteUser({email, app_name, hours_till_expiration, template, app_metadata, profile, ...payload}) {
-      return clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri).then(clients => {
-        if (clients.models.length === 0) {
-          throw Boom.badData('The provided redirect uri is invalid for the given client id.');
-        }
-      }).then(()=> self.create(
-        email,
-        uuid.v4(),
-        {
-          app_metadata: app_metadata || {},
-          profile : profile || {}
-        }
-      )).then(user => {
-        return userEmails.sendInviteEmail(
-          user,
-          app_name,
-          hours_till_expiration,
-          template,
-          payload
-        ).then(() => user);
+    async inviteUser({email, app_name, hours_till_expiration, template, app_metadata, profile, ...payload}) {
+      const clients = await clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri);
+      if (clients.models.length === 0) {
+        throw Boom.badData('The provided redirect uri is invalid for the given client id.');
+      }
+
+      const user = await self.create(email, uuid.v4(), {
+        app_metadata: app_metadata || {},
+        profile : profile || {}
       });
+
+      await userEmails.sendInviteEmail(
+        user,
+        app_name,
+        hours_till_expiration,
+        template,
+        payload
+      );
+
+      return user;
     },
 
     create: function(email, password, additional) {
