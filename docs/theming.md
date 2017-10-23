@@ -26,6 +26,13 @@ Templates are the individual screens that can be created. To create a new templa
 | login                   | The login form                                                                     |
 | end_session             | The identity provider logout screen                                                |
 | interaction             | Any other OIDC interactions                                                        |
+| change-password         | The change password form |
+| change-password-success-email | The email that alerts users that their password has changed |
+| email-settings | The email settings screen |
+| email-verify-success | The success screen users see after clicking the verify link from their email |
+| email-verify-email | The email address verification email |
+| change-email-verify-email | The email sent to the new address with a verify link after the user changes their email |
+| change-email-alert-email | The eamil sent to the old address with an alert that the user's email has changed |
 
 ##### Variables
 
@@ -157,6 +164,75 @@ You'll receive a field object for each of these fields:
 ```
 {
   // nothing
+}
+```
+
+###### change-password
+```
+{
+  formAction, // url the form will post to
+  returnTo, // url to return the user to if they cancel
+  error, // bool, true if there are errors
+  validationErrorMessages, // errors formatted like { field: ['message', 'message2'] }
+}
+```
+
+###### change-password-success-email
+```
+{
+  appName, // the name of the client application
+}
+```
+
+###### email-settings
+The email settings screen allows the user to do one of four things:
+1. Change their email address
+1. Resend a verification email to their current address (if unverified)
+1. Resend a verification email to their new pending address
+1. Cancel a pending email change
+
+```
+{
+  formAction, // the url the forms should post to
+  email, // user's current email
+  emailVerified, // bool indicating whether or not the user has verified their email address
+  pendingEmail, // the user's new email. only shown if they haven't yet verified the new email
+  success, // bool indicating whether one of the forms was successfully submitted
+  successMessage, // A message to show the user when one of the form actions succeeds
+  returnTo, // url to return the user to if they cancel
+  error, // bool, true if there are errors
+  validationErrorMessages, // errors formatted like { field: ['message', 'message2'] }
+}
+```
+
+###### email-verify-success
+```
+{
+  returnTo, // url to return the user to if they cancel
+  validationErrorMessages, // errors formatted like { field: ['message', 'message2'] }
+}
+```
+
+###### email-verify-email
+```
+{
+  appName, // client application name
+  url, // the verification url
+}
+```
+
+###### change-email-verify-email
+```
+{
+  appName, // client application name
+  url, // the verification url
+}
+```
+
+###### change-email-alert-email
+```
+{
+  appName, // client application name
 }
 ```
 
