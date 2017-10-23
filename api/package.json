@@ -1,6 +1,6 @@
 {
   "name": "identity-platform-api",
-  "version": "0.0.0",
+  "version": "2.1.0",
   "description": "OpenID Connect provider for synapse projects",
   "main": "server.js",
   "scripts": {
@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/synapsestudios/hapi-api-template.git"
+    "url": "https://github.com/synapsestudios/oidc-platform"
   },
   "author": "Synapse Studios, LLC (http://synapsestudios.com)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/synapsestudios/hapi-api-template/issues"
+    "url": "https://github.com/synapsestudios/oidc-platform/issues"
   },
-  "homepage": "https://github.com/synapsestudios/hapi-api-template#readme",
+  "homepage": "https://github.com/synapsestudios/oidc-platform",
   "dependencies": {
     "aws-sdk": "^2.9.0",
     "bcrypt": "^1.0.2",
