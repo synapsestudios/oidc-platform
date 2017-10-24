@@ -35,7 +35,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return model.fetchAll();
     },
 
-    resendUserInvite(userId, appName, clientId, redirectUri, responseType, scope, hoursTillExpiration, template, nonce) {
+    resendUserInvite(userId, clientId, redirectUri, responseType, scope, hoursTillExpiration, template, nonce) {
       return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
         if (!user) {
           return Boom.notFound();
@@ -54,7 +54,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       });
     },
 
-    async inviteUser({email, app_name, hours_till_expiration, template, app_metadata, profile, ...payload}) {
+    async inviteUser({email, hours_till_expiration, template, app_metadata, profile, ...payload}) {
       const client = await clientService.findById(payload.client_id);
       return bookshelf.transaction(async trx => {
         const user = await self.create(email, uuid.v4(), {

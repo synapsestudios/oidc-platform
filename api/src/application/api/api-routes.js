@@ -17,7 +17,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       validate: {
         payload: mixedValidation(
           {
-            app_name: Joi.string().required(),
             client_id: Joi.string().required(),
             email: Joi.string().email().required(),
             redirect_uri: Joi.string().required(),
@@ -44,7 +43,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       reply(
         userService.resendUserInvite(
           request.params.userId,
-          request.payload.app_name,
           request.payload.client_id,
           request.payload.redirect_uri,
           request.payload.response_type,
@@ -70,7 +68,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           }
         ),
         payload: {
-          app_name: Joi.string().required(),
           client_id: Joi.string().required(),
           redirect_uri: Joi.string().required(),
           response_type: Joi.string().required(),
