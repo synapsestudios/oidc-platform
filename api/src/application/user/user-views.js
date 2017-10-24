@@ -315,8 +315,10 @@ module.exports = {
     };
   },
 
-  inviteEmail : (appName, baseUrl, query) => ({
+  inviteEmail : (user, client, baseUrl, query) => ({
+    user: user.serialize(),
+    client: client.serialize({strictOidc:true}),
     url: `${baseUrl}/user/accept-invite?${querystring.stringify(query)}`.replace(' ', '%20'),
-    appName: appName,
+    appName: client.get('client_name'),
   }),
 };

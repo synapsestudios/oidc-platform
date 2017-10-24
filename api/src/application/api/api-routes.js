@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 
-module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists) => [
+module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator) => [
   {
     method: 'POST',
     path: '/api/invite',
@@ -30,7 +30,8 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
             hours_till_expiration: hoursTillExpirationSchema,
           },
           {
-            email: rowNotExists('user', 'email', 'Email already in use')
+            email: rowNotExists('user', 'email', 'Email already in use'),
+            client_id: clientValidator,
           }
         )
       }
@@ -131,4 +132,5 @@ module.exports['@require'] = [
   'validator/mixed-validation',
   'validator/constraints/row-not-exists',
   'validator/constraints/row-exists',
+  'validator/constraints/client-validator',
 ];

@@ -40,11 +40,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
         if (!user) {
           return Boom.notFound();
         }
-        return clientService.findByRedirectUriAndClientId(clientId, redirectUri).then(clients => {
-          if (clients.models.length === 0) {
-            throw Boom.badData('The provided redirect uri is invalid for the given client id.');
-          }
-
+        return clientService.findById(clientId).then(client => {
           const query = {
             client_id: clientId,
             redirect_uri: redirectUri,
@@ -52,18 +48,14 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
             scope,
           };
           if (nonce) query.nonce = nonce;
-          return userEmails.sendInviteEmail(user, appName, hoursTillExpiration, template, query).then(() => user);
+          return userEmails.sendInviteEmail(user, client, hoursTillExpiration, template, query).then(() => user);
         });
 
       });
     },
 
     async inviteUser({email, app_name, hours_till_expiration, template, app_metadata, profile, ...payload}) {
-      const clients = await clientService.findByRedirectUriAndClientId(payload.client_id, payload.redirect_uri);
-      if (clients.models.length === 0) {
-        throw Boom.badData('The provided redirect uri is invalid for the given client id.');
-      }
-
+      const client = await clientService.findById(payload.client_id);
       return bookshelf.transaction(async trx => {
         const user = await self.create(email, uuid.v4(), {
           app_metadata: app_metadata || {},
@@ -72,7 +64,7 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
 
         await userEmails.sendInviteEmail(
           user,
-          app_name,
+          client,
           hours_till_expiration,
           template,
           payload,

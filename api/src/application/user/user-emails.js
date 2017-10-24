@@ -121,14 +121,14 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       });
     },
 
-    async sendInviteEmail(user, appName, hoursTilExpiration, templateOverride, query, saveOptions) {
+    async sendInviteEmail(user, client, hoursTilExpiration, templateOverride, query, saveOptions) {
       Hoek.assert(Hoek.contain(
         Object.keys(query),
         ['client_id', 'redirect_uri', 'scope', 'response_type'],
       ), new Error('query must contain client_id, redirect_uri, response_type, and scope'));
 
       const token = await emailTokenService.create(user.get('id'), hoursTilExpiration, saveOptions);
-      const viewContext = userViews.inviteEmail(appName, config('/baseUrl'), {...query, token: token.get('token')});
+      const viewContext = userViews.inviteEmail(user, client, config('/baseUrl'), {...query, token: token.get('token')});
       let emailBody;
 
       if (templateOverride) {
@@ -144,9 +144,11 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
         }
       }
 
+      console.log(client);
+
       return await emailService.send({
         to: user.get('email'),
-        subject: `${appName} Invitation`,
+        subject: `${client.get('client_name')} Invitation`,
         html: emailBody,
       });
     },
