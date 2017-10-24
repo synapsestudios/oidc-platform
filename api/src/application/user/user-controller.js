@@ -120,11 +120,11 @@ module.exports = (
     }),
 
     forgotPasswordHandler: formHandler('forgot-password', views.forgotPassword, async (request, reply, user, client, render) => {
-      user = await userService.findByEmailForOidc(request.payload.email);
+      user = await userService.findByEmail(request.payload.email);
 
       let token;
       if (user) {
-        await userEmails.sendForgotPasswordEmail(request.payload.email, request.query, user.accountId);
+        await userEmails.sendForgotPasswordEmail(user, client, request.payload.email, request.query);
       }
 
       const viewContext = { title: 'Forgot Password' };

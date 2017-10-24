@@ -101,9 +101,9 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
       return bookshelf.model('user').forge({ id }).save(payload, { patch: true });
     },
 
-    findByEmailForOidc: function(email) {
+    findByEmail: function(email, serializeOptions = {}) {
       return bookshelf.model('user').where({ email_lower: email.toLowerCase() }).fetch()
-        .then(user => user ? user.serialize({strictOidc: true}) : null);
+        .then(user => user ? user.serialize(serializeOptions) : null);
     },
 
     findById: function(id) {

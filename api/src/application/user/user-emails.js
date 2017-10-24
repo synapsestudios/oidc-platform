@@ -99,8 +99,8 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       });
     },
 
-    async sendForgotPasswordEmail(email, query, userId) {
-      const token = await emailTokenService.create(userId);
+    async sendForgotPasswordEmail(user, client, email, query) {
+      const token = await emailTokenService.create(user.get('id'));
       const newQuery = querystring.stringify(Object.assign({}, query, { token: token.get('token') }));
       let template = await themeService.renderThemedTemplate(query.client_id, 'forgot-password-email', {
         url: `${base}/user/reset-password?${newQuery}`
@@ -108,6 +108,8 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
 
       if (!template) {
         template = await renderTemplate('forgot-password-email', {
+          user: user.serialize(),
+          client: client.serialize({strictOidc:true}),
           url: `${base}/user/reset-password?${newQuery}`,
         }, {
           layout: 'email',
@@ -143,8 +145,6 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
           });
         }
       }
-
-      console.log(client);
 
       return await emailService.send({
         to: user.get('email'),
