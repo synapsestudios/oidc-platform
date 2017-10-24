@@ -130,6 +130,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path: '/user/email-verify',
       handler: controller.emailVerifySuccessHandler,
       config: {
+        auth: {
+          strategy: 'email_token',
+        },
         validate: {
           failAction: controller.emailVerifySuccessHandler,
           query: mixedValidation({
@@ -338,6 +341,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path: '/user/accept-invite',
       handler: setPasswordHandler,
       config: {
+        auth: {
+          strategy: 'email_token',
+        },
         validate: {
           query: {
             token: Joi.string().guid().required(),
