@@ -27,6 +27,7 @@ module.exports = {
   userRegistration : (user, client, request, error) => {
     const payload = request.payload || {};
     return {
+      client: client.serialize({strictOidc:true}),
       title: 'Sign Up',
       formAction: `/user/register?${querystring.stringify(request.query)}`,
       returnTo: `${request.query.redirect_uri}`,
@@ -51,6 +52,8 @@ module.exports = {
     };
 
     return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
       changePassUrl: `/user/password?${querystring.stringify({
         client_id: request.query.client_id,
         redirect_uri: request.query.redirect_uri,
@@ -213,6 +216,7 @@ module.exports = {
   },
 
   forgotPassword : (user, client, request, error) => ({
+    client: client.serialize({strictOidc:true}),
     title: 'Forgot Password',
     formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
     returnTo: `${request.query.redirect_uri}`,
@@ -237,6 +241,8 @@ module.exports = {
     }
 
     return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
       title: 'Email Settings',
       returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
         client_id: request.query.client_id,
@@ -254,6 +260,8 @@ module.exports = {
 
   changePassword : (user, client, request, error) => {
     return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
       title: 'Change Password',
       returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
         client_id: request.query.client_id,
@@ -265,8 +273,10 @@ module.exports = {
     }
   },
 
-  completeChangePassword : (request, error) => {
+  completeChangePassword : (user, client, request, error) => {
     return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
       title : error ? 'Email not verified' : 'Email verified',
       returnTo : request.query.redirect_uri,
       error: !!error,
@@ -274,8 +284,10 @@ module.exports = {
     }
   },
 
-  emailVerifySuccess : (request, error) => {
+  emailVerifySuccess : (user, client, request, error) => {
     return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
       title: error ? 'Email not verified' :'Email Verified',
       returnTo: request.query.redirect_uri,
       error: !!error,
@@ -286,6 +298,8 @@ module.exports = {
   resetPassword : title => (user, client, request, error) => {
     const redirectSet = request.query.token != undefined;
     return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
       title: title,
       returnTo: (redirectSet) ? false : `${request.query.redirect_uri}`,
       error: !!error,
@@ -301,8 +315,10 @@ module.exports = {
     };
   },
 
-  inviteEmail : (appName, baseUrl, query) => ({
+  inviteEmail : (user, client, baseUrl, query) => ({
+    user: user.serialize(),
+    client: client.serialize({strictOidc:true}),
     url: `${baseUrl}/user/accept-invite?${querystring.stringify(query)}`.replace(' ', '%20'),
-    appName: appName,
+    appName: client.get('client_name'),
   }),
 };

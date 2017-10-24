@@ -37,7 +37,7 @@ module.exports = (
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
       user = await userService.create(request.payload.email, request.payload.password)
-      await userEmails.sendVerificationEmail(request.payload.email, request.query, user, client);
+      await userEmails.sendVerificationEmail(user, client, request.payload.email, request.query);
       reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
     }),
 
@@ -64,8 +64,8 @@ module.exports = (
             await user.save();
 
             await Promise.all([
-              userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client),
-              userEmails.sendChangeEmailAlertEmail(user.get('email'), client),
+              userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query),
+              userEmails.sendChangeEmailAlertEmail(user,client, user.get('email')),
             ]);
 
           } else {
@@ -85,7 +85,7 @@ module.exports = (
       if (isAuthenticated) {
         const hashedPassword = await userService.encryptPassword(password);
         await userService.update(user.get('id'), { password: hashedPassword });
-        await userEmails.sendPasswordChangeEmail(user.get('email'), client);
+        await userEmails.sendPasswordChangeEmail(user, client, user.get('email'));
       } else {
         error = { current: ['Password is incorrect'] };
       }
@@ -120,11 +120,11 @@ module.exports = (
     }),
 
     forgotPasswordHandler: formHandler('forgot-password', views.forgotPassword, async (request, reply, user, client, render) => {
-      user = await userService.findByEmailForOidc(request.payload.email);
+      user = await userService.findByEmail(request.payload.email);
 
       let token;
       if (user) {
-        await userEmails.sendForgotPasswordEmail(request.payload.email, request.query, user.accountId);
+        await userEmails.sendForgotPasswordEmail(user, client, request.payload.email, request.query);
       }
 
       const viewContext = { title: 'Forgot Password' };
@@ -137,9 +137,11 @@ module.exports = (
     }),
 
     completeEmailUpdateHandler: async (request, reply, source, error) => {
+      const token = request.auth.credentials.token;
+      const user = request.auth.credentials.user;
+      const client = await clientService.findById(request.query.client_id);
+
       if (!error) {
-        const user = await userService.findById(token.get('user_id'));
-        const token = await emailTokenService.find(request.query.token);
         const userCollection = await bookshelf.model('user').where({email_lower: user.get('pending_email_lower')}).fetchAll();
 
         if (userCollection.length >= 1) {
@@ -159,7 +161,7 @@ module.exports = (
         }
       }
 
-      const viewContext = views.completeChangePassword(request, error);
+      const viewContext = views.completeChangePassword(user, client, request, error);
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
       if (template) {
@@ -170,17 +172,18 @@ module.exports = (
     },
 
     emailVerifySuccessHandler: async (request, reply, source, error) => {
-      if (!error) {
-        const token = await emailTokenService.find(request.query.token);
-        const user = await userService.findById(token.get('user_id'));
+      const token = request.auth.credentials.token;
+      const user = request.auth.credentials.user;
 
+      if (!error) {
         const profile = user.get('profile');
         profile.email_verified = true;
         await userService.update(user.get('id'), { profile });
         token.destroy();
       }
 
-      const viewContext = views.emailVerifySuccess(request, error);
+      const client = await clientService.findById(request.query.client_id);
+      const viewContext = views.emailVerifySuccess(user, client, request, error);
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
       if (template) {
@@ -191,34 +194,18 @@ module.exports = (
     },
 
     resetPassword: async function(request, reply, user, client, render) {
-      const token = await emailTokenService.find(request.query.token);
-      if (token) {
-        user = await userService.findById(token.get('user_id'));
+      const token = request.auth.credentials.token;
+      const password = await userService.encryptPassword(request.payload.password)
+      const profile = user.get('profile');
+      profile.email_verified = true;
+      await userService.update(user.get('id'), { password, profile });
+
+      const viewContext = views.resetPasswordSuccess(request);
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
+      if (template) {
+        reply(template);
       } else {
-        user = await userService.findByPasswordToken(request.query.token);
-      }
-
-      if (user) {
-        const password = await userService.encryptPassword(request.payload.password)
-        const profile = user.get('profile');
-        profile.email_verified = true;
-        await userService.update(user.get('id'), { password, profile });
-
-        if (token) {
-          await token.destroy();
-        } else {
-          await userService.destroyPasswordToken(request.query.token);
-        }
-
-        const viewContext = views.resetPasswordSuccess(request);
-        const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('reset-password-success', viewContext);
-        }
-      } else {
-        await render({ token: ['Token is invalid or expired'] })
+        reply.view('reset-password-success', viewContext);
       }
     },
 

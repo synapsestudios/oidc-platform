@@ -4,12 +4,14 @@ module.exports = (
   clientService
 ) => {
   return (templateName, getView, postHandler) => async (request, reply, source, error) => {
-
     try {
       const client = await clientService.findById(request.query.client_id);
-      const user = request.auth.isAuthenticated
-        ? await userService.findById(request.auth.credentials.accountId())
-        : null;
+      let user = null;
+      if (request.auth.isAuthenticated) {
+        user = request.auth.strategy === 'email_token'
+          ? request.auth.credentials.user
+          : await userService.findById(request.auth.credentials.accountId());
+      }
 
       const render = async e => {
         const viewContext = getView(user, client, request, e);

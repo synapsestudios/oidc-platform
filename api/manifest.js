@@ -62,6 +62,11 @@ module.exports = Promise.all([
       },
       {
         plugin: {
+          register: './plugins/email-token-scheme',
+        }
+      },
+      {
+        plugin: {
           register: 'good',
           options: {
             reporters: {

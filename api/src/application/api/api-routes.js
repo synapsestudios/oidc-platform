@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 
-module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists) => [
+module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator) => [
   {
     method: 'POST',
     path: '/api/invite',
@@ -17,7 +17,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       validate: {
         payload: mixedValidation(
           {
-            app_name: Joi.string().required(),
             client_id: Joi.string().required(),
             email: Joi.string().email().required(),
             redirect_uri: Joi.string().required(),
@@ -30,7 +29,8 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
             hours_till_expiration: hoursTillExpirationSchema,
           },
           {
-            email: rowNotExists('user', 'email', 'Email already in use')
+            email: rowNotExists('user', 'email', 'Email already in use'),
+            client_id: clientValidator,
           }
         )
       }
@@ -43,7 +43,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       reply(
         userService.resendUserInvite(
           request.params.userId,
-          request.payload.app_name,
           request.payload.client_id,
           request.payload.redirect_uri,
           request.payload.response_type,
@@ -69,7 +68,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           }
         ),
         payload: {
-          app_name: Joi.string().required(),
           client_id: Joi.string().required(),
           redirect_uri: Joi.string().required(),
           response_type: Joi.string().required(),
@@ -131,4 +129,5 @@ module.exports['@require'] = [
   'validator/mixed-validation',
   'validator/constraints/row-not-exists',
   'validator/constraints/row-exists',
+  'validator/constraints/client-validator',
 ];

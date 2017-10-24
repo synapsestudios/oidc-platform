@@ -12,20 +12,7 @@ const queryValidation = {
   nonce : Joi.string().optional(),
 };
 
-const clientValidator = server => async (value, options) => {
-  const provider = server.plugins['open-id-connect'].provider;
-
-  const client = await provider.Client.find(value);
-  if (!client) throw Boom.notFound('Client not found');
-
-  const redirectUri = options.context.values.redirect_uri;
-  if (client.redirectUris.indexOf(redirectUri) < 0) throw Boom.forbidden('redirect_uri not in whitelist');
-
-  return value;
-}
-
-
-module.exports = (bookshelf, service, controller, mixedValidation, ValidationError, server, formHandler, rowExists) => {
+module.exports = (bookshelf, service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, clientValidator) => {
   const emailValidator = async (value, options) => {
     const userCollection = await bookshelf.model('user').where({email_lower: value.toLowerCase()}).fetchAll();
     if (userCollection.length >= 1) {
@@ -34,7 +21,6 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
 
     return value;
   }
-
 
   const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
   const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
@@ -83,7 +69,7 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
           }, {
-            client_id: clientValidator(server),
+            client_id: clientValidator,
           }),
         }
       }
@@ -103,7 +89,7 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
           }, {
-            client_id: clientValidator(server),
+            client_id: clientValidator,
           }),
           payload: mixedValidation({
             action: Joi.any().valid(['reverify', 'new_reverify', 'change', 'cancel_new']).required(),
@@ -130,6 +116,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path: '/user/email-verify',
       handler: controller.emailVerifySuccessHandler,
       config: {
+        auth: {
+          strategy: 'email_token',
+        },
         validate: {
           failAction: controller.emailVerifySuccessHandler,
           query: mixedValidation({
@@ -137,8 +126,7 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
-            token: rowExists('email_token', 'token', 'Email link no longer valid.'),
-            client_id: clientValidator(server),
+            client_id: clientValidator,
           }),
         },
       },
@@ -148,6 +136,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path: '/user/complete-email-update',
       handler: controller.completeEmailUpdateHandler,
       config: {
+        auth: {
+          strategy: 'email_token',
+        },
         validate: {
           failAction: controller.completeEmailUpdateHandler,
           query: mixedValidation({
@@ -155,8 +146,7 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
-            token: rowExists('email_token', 'token', 'Email link no longer valid.'),
-            client_id: clientValidator(server),
+            client_id: clientValidator,
           }),
         },
       }
@@ -175,7 +165,7 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
           }, {
-            client_id: clientValidator(server),
+            client_id: clientValidator,
           }),
         }
       }
@@ -195,7 +185,7 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
           }, {
-            client_id: clientValidator(server),
+            client_id: clientValidator,
           }),
           payload: {
             current: Joi.string().required(),
@@ -218,7 +208,7 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
-            client_id: clientValidator(server),
+            client_id: clientValidator,
           }),
         }
       }
@@ -244,7 +234,7 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
-            client_id: clientValidator(server),
+            client_id: clientValidator,
           }),
           payload: Joi.object().keys({
             name: Joi.string().allow(''),
@@ -303,6 +293,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path : '/user/reset-password',
       handler : resetPasswordHandler,
       config : {
+        auth: {
+          strategy: 'email_token',
+        },
         validate : {
           query : Object.assign({
             token: Joi.string().required(),
@@ -318,6 +311,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path : '/user/reset-password',
       handler : resetPasswordHandler,
       config : {
+        auth: {
+          strategy: 'email_token',
+        },
         validate : {
           payload : {
             password : Joi.string().min(8).required(),
@@ -338,6 +334,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path: '/user/accept-invite',
       handler: setPasswordHandler,
       config: {
+        auth: {
+          strategy: 'email_token',
+        },
         validate: {
           query: {
             token: Joi.string().guid().required(),
@@ -355,6 +354,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path: '/user/accept-invite',
       handler: setPasswordHandler,
       config: {
+        auth: {
+          strategy: 'email_token'
+        },
         validate: {
           payload : {
             password : Joi.string().min(8).required(),
@@ -397,4 +399,5 @@ module.exports['@require'] = [
   'server',
   'form-handler',
   'validator/constraints/row-exists',
+  'validator/constraints/client-validator',
 ];

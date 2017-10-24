@@ -1,5 +1,6 @@
 ## [v2.0.1](https://github.com/synapsestudios/oidc-platform/compare/v2.0.0...v2.1.0) - 2017-10-23
 ### Changed
+- [#141](https://github.com/synapsestudios/oidc-platform/issues/141) Add user/client to templates
 - [#142](https://github.com/synapsestudios/oidc-platform/issues/142) Remove deprecated template schema
 - [#59](https://github.com/synapsestudios/oidc-platform/issues/59) Change password
 - [#114](https://github.com/synapsestudios/oidc-platform/issues/114) Email Settings
