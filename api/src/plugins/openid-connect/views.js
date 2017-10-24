@@ -4,6 +4,7 @@ module.exports = {
   login: (cookie, client, error) => ({
     client,
     cookie,
+    returnTo: cookie.returnTo,
     title: 'Log In',
     forgotPasswordPath: `/user/forgot-password?${querystring.stringify({
       client_id: cookie.params.client_id,
@@ -18,6 +19,7 @@ module.exports = {
   interaction: (cookie, client) => ({
     client,
     cookie,
+    returnTo: cookie.returnTo,
     title: 'Authorize',
   })
 };

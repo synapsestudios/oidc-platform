@@ -137,9 +137,11 @@ module.exports = (
     }),
 
     completeEmailUpdateHandler: async (request, reply, source, error) => {
+      const client = await clientService.findById(request.query.client_id);
+      let user;
       if (!error) {
-        const user = await userService.findById(token.get('user_id'));
         const token = await emailTokenService.find(request.query.token);
+        const user = await userService.findById(token.get('user_id'));
         const userCollection = await bookshelf.model('user').where({email_lower: user.get('pending_email_lower')}).fetchAll();
 
         if (userCollection.length >= 1) {

@@ -149,7 +149,8 @@ You'll receive a field object for each of these fields:
 ```
 {
   forgotPasswordPath, // link to the forgot password form
-  error, // string with an error message
+  error, // bool, true if there are errors
+  validationErrorMessages, // errors formatted like { field: ['message', 'message2'] }
 }
 ```
 
@@ -245,12 +246,15 @@ Layouts are the wrapping html that themplates are rendered into. Create a new la
 ```
 {
   /* This is the client object from the oidc provider */
-  /* may not be provided */
   client,
 
   /* This is the cookie object set by the oidc provider */
-  /* may not be provided */
+  /* only provided for login and interaction screens */
   cookie,
+
+  /* This is the user object */
+  /* not provided when the user isn't logged in yet */
+  user,
 
   title
 }
@@ -286,6 +290,19 @@ Client {
   revocationEndpointAuthMethod: 'client_secret_basic',
   revocationEndpointAuthSigningAlg: undefined,
   introspectionEndpointAuthSigningAlg: undefined
+}
+```
+
+##### Example User Object
+```
+{
+  id: 'e0746f3a-9625-4ee3-99e3-7d72ac1bc79a',
+  email: 'aaron+user@something.com',
+  profile: { email_verified: false, phone_number_verified: false },
+  app_metadata: [],
+  email_lower: 'aaron+user@something.com',
+  pending_email: null,
+  pending_email_lower: null
 }
 ```
 

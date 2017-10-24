@@ -4,7 +4,6 @@ module.exports = (
   clientService
 ) => {
   return (templateName, getView, postHandler) => async (request, reply, source, error) => {
-
     try {
       const client = await clientService.findById(request.query.client_id);
       const user = request.auth.isAuthenticated
