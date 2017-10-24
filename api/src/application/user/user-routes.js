@@ -35,7 +35,6 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
     return value;
   }
 
-
   const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
   const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
 
@@ -140,7 +139,6 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
-            token: rowExists('email_token', 'token', 'Email link no longer valid.'),
             client_id: clientValidator(server),
           }),
         },
@@ -151,6 +149,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path: '/user/complete-email-update',
       handler: controller.completeEmailUpdateHandler,
       config: {
+        auth: {
+          strategy: 'email_token',
+        },
         validate: {
           failAction: controller.completeEmailUpdateHandler,
           query: mixedValidation({
@@ -158,7 +159,6 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
-            token: rowExists('email_token', 'token', 'Email link no longer valid.'),
             client_id: clientValidator(server),
           }),
         },

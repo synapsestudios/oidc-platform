@@ -273,8 +273,10 @@ module.exports = {
     }
   },
 
-  completeChangePassword : (request, error) => {
+  completeChangePassword : (user, client, request, error) => {
     return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
       title : error ? 'Email not verified' : 'Email verified',
       returnTo : request.query.redirect_uri,
       error: !!error,
@@ -282,8 +284,10 @@ module.exports = {
     }
   },
 
-  emailVerifySuccess : (request, error) => {
+  emailVerifySuccess : (user, client, request, error) => {
     return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
       title: error ? 'Email not verified' :'Email Verified',
       returnTo: request.query.redirect_uri,
       error: !!error,
@@ -292,7 +296,6 @@ module.exports = {
   },
 
   resetPassword : title => (user, client, request, error) => {
-    console.log(user);
     const redirectSet = request.query.token != undefined;
     return {
       user: user.serialize(),

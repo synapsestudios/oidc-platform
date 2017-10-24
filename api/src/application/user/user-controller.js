@@ -137,11 +137,11 @@ module.exports = (
     }),
 
     completeEmailUpdateHandler: async (request, reply, source, error) => {
+      const token = request.auth.credentials.token;
+      const user = request.auth.credentials.user;
       const client = await clientService.findById(request.query.client_id);
-      let user;
+
       if (!error) {
-        const token = await emailTokenService.find(request.query.token);
-        const user = await userService.findById(token.get('user_id'));
         const userCollection = await bookshelf.model('user').where({email_lower: user.get('pending_email_lower')}).fetchAll();
 
         if (userCollection.length >= 1) {
@@ -161,7 +161,7 @@ module.exports = (
         }
       }
 
-      const viewContext = views.completeChangePassword(request, error);
+      const viewContext = views.completeChangePassword(user, client, request, error);
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
       if (template) {
@@ -172,17 +172,18 @@ module.exports = (
     },
 
     emailVerifySuccessHandler: async (request, reply, source, error) => {
-      if (!error) {
-        const token = await emailTokenService.find(request.query.token);
-        const user = await userService.findById(token.get('user_id'));
+      const token = request.auth.credentials.token;
+      const user = request.auth.credentials.user;
 
+      if (!error) {
         const profile = user.get('profile');
         profile.email_verified = true;
         await userService.update(user.get('id'), { profile });
         token.destroy();
       }
 
-      const viewContext = views.emailVerifySuccess(request, error);
+      const client = await clientService.findById(request.query.client_id);
+      const viewContext = views.emailVerifySuccess(user, client, request, error);
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
       if (template) {
