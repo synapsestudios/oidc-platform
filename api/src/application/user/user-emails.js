@@ -7,7 +7,7 @@ const handlebars = require('handlebars');
 
 module.exports = (emailService, themeService, renderTemplate, emailTokenService) => {
   return {
-    async sendChangeEmailVerifyEmail(email, query, user, client) {
+    async sendChangeEmailVerifyEmail(user, client, email, query) {
       const token = await emailTokenService.create(user.get('id'));
 
       const viewContext = {
@@ -16,6 +16,8 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
           redirect_uri: query.redirect_uri,
           token: token.get('token')})}`,
         appName: client.get('client_name'),
+        user: user.serialize(),
+        client: client.serialize({strictOidc:true}),
       };
 
       let template = await themeService.renderThemedTemplate(query.client_id, 'change-email-verify-email', viewContext);
@@ -33,9 +35,11 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       });
     },
 
-    async sendChangeEmailAlertEmail(email, client) {
+    async sendChangeEmailAlertEmail(user, client, email) {
       const viewContext = {
         appName: client.get('client_name'),
+        user: user.serialize(),
+        client: client.serialize({strictOidc:true}),
       };
 
       let template = await themeService.renderThemedTemplate(client.get('client_id'), 'change-email-alert-email', viewContext);
@@ -53,7 +57,7 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       });
     },
 
-    async sendVerificationEmail(email, query, user, client) {
+    async sendVerificationEmail(user, client, email, query) {
       const token = await emailTokenService.create(user.get('id'));
 
       const viewContext = {
@@ -62,6 +66,8 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
           redirect_uri: query.redirect_uri,
           token: token.get('token')})}`,
         appName: client.get('client_name'),
+        user: user.serialize(),
+        client: client.serialize({strictOidc:true}),
       };
 
       let template = await themeService.renderThemedTemplate(query.client_id, 'forgot-password-email', viewContext);
@@ -79,13 +85,17 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       });
     },
 
-    async sendPasswordChangeEmail(email, client) {
+    async sendPasswordChangeEmail(user, client, email) {
       let template = await themeService.renderThemedTemplate(client.get('client_id'), 'change-password-success-email', {
+        user: user.serialize(),
+        client: client.serialize({strictOidc:true}),
         appName: client.get('client_name'),
       });
 
       if (!template) {
         template = await renderTemplate('change-password-success-email', {
+          user: user.serialize(),
+          client: client.serialize({strictOidc:true}),
           appName: client.get('client_name'),
         }, {
           layout: 'email',
@@ -103,7 +113,10 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       const token = await emailTokenService.create(user.get('id'));
       const newQuery = querystring.stringify(Object.assign({}, query, { token: token.get('token') }));
       let template = await themeService.renderThemedTemplate(query.client_id, 'forgot-password-email', {
-        url: `${base}/user/reset-password?${newQuery}`
+        user: user.serialize(),
+        client: client.serialize({strictOidc:true}),
+        url: `${base}/user/reset-password?${newQuery}`,
+        appName: client.get('client_name'),
       });
 
       if (!template) {
@@ -111,6 +124,7 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
           user: user.serialize(),
           client: client.serialize({strictOidc:true}),
           url: `${base}/user/reset-password?${newQuery}`,
+          appName: client.get('client_name'),
         }, {
           layout: 'email',
         });

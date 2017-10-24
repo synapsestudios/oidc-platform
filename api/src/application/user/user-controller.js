@@ -37,7 +37,7 @@ module.exports = (
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
       user = await userService.create(request.payload.email, request.payload.password)
-      await userEmails.sendVerificationEmail(request.payload.email, request.query, user, client);
+      await userEmails.sendVerificationEmail(user, client, request.payload.email, request.query);
       reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
     }),
 
@@ -64,8 +64,8 @@ module.exports = (
             await user.save();
 
             await Promise.all([
-              userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client),
-              userEmails.sendChangeEmailAlertEmail(user.get('email'), client),
+              userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query),
+              userEmails.sendChangeEmailAlertEmail(user,client, user.get('email')),
             ]);
 
           } else {
@@ -85,7 +85,7 @@ module.exports = (
       if (isAuthenticated) {
         const hashedPassword = await userService.encryptPassword(password);
         await userService.update(user.get('id'), { password: hashedPassword });
-        await userEmails.sendPasswordChangeEmail(user.get('email'), client);
+        await userEmails.sendPasswordChangeEmail(user, client, user.get('email'));
       } else {
         error = { current: ['Password is incorrect'] };
       }
