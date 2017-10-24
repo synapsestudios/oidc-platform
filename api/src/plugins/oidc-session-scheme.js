@@ -5,21 +5,21 @@ exports.register = function (server, pluginOptions, next) {
     return {
 
       async authenticate(request, reply) {
-        /*
-         * WHY DON'T I HAVE A SESSION ID IN MY COOKIES???
-         */
-
-        try {
-          var session = await request.server.plugins['open-id-connect'].provider.Session.find(request.state._session);
-          if (!session.accountId()) {
-            reply(Boom.forbidden());
-          } else {
-            reply.continue({
-              credentials: session,
-            });
+        if (!request.state._session) {
+          reply(Boom.forbidden());
+        } else {
+          try {
+            var session = await request.server.plugins['open-id-connect'].provider.Session.find(request.state._session);
+            if (!session.accountId()) {
+              reply(Boom.forbidden());
+            } else {
+              reply.continue({
+                credentials: session,
+              });
+            }
+          } catch(e) {
+            reply(e);
           }
-        } catch(e) {
-          reply(e);
         }
       }
     };
