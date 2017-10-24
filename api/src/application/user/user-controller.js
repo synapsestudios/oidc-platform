@@ -193,34 +193,18 @@ module.exports = (
     },
 
     resetPassword: async function(request, reply, user, client, render) {
-      const token = await emailTokenService.find(request.query.token);
-      if (token) {
-        user = await userService.findById(token.get('user_id'));
+      const token = request.auth.credentials.token;
+      const password = await userService.encryptPassword(request.payload.password)
+      const profile = user.get('profile');
+      profile.email_verified = true;
+      await userService.update(user.get('id'), { password, profile });
+
+      const viewContext = views.resetPasswordSuccess(request);
+      const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
+      if (template) {
+        reply(template);
       } else {
-        user = await userService.findByPasswordToken(request.query.token);
-      }
-
-      if (user) {
-        const password = await userService.encryptPassword(request.payload.password)
-        const profile = user.get('profile');
-        profile.email_verified = true;
-        await userService.update(user.get('id'), { password, profile });
-
-        if (token) {
-          await token.destroy();
-        } else {
-          await userService.destroyPasswordToken(request.query.token);
-        }
-
-        const viewContext = views.resetPasswordSuccess(request);
-        const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('reset-password-success', viewContext);
-        }
-      } else {
-        await render({ token: ['Token is invalid or expired'] })
+        reply.view('reset-password-success', viewContext);
       }
     },
 

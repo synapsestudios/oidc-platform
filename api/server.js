@@ -18,11 +18,19 @@ manifestPromise.then(manifest => {
     server.auth.strategy('client_credentials', 'access_token', { token_type: 'client_credentials' });
     server.auth.strategy('oidc_session', 'oidc_session');
     server.auth.strategy('email_token', 'email_token', {
-      findToken: async (token) => {
-        return await bookshelf.model('email_token')
-          .forge({ token })
+      findToken: async id => {
+        let token = await bookshelf.model('email_token')
+          .forge({ token: id })
           .where('expires_at', '>', bookshelf.knex.fn.now())
-          .fetch()
+          .fetch();
+
+        if (!token) {
+          token = await bookshelf.model('user_password_reset_token')
+            .forge({ token })
+            .where('expires_at', '>', bookshelf.knex.fn.now())
+            .fetch();
+        }
+        return token;
       },
       findUser: async(id) => {
         return await bookshelf.model('user').where({ id }).fetch();

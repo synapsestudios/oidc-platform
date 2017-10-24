@@ -306,6 +306,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path : '/user/reset-password',
       handler : resetPasswordHandler,
       config : {
+        auth: {
+          strategy: 'email_token',
+        },
         validate : {
           query : Object.assign({
             token: Joi.string().required(),
@@ -321,6 +324,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path : '/user/reset-password',
       handler : resetPasswordHandler,
       config : {
+        auth: {
+          strategy: 'email_token',
+        },
         validate : {
           payload : {
             password : Joi.string().min(8).required(),
@@ -361,6 +367,9 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
       path: '/user/accept-invite',
       handler: setPasswordHandler,
       config: {
+        auth: {
+          strategy: 'email_token'
+        },
         validate: {
           payload : {
             password : Joi.string().min(8).required(),
