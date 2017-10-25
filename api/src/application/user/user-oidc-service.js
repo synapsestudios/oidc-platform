@@ -1,6 +1,7 @@
 const comparePasswords = require('../../lib/comparePasswords');
+const bookshelf = require('../../lib/bookshelf');
 
-module.exports = (bookshelf) => {
+module.exports = () => {
 
   const findByIdForOidc = id => bookshelf.model('user').where({ id }).fetch()
     .then(user => user ? user.serialize({ strictOidc: true }) : false);
@@ -27,4 +28,4 @@ module.exports = (bookshelf) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];
+module.exports['@require'] = [];

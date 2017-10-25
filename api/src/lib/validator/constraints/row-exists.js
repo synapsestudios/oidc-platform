@@ -1,4 +1,6 @@
-module.exports = (bookshelf, ValidationError) => {
+const bookshelf = require('../../bookshelf');
+
+module.exports = (ValidationError) => {
   return (modelName, column, message) => {
     return (value) => {
       return new Promise((resolve, reject) => {
@@ -26,4 +28,4 @@ module.exports = (bookshelf, ValidationError) => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf', 'validator/validation-error'];
+module.exports['@require'] = ['validator/validation-error'];

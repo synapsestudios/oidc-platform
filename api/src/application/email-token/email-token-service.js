@@ -1,6 +1,7 @@
 const uuid = require('uuid');
+const bookshelf = require('../../lib/bookshelf');
 
-module.exports = bookshelf => {
+module.exports = () => {
   return {
     create: function(userId, hoursTilExpiration, saveOptions) {
       hoursTilExpiration = hoursTilExpiration || 1;
@@ -24,4 +25,4 @@ module.exports = bookshelf => {
 };
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['bookshelf'];
+module.exports['@require'] = [];

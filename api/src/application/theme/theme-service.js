@@ -2,6 +2,7 @@ const handlebars = require('handlebars');
 const fs = require('fs');
 const { promisify } = require('util');
 const Hoek = require('hoek');
+const bookshelf = require('../../lib/bookshelf');
 
 const defaultLayouts = {
   'end_session': 'default.hbs',
@@ -26,7 +27,7 @@ const defaultLayouts = {
 };
 
 
-module.exports = bookshelf => ({
+module.exports = () => ({
   async renderThemedTemplate(clientId, page, context) {
     Hoek.assert(clientId, new Error('clientId is required in ThemeService::renderThemedTemplate'));
 
@@ -59,6 +60,4 @@ module.exports = bookshelf => ({
 });
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = [
-  'bookshelf',
-];
+module.exports['@require'] = [];

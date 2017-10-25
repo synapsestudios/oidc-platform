@@ -4,6 +4,7 @@ const userFormData = require('./user-form-data');
 const Boom = require('boom');
 const views = require('./user-views');
 const clientInitiatedLogout = require('../../../config')('/clientInitiatedLogout');
+const bookshelf = require('../../lib/bookshelf');
 
 const queryValidation = {
   client_id : Joi.string().required(),
@@ -13,7 +14,7 @@ const queryValidation = {
   nonce : Joi.string().optional(),
 };
 
-module.exports = (bookshelf, service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, clientValidator) => {
+module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, clientValidator) => {
   const emailValidator = async (value, options) => {
     const userCollection = await bookshelf.model('user').where({email_lower: value.toLowerCase()}).fetchAll();
     if (userCollection.length >= 1) {
@@ -397,7 +398,6 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
 
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
-  'bookshelf',
   'user/user-service',
   'user/user-controller',
   'validator/mixed-validation',

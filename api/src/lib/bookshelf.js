@@ -10,5 +10,6 @@ for (let i = 0; i < models.length; i++) {
 }
 
 module.exports = () => bookshelf;
-module.exports['@singleton'] = true;
-module.exports['@require'] = []; // don't add any ioc dependencies here!
+module.exports = bookshelf;
+// module.exports['@singleton'] = true;
+// module.exports['@require'] = []; // don't add any ioc dependencies here!

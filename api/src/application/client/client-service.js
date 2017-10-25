@@ -1,3 +1,5 @@
+const bookshelf = require('../../lib/bookshelf');
+
 const oidcRelations = [
   'default_acr_values',
   'post_logout_redirect_uris',
@@ -8,7 +10,7 @@ const oidcRelations = [
   'contacts',
 ];
 
-module.exports = (bookshelf) => ({
+module.exports = () => ({
   create(id, payload) {
     const toStore = Object.assign({}, payload);
 
@@ -109,6 +111,4 @@ module.exports = (bookshelf) => ({
 });
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = [
-  'bookshelf',
-];
+module.exports['@require'] = [];
