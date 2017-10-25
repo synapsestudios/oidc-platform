@@ -19,6 +19,7 @@ var config = {
     oidc: {
       cookieKeys: [process.env.COOKIE_KEY, process.env.OLD_COOKIE_KEY],
       initialAccessToken: process.env.OIDC_INITIAL_ACCESS_TOKEN,
+      pairwiseSalt: process.env.OIDC_PAIRWISE_SALT,
     },
     baseUrl: process.env.OIDC_BASE_URL,
     aws: {

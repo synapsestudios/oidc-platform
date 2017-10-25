@@ -96,6 +96,7 @@ module.exports = Promise.all([
             getTemplate: lib.themeService.renderThemedTemplate,
             authenticateUser: lib.userService.authenticate,
             findUserById: lib.userService.findByIdWithCtx,
+            pairwiseSalt: config('/oidc/pairwiseSalt'),
             cookieKeys: config('/oidc/cookieKeys'),
             initialAccessToken: config('/oidc/initialAccessToken'),
             adapter: function OidcAdapterFactory(name) {
