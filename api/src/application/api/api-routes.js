@@ -59,15 +59,12 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
         scope: 'admin'
       },
       validate: {
-        params: mixedValidation(
-          {
-            userId: Joi.any().required(),
-          },
-          {
-            userId: rowExists('user', 'id', 'User not found')
-          }
-        ),
-        payload: {
+        params: mixedValidation({
+          userId: Joi.any().required(),
+        }, {
+          userId: rowExists('user', 'id', 'User not found')
+        }),
+        payload: mixedValidation({
           client_id: Joi.string().required(),
           redirect_uri: Joi.string().required(),
           response_type: Joi.string().required(),
@@ -75,7 +72,9 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           nonce: Joi.string(),
           hours_till_expiration: hoursTillExpirationSchema,
           template: Joi.string(),
-        }
+        }, {
+          client_id: clientValidator,
+        })
       },
     }
   },
