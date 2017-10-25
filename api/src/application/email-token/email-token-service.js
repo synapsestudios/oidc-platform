@@ -20,6 +20,10 @@ module.exports = () => {
         .forge({ token })
         .where('expires_at', '>', bookshelf.knex.fn.now())
         .fetch()
+    },
+
+    destroyUserTokens: function(user) {
+      return bookshelf.model('email_token').where('user_id', user.get('id')).destroy();
     }
   };
 };

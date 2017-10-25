@@ -7,7 +7,7 @@ const querystring = require('querystring');
 const userViews = require('./user-views');
 const bookshelf = require('../../lib/bookshelf');
 
-module.exports = (emailService, clientService, renderTemplate, RedisAdapter, themeService, userEmails) => {
+module.exports = (emailService, clientService, renderTemplate, RedisAdapter, themeService, userEmails, emailTokenService) => {
   var self = {
     redisAdapter: new RedisAdapter('Session'),
 
@@ -36,23 +36,21 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
       return model.fetchAll();
     },
 
-    resendUserInvite(userId, clientId, redirectUri, responseType, scope, hoursTillExpiration, template, nonce) {
-      return bookshelf.model('user').where({ id: userId }).fetch().then(user => {
-        if (!user) {
-          return Boom.notFound();
-        }
-        return clientService.findById(clientId).then(client => {
-          const query = {
-            client_id: clientId,
-            redirect_uri: redirectUri,
-            response_type: responseType,
-            scope,
-          };
-          if (nonce) query.nonce = nonce;
-          return userEmails.sendInviteEmail(user, client, hoursTillExpiration, template, query).then(() => user);
-        });
+    async resendUserInvite(userId, clientId, redirectUri, responseType, scope, hoursTillExpiration, template, nonce) {
+      const user = await bookshelf.model('user').where({ id: userId }).fetch();
+      if (!user) throw Boom.notFound();
+      const client = await clientService.findById(clientId);
+      const query = {
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        response_type: responseType,
+        scope,
+      };
+      if (nonce) query.nonce = nonce;
 
-      });
+      await emailTokenService.destroyUserTokens(user);
+      await userEmails.sendInviteEmail(user, client, hoursTillExpiration, template, query);
+      return user;
     },
 
     async inviteUser({email, hours_till_expiration, template, app_metadata, profile, ...payload}) {
@@ -150,4 +148,5 @@ module.exports['@require'] = [
   'oidc-adapter/redis',
   'theme/theme-service',
   'user/user-emails',
+  'email-token/email-token-service',
 ];
