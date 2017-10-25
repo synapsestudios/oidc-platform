@@ -3,6 +3,7 @@ const Readable = require('stream').Readable;
 const userFormData = require('./user-form-data');
 const Boom = require('boom');
 const views = require('./user-views');
+const clientInitiatedLogout = require('../../../config')('/clientInitiatedLogout');
 
 const queryValidation = {
   client_id : Joi.string().required(),
@@ -25,7 +26,7 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
   const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
   const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
 
-  return [
+  const routes = [
     {
       method : 'GET',
       path : '/user/register',
@@ -374,7 +375,10 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
         },
       },
     },
-    {
+  ];
+
+  if (clientInitiatedLogout) {
+    routes.push({
       method: 'GET',
       path: '/user/logout',
       handler: controller.logout,
@@ -385,8 +389,10 @@ module.exports = (bookshelf, service, controller, mixedValidation, ValidationErr
           },
         },
       },
-    },
-  ];
+    });
+  }
+
+  return routes;
 };
 
 module.exports['@singleton'] = true;
