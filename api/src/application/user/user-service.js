@@ -5,8 +5,9 @@ const uuid = require('uuid');
 const handlebars = require('handlebars');
 const querystring = require('querystring');
 const userViews = require('./user-views');
+const bookshelf = require('../../lib/bookshelf');
 
-module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisAdapter, themeService, userEmails) => {
+module.exports = (emailService, clientService, renderTemplate, RedisAdapter, themeService, userEmails) => {
   var self = {
     redisAdapter: new RedisAdapter('Session'),
 
@@ -143,7 +144,6 @@ module.exports = (bookshelf, emailService, clientService, renderTemplate, RedisA
 
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
-  'bookshelf',
   'email/email-service',
   'client/client-service',
   'render-template',

@@ -9,6 +9,7 @@ const views = require('./user-views');
 const errorMessages = require('./user-error-messages');
 const userFormData = require('./user-form-data');
 const comparePasswords = require('../../lib/comparePasswords');
+const bookshelf = require('../../lib/bookshelf');
 
 // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
 const expandDotPaths = function(object) {
@@ -31,8 +32,7 @@ module.exports = (
   clientService,
   formHandler,
   userEmails,
-  emailTokenService,
-  bookshelf
+  emailTokenService
 ) => {
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
@@ -236,5 +236,4 @@ module.exports['@require'] = [
   'form-handler',
   'user/user-emails',
   'email-token/email-token-service',
-  'bookshelf',
 ];

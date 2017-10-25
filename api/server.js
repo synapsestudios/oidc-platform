@@ -2,7 +2,7 @@ const Glue = require('glue');
 const ioc = require('electrolyte');
 const handlebars = require('handlebars');
 const manifestPromise = require('./manifest');
-const bookshelf = require('./src/lib/bookshelf')();
+const bookshelf = require('./src/lib/bookshelf');
 
 var options = {
   relativeTo: __dirname + '/src'
@@ -58,7 +58,6 @@ manifestPromise.then(manifest => {
     // Register routes
     return Promise.all([
       ioc.create('api/api-routes'),
-      ioc.create('client/client-routes'),
       ioc.create('user/user-routes'),
     ])
       .then(routes => {

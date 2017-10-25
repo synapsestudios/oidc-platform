@@ -1,5 +1,5 @@
 const Boom = require('boom');
-const bookshelf = require('../lib/bookshelf')();
+const bookshelf = require('../lib/bookshelf');
 
 exports.register = function (server, pluginOptions, next) {
   server.auth.scheme('email_token', (server, schemeOptions) => {
