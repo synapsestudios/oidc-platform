@@ -11,6 +11,8 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | COOKIE_KEY                | Set this to a long string to be used to encrypt session cookies |
 | OLD_COOKIE_KEY            | When you update COOKIE_KEY make sure to set OLD_COOKIE_KEY to the value that was in COOKIE_KEY. New cookies will be encrypted with the COOKIE_KEY. Old cookies will be decrypted with OLD_COOKIE_KEY to be validated then reencrypted with COOKIE_KEY |
 | CLIENT_INITIATED_LOGOUT   | Set to true if you want to enable client initiated logouts using the `/user/logout` endpoint |
+| OIDC_PAIRWISE_SALT        | The salt used to generate [OIDC Pairwise Subject Identifiers](http://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg) |
+
 ## Keystores
 
 node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes YOU SHOULD PROVIDE YOUR OWN KEYS. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but PLEASE DO NOT USE THE DEFAULTS IN PRODUCTION.
