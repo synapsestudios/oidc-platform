@@ -93,7 +93,7 @@ module.exports = Promise.all([
               layout: 'default',
             },
             prefix: 'op',
-            getTemplate: lib.themeService.renderThemedTemplate,
+            getTemplate: lib.themeService.renderThemedTemplate.bind(lib.themeService),
             authenticateUser: lib.userService.authenticate,
             findUserById: lib.userService.findByIdWithCtx,
             userRegistration: config('userRegistration'),

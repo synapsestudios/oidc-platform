@@ -34,6 +34,10 @@ Templates are the individual screens that can be created. To create a new templa
 | change-email-verify-email | The email sent to the new address with a verify link after the user changes their email |
 | change-email-alert-email | The eamil sent to the old address with an alert that the user's email has changed |
 
+##### Options
+
+For each template record in the `SIP_template` table there is an `options` json field. The only thing this is currently used for is that if you set this to `{"subject":"hello"}` on an email template then the subject from your options object will be used when sending the email.
+
 ##### Variables
 
 Each template will receive the same variables as the [layout](#layout). In addition each template will be provided with unique values that can be used.
