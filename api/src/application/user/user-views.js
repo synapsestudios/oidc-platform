@@ -30,7 +30,7 @@ module.exports = {
       client: client.serialize({strictOidc:true}),
       title: 'Sign Up',
       formAction: `/user/register?${querystring.stringify(request.query)}`,
-      returnTo: `${request.query.redirect_uri}`,
+      returnTo: request.query.login ? `/op/auth?${querystring.stringify(request.query)}` : request.query.redirect_uri,
       error: !!error,
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
       email: payload.email || ''
