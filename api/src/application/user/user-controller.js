@@ -46,7 +46,7 @@ module.exports = (
       const { current, email } = request.payload;
       switch(request.payload.action) {
         case 'reverify':
-          await userEmails.sendVerificationEmail(email, request.query, user, client);
+          await userEmails.sendVerificationEmail(user, client, email, request.query);
           break;
         case 'new_reverify':
           await userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client);
