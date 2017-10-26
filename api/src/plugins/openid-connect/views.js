@@ -1,20 +1,25 @@
 const querystring = require('querystring');
 
 module.exports = {
-  login: (cookie, client, error) => ({
-    client,
-    cookie,
-    returnTo: cookie.returnTo,
-    title: 'Log In',
-    forgotPasswordPath: `/user/forgot-password?${querystring.stringify({
+  login: (cookie, client, options, error) => {
+    const queryString = querystring.stringify({
       client_id: cookie.params.client_id,
       response_type: cookie.params.response_type,
       scope: cookie.params.scope,
       redirect_uri: cookie.params.redirect_uri,
       nonce: cookie.params.nonce
-    })}`,
-    error
-  }),
+    });
+
+    return {
+      client,
+      cookie,
+      returnTo: cookie.returnTo,
+      title: 'Log In',
+      forgotPasswordPath: `/user/forgot-password?${queryString}`,
+      userRegistrationPath: `/user/register?${queryString}&login=true`,
+      error
+    }
+  },
 
   interaction: (cookie, client) => ({
     client,
