@@ -127,7 +127,6 @@ module.exports = (
 
       let token;
       if (user) {
-        console.log(user);
         await userEmails.sendForgotPasswordEmail(user, client, request.payload.email, request.query);
       }
 
