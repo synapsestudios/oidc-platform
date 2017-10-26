@@ -46,9 +46,11 @@ module.exports = (
       const { current, email } = request.payload;
       switch(request.payload.action) {
         case 'reverify':
+          await emailTokenService.destroyUserTokens(user);
           await userEmails.sendVerificationEmail(user, client, email, request.query);
           break;
         case 'new_reverify':
+          await emailTokenService.destroyUserTokens(user);
           await userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client);
           break;
         case 'cancel_new':
@@ -62,6 +64,7 @@ module.exports = (
             user.set('pending_email', email);
             user.set('pending_email_lower', email.toLowerCase());
             await user.save();
+            await emailTokenService.destroyUserTokens(user);
 
             await Promise.all([
               userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query),
@@ -124,6 +127,7 @@ module.exports = (
 
       let token;
       if (user) {
+        console.log(user);
         await userEmails.sendForgotPasswordEmail(user, client, request.payload.email, request.query);
       }
 

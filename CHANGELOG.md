@@ -1,5 +1,6 @@
 ## [v2.0.1](https://github.com/synapsestudios/oidc-platform/compare/v2.0.0...v2.1.0) - 2017-10-23
 ### Changed
+- [#200](https://github.com/synapsestudios/oidc-platform/issues/200) Allow templates to have "options" and use those options to set custom subjects for emails
 - [#137](https://github.com/synapsestudios/oidc-platform/issues/137) Stop hard coding the pairwise salt
 - [#112](https://github.com/synapsestudios/oidc-platform/issues/112) Env var to control client initiated logout
 - [#141](https://github.com/synapsestudios/oidc-platform/issues/141) Add user/client to templates
