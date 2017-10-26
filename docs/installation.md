@@ -12,6 +12,7 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | OLD_COOKIE_KEY            | When you update COOKIE_KEY make sure to set OLD_COOKIE_KEY to the value that was in COOKIE_KEY. New cookies will be encrypted with the COOKIE_KEY. Old cookies will be decrypted with OLD_COOKIE_KEY to be validated then reencrypted with COOKIE_KEY |
 | CLIENT_INITIATED_LOGOUT   | Set to true if you want to enable client initiated logouts using the `/user/logout` endpoint |
 | OIDC_PAIRWISE_SALT        | The salt used to generate [OIDC Pairwise Subject Identifiers](http://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg) |
+| ENABLE_USER_REGISTRATION  | Set to true if you want to enable user registration at the `/user/register` endpoint. If this is disabled client initiated invites is the only way to make new users |
 
 ## Keystores
 

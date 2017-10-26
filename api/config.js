@@ -26,6 +26,7 @@ var config = {
       s3Bucket: process.env.OIDC_S3_BUCKET,
     },
     clientInitiatedLogout: process.env.CLIENT_INITIATED_LOGOUT === 'true' ? true : false,
+    userRegistration: process.env.ENABLE_USER_REGISTRATION === 'true' ? true : false,
   },
   'development': {},
   'qa': {},

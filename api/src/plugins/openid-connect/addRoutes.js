@@ -11,7 +11,7 @@ module.exports = (server, issuer, options) => {
       const client = await provider.Client.find(cookie.params.client_id);
 
       if (cookie.interaction.error === 'login_required') {
-        const viewContext = views.login(cookie, client);
+        const viewContext = views.login(cookie, client, options);
         const template = await options.getTemplate(client.clientId, 'login', viewContext);
         if (template) {
           reply(template);
@@ -70,7 +70,7 @@ module.exports = (server, issuer, options) => {
       } else {
         const cookie = await provider.interactionDetails(request.raw.req);
         const client = await provider.Client.find(cookie.params.client_id);
-        const viewContext = views.login(cookie, client, 'Invalid email password combination');
+        const viewContext = views.login(cookie, client, options, 'Invalid email password combination');
         const template = await options.getTemplate(client.clientId, 'login', viewContext);
 
         if (template) {

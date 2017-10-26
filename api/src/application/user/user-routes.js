@@ -4,6 +4,7 @@ const userFormData = require('./user-form-data');
 const Boom = require('boom');
 const views = require('./user-views');
 const clientInitiatedLogout = require('../../../config')('/clientInitiatedLogout');
+const userRegistration = require('../../../config')('/userRegistration');
 const bookshelf = require('../../lib/bookshelf');
 
 const queryValidation = {
@@ -27,36 +28,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
   const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
   const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
 
-  const routes = [
-    {
-      method : 'GET',
-      path : '/user/register',
-      handler : controller.registerHandler,
-      config : {
-        validate : {
-          failAction : controller.registerHandler,
-          query : queryValidation,
-        }
-      },
-    },
-    {
-      method : 'POST',
-      path : '/user/register',
-      handler : controller.registerHandler,
-      config : {
-        validate : {
-          payload : mixedValidation({
-            email : Joi.string().email().required(),
-            password : Joi.string().min(8).required(),
-            pass2 : Joi.any().valid(Joi.ref('password')).required(),
-          }, {
-            email: emailValidator,
-          }),
-          query : queryValidation,
-          failAction : controller.registerHandler,
-        }
-      },
-    },
+  let routes = [
     {
       method: 'GET',
       path: '/user/email-settings',
@@ -391,6 +363,37 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
         },
       },
     });
+  }
+
+  if (userRegistration) {
+    routes = [...routes, {
+      method : 'GET',
+      path : '/user/register',
+      handler : controller.registerHandler,
+      config : {
+        validate : {
+          failAction : controller.registerHandler,
+          query : queryValidation,
+        }
+      },
+    }, {
+      method : 'POST',
+      path : '/user/register',
+      handler : controller.registerHandler,
+      config : {
+        validate : {
+          payload : mixedValidation({
+            email : Joi.string().email().required(),
+            password : Joi.string().min(8).required(),
+            pass2 : Joi.any().valid(Joi.ref('password')).required(),
+          }, {
+            email: emailValidator,
+          }),
+          query : queryValidation,
+          failAction : controller.registerHandler,
+        }
+      },
+    }];
   }
 
   return routes;

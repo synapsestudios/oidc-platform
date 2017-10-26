@@ -96,6 +96,7 @@ module.exports = Promise.all([
             getTemplate: lib.themeService.renderThemedTemplate.bind(lib.themeService),
             authenticateUser: lib.userService.authenticate,
             findUserById: lib.userService.findByIdWithCtx,
+            userRegistration: config('userRegistration'),
             pairwiseSalt: config('/oidc/pairwiseSalt'),
             cookieKeys: config('/oidc/cookieKeys'),
             initialAccessToken: config('/oidc/initialAccessToken'),
