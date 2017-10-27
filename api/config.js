@@ -27,6 +27,9 @@ var config = {
     },
     clientInitiatedLogout: process.env.CLIENT_INITIATED_LOGOUT === 'true' ? true : false,
     userRegistration: process.env.ENABLE_USER_REGISTRATION === 'true' ? true : false,
+    webhooks: process.env.ENABLE_WEBHOOKS === 'true' ? {
+      adapter: 'memory',
+    } : false,
   },
   'development': {},
   'qa': {},

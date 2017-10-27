@@ -1,5 +1,6 @@
 const bookshelf = require('../../lib/bookshelf');
 const uuid = require('uuid');
+const queue = require('./webhook-queue');
 
 class WebhookService {
   constructor() {
