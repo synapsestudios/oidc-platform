@@ -16,7 +16,7 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       });
     } else {
       html = renderedTemplate;
-      subject = template.get('options').subject || subject;
+      subject = template.get('options') && template.get('options').subject || subject;
     }
 
     await emailService.send({to, subject, html});
