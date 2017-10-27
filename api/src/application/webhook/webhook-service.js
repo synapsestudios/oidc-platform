@@ -2,12 +2,10 @@ const bookshelf = require('../../lib/bookshelf');
 const uuid = require('uuid');
 const queue = require('./webhook-queue');
 
-class WebhookService {
-  constructor() {
-    this.events = [
-      'user.update',
-    ];
-  }
+module.exports = {
+  events: [
+    'user.update',
+  ],
 
   async create(clientId, url, events) {
     return bookshelf.transaction(async trx => {
@@ -28,6 +26,4 @@ class WebhookService {
       return webhook;
     });
   }
-}
-
-module.exports = new WebhookService();
+};
