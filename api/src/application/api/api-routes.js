@@ -119,6 +119,25 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       }
     }
   },
+  {
+    method: 'POST',
+    path: '/api/webhooks',
+    handler: (request, reply) => {
+      reply('hello');
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin',
+      },
+      validate: {
+        payload: {
+          events: Joi.array().items(Joi.string()).min(1),
+          url: Joi.string().required(),
+        }
+      }
+    }
+  }
 ];
 
 module.exports['@singleton'] = true;
