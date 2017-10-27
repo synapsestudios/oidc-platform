@@ -1,5 +1,5 @@
 module.exports = {
-  async enqueue() {
-    console.log('hi');
+  async enqueue(job) {
+    console.log(job);
   }
 }

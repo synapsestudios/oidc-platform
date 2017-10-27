@@ -10,6 +10,7 @@ const errorMessages = require('./user-error-messages');
 const userFormData = require('./user-form-data');
 const comparePasswords = require('../../lib/comparePasswords');
 const bookshelf = require('../../lib/bookshelf');
+const webhookService = require('../webhook/webhook-service');
 
 // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
 const expandDotPaths = function(object) {
@@ -48,6 +49,9 @@ module.exports = (
         case 'reverify':
           await emailTokenService.destroyUserTokens(user);
           await userEmails.sendVerificationEmail(user, client, email, request.query);
+
+          // REMOVE THIS CALL ITS JUST FOR DEBUGGING
+          webhookService.trigger('user.update', user);
           break;
         case 'new_reverify':
           await emailTokenService.destroyUserTokens(user);
@@ -183,6 +187,8 @@ module.exports = (
         profile.email_verified = true;
         await userService.update(user.get('id'), { profile });
         token.destroy();
+
+        webhookService.trigger('user.update', user);
       }
 
       const client = await clientService.findById(request.query.client_id);

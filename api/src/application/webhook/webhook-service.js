@@ -25,5 +25,37 @@ module.exports = {
       webhook.related('events').add(eventCollection);
       return webhook;
     });
+  },
+
+  async trigger(event, resource) {
+    // TODO: validate that event is in this.events
+
+    try {
+      // get the webhooks for this event
+      const webhookCollection = await bookshelf.model('webhook')
+        .query(q => {
+          q.join('SIP_webhook_event', 'SIP_webhook.id', '=', 'SIP_webhook_event.webhook_id');
+          q.where('SIP_webhook_event.event', event);
+        }).fetchAll();
+
+      // enqueue the webhook payload for each webhook
+      webhookCollection.forEach(webhook => {
+        queue.enqueue({
+          id: uuid.v4(),
+          url: webhook.get('url'),
+          payload: {
+            event,
+            webhook_id: webhook.get('id'),
+            timestamp: new Date().getTime()/1000|0,
+            resource: resource instanceof bookshelf.Model
+            ? resource.serialize()
+            : resource,
+          }
+        });
+      });
+    } catch(e) {
+      // log stuff once i figure that out
+      console.error(e);
+    }
   }
 };
