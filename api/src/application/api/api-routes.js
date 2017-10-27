@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const webhookService = require('../webhook/webhook-service');
 
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 
@@ -123,7 +124,11 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
     method: 'POST',
     path: '/api/webhooks',
     handler: (request, reply) => {
-      reply('hello');
+      reply(webhookService.create(
+        request.auth.credentials.clientId,
+        request.payload.url,
+        request.payload.events
+      ));
     },
     config: {
       auth: {
@@ -132,7 +137,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       },
       validate: {
         payload: {
-          events: Joi.array().items(Joi.string()).min(1),
+          events: Joi.array().items(Joi.any().valid(webhookService.events)).min(1),
           url: Joi.string().required(),
         }
       }
