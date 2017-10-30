@@ -46,6 +46,7 @@
     "oidc-provider": "^2.3.2",
     "pg": "^6.1.2",
     "querystring": "^0.2.0",
+    "queue": "^4.4.2",
     "uuid": "^3.0.1",
     "vision": "^4.1.0"
   },

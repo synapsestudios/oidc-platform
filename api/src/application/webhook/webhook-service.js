@@ -1,5 +1,4 @@
 const bookshelf = require('../../lib/bookshelf');
-const uuid = require('uuid');
 const queue = require('./webhook-queue');
 
 module.exports = {
@@ -29,7 +28,6 @@ module.exports = {
 
   async trigger(event, resource) {
     // TODO: validate that event is in this.events
-
     try {
       // get the webhooks for this event
       const webhookCollection = await bookshelf.model('webhook')
@@ -41,7 +39,6 @@ module.exports = {
       // enqueue the webhook payload for each webhook
       webhookCollection.forEach(webhook => {
         queue.enqueue({
-          id: uuid.v4(),
           url: webhook.get('url'),
           payload: {
             event,
