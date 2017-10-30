@@ -39,7 +39,7 @@ module.exports = {
 
       // enqueue the webhook payload for each webhook
       webhookCollection.forEach(webhook => {
-        const client = webhook.related('client').get('client_id');
+        const client = webhook.related('client');
         queue.enqueue({
           url: webhook.get('url'),
           client_id: client.get('client_id'),

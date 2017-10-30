@@ -1,12 +1,36 @@
 const Hapi = require('hapi');
 const Joi = require('joi');
 const Boom = require('boom');
+const config = require('../src/config');
 
 const inviteHandler = require('./inviteHandler');
+const webhookHandler = require('./webhookHandler');
 
 const server = new Hapi.Server();
-
 server.connection({ port: 8080 });
+
+const validate = (request, username, password, callback) => {
+  if (username === config.clientId && password === config.clientSecret) {
+    callback(null, true, { clientId: username, clientSecret: password });
+  } else {
+    console.log(config);
+    callback(Boom.forbidden());
+  }
+}
+
+server.register(require('hapi-auth-basic'), err => {
+  server.auth.strategy('simple', 'basic', { validateFunc: validate });
+
+  server.route({
+    method: 'POST',
+    path: '/webhook',
+    handler: webhookHandler,
+    config: {
+      auth: 'simple',
+    }
+  });
+});
+
 
 server.route({
   method: 'POST',
@@ -21,30 +45,6 @@ server.route({
       }
     }
   }
-});
-
-server.route({
-  method: 'POST',
-  path: '/webhook',
-  handler: (request, reply) => {
-    console.log(request.payload);
-    const random = Math.floor(Math.random() * 100);
-    switch (true) {
-      case (random < 5):
-        console.log('responding with 5xx');
-        reply(Boom.badImplementation());
-        break;
-      case (random >= 5 && random < 10):
-        console.log('responding with 4xx');
-        reply(Boom.forbidden());
-        break;
-      default:
-        console.log('responding with 1 second delay');
-        setTimeout(() => {
-          reply(request.payload);
-        }, 1000);
-    }
-  },
 });
 
 server.start((err) => {
