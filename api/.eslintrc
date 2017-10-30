@@ -21,7 +21,6 @@
         "new-cap"                       : 0,
         "camelcase"                     : 0,
         "no-console"                    : 0,
-        "no-unused-vars"                : [2, { 'vars': 'local', 'args': 'none' }],
         "comma-dangle"                  : 0,
     },
     "env"     : {
