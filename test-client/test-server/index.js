@@ -27,6 +27,7 @@ server.route({
   method: 'POST',
   path: '/webhook',
   handler: (request, reply) => {
+    console.log(request.payload);
     const random = Math.floor(Math.random() * 100);
     switch (true) {
       case (random < 5):

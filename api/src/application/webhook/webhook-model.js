@@ -3,5 +3,9 @@ module.exports = bookshelf => ({
 
   events() {
     return this.hasMany('webhook_event', 'webhook_id');
+  },
+
+  client() {
+    return this.belongsTo('client', 'client_id');
   }
 });

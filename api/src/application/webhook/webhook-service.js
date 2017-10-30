@@ -34,12 +34,16 @@ module.exports = {
         .query(q => {
           q.join('SIP_webhook_event', 'SIP_webhook.id', '=', 'SIP_webhook_event.webhook_id');
           q.where('SIP_webhook_event.event', event);
-        }).fetchAll();
+        }).fetchAll({withRelated: 'client'});
+
 
       // enqueue the webhook payload for each webhook
       webhookCollection.forEach(webhook => {
+        const client = webhook.related('client').get('client_id');
         queue.enqueue({
           url: webhook.get('url'),
+          client_id: client.get('client_id'),
+          client_secret: client.get('client_secret'),
           payload: {
             event,
             webhook_id: webhook.get('id'),
