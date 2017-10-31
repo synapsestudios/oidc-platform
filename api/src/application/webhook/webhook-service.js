@@ -1,5 +1,5 @@
 const bookshelf = require('../../lib/bookshelf');
-const queue = require('./webhook-queue');
+const queue = require('./getQueue')();
 
 module.exports = {
   events: [
@@ -43,7 +43,7 @@ module.exports = {
         queue.enqueue({
           url: webhook.get('url'),
           client_id: client.get('client_id'),
-          client_secret: client.get('client_secret'),
+          alg: client.get('id_token_signed_response_alg'),
           payload: {
             event,
             webhook_id: webhook.get('id'),

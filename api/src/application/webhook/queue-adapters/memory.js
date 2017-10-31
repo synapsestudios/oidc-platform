@@ -1,13 +1,4 @@
 const uuid = require('uuid');
-const Wreck = require('wreck');
-const btoa = require('btoa');
-
-const {
-  JWS: { createSign, createVerify },
-} = require('node-jose')
-
-
-
 
 const maxRetries = 2;    // make configurable
 const retryDelay = 1000; // make configurable
@@ -17,8 +8,6 @@ const q = require('queue')({
   timeout: 2000,   // make configurable
   autostart: true,
 });
-
-let keystore;
 
 /**
  * Retry if the job hasn't reached max retrys
@@ -32,44 +21,19 @@ const attemptRetry = job => {
   }
 }
 
-getJob = data => {
+getJob = (data, post) => {
   let job = cb => {
     const timestamp = new Date().getTime()/1000|0;
-    const tokenPayload = {
-      iat: timestamp,
-      exp: timestamp + 60 * 10,
-      aud: data.client_id,
-      iss: process.env.OIDC_BASE_URL || 'http://localhost:9000',
-    };
-
-    createSign({
-      fields: { typ: 'JWT' },
-      format: 'compact',
-    }, keystore.get({ alg: 'RS256' }))
-      .update(JSON.stringify(tokenPayload), 'utf8')
-      .final()
-      .then(jwt => {
-        console.log(`processing job! ${data.url}:${data.payload.webhook_id}`);
-        const options = {
-          payload: data.payload,
-          headers: {
-            Authorization: 'Bearer ' + jwt,
-          }
-        };
-
-        Wreck.post(data.url, options, (err, response, payload) => {
-          job.attempts.push({
-            timestamp,
-            response,
-            error: err,
-          });
-
-          cb(err);
-        });
-      })
-      .catch(err => {
-        cb(err);
+    console.log(`processing ${job.id}`);
+    post(data, (err, response) => {
+      job.attempts.push({
+        timestamp,
+        response,
+        error: err,
       });
+
+      cb(err);
+    });
   }
 
   job.id = uuid.v4();
@@ -90,14 +54,10 @@ q.on('timeout', (next, job) => {
   attemptRetry(job);
 });
 
-module.exports = function getAdapter(){
+module.exports = function getAdapter(post) {
   return {
-    setKeystore(k) {
-      keystore = k;
-    },
-
     enqueue(data) {
-      q.push(getJob(data));
+      q.push(getJob(data, post));
     }
   }
 }
