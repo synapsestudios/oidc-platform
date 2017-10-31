@@ -28,6 +28,7 @@
     "bcrypt": "^1.0.2",
     "bookshelf": "^0.10.2",
     "boom": "^4.2.0",
+    "btoa": "^1.1.2",
     "confidence": "^3.0.0",
     "electrolyte": "^0.4.0",
     "glue": "^4.1.0",
@@ -46,6 +47,7 @@
     "oidc-provider": "^2.3.2",
     "pg": "^6.1.2",
     "querystring": "^0.2.0",
+    "queue": "^4.4.2",
     "uuid": "^3.0.1",
     "vision": "^4.1.0"
   },

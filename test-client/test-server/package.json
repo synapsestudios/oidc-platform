@@ -13,6 +13,7 @@
     "boom": "^4.3.1",
     "btoa": "^1.1.2",
     "hapi": "^16.1.1",
+    "hapi-auth-basic": "^4.2.0",
     "hapi-auth-jwt2": "^7.2.4",
     "lodash": "^4.17.4",
     "wreck": "^12.2.0"

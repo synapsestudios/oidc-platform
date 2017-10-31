@@ -1,6 +1,4 @@
 const Wreck = require('wreck');
-const boom = require('boom');
-const btoa = require('btoa');
 const config = require('../src/config');
 const fs = require('fs');
 const path = require('path');
@@ -12,7 +10,6 @@ const wreck = Wreck.defaults({
 });
 
 const clientId = config.clientId;
-const clientSecret = config.clientSecret;
 const scope = 'openid email app_metadata profile';
 
 module.exports = (request, reply) => {
