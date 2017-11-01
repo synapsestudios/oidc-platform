@@ -21,6 +21,10 @@ exports.register = function (server, options, next) {
       const { grantTypeFactory, params } = passwordGrant(options);
       provider.registerGrantType('password', grantTypeFactory, params);
 
+      provider.app.on('error', err => {
+        logger.error(err);
+      });
+
       provider.app.middleware.unshift(winstonKoaLogger(options.logger));
       provider.app.middleware.unshift(cors());
       provider.app.keys = options.cookieKeys;
