@@ -1,7 +1,13 @@
 const Hapi = require('hapi');
 const Joi = require('joi');
-const Boom = require('boom');
-const config = require('../src/config');
+
+const {
+  JWK: { asKeyStore },
+  JWS: { createVerify },
+} = require('node-jose');
+
+const keys = require('../../api/keystore');
+
 
 const inviteHandler = require('./inviteHandler');
 const webhookHandler = require('./webhookHandler');
@@ -9,24 +15,28 @@ const webhookHandler = require('./webhookHandler');
 const server = new Hapi.Server();
 server.connection({ port: 8080 });
 
-const validate = (request, username, password, callback) => {
-  if (username === config.clientId && password === config.clientSecret) {
-    callback(null, true, { clientId: username, clientSecret: password });
-  } else {
-    console.log(config);
-    callback(Boom.forbidden());
+const validate = async (decoded, request, callback) => {
+  try {
+    const keystore = await asKeyStore(keys);
+    let token = request.headers.authorization;
+    token = token.replace('Bearer ', '');
+    const result = await createVerify(keystore).verify(token);
+    callback(null, result);
+  } catch (e) {
+    console.error(e);
+    callback(null, false);
   }
 }
 
-server.register(require('hapi-auth-basic'), err => {
-  server.auth.strategy('simple', 'basic', { validateFunc: validate });
+server.register(require('hapi-auth-jwt2'), err => {
+  server.auth.strategy('jwt', 'jwt', { verifyFunc: validate });
 
   server.route({
     method: 'POST',
     path: '/webhook',
     handler: webhookHandler,
     config: {
-      auth: 'simple',
+      auth: 'jwt',
     }
   });
 });

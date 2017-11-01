@@ -1,6 +1,4 @@
 const uuid = require('uuid');
-const Wreck = require('wreck');
-const btoa = require('btoa');
 
 const maxRetries = 2;    // make configurable
 const retryDelay = 1000; // make configurable
@@ -23,19 +21,11 @@ const attemptRetry = job => {
   }
 }
 
-getJob = data => {
+getJob = (data, post) => {
   let job = cb => {
-    console.log(`processing job! ${data.url}:${data.payload.webhook_id}`);
     const timestamp = new Date().getTime()/1000|0;
-
-    const options = {
-      payload: data.payload,
-      headers: {
-        Authorization: 'Basic ' + btoa(`${data.client_id}:${data.client_secret}`),
-      }
-    };
-
-    Wreck.post(data.url, options, (err, response, payload) => {
+    console.log(`processing ${job.id}`);
+    post(data, (err, response) => {
       job.attempts.push({
         timestamp,
         response,
@@ -64,8 +54,10 @@ q.on('timeout', (next, job) => {
   attemptRetry(job);
 });
 
-module.exports = {
-  enqueue(data) {
-    q.push(getJob(data));
+module.exports = function getAdapter(post) {
+  return {
+    enqueue(data) {
+      q.push(getJob(data, post));
+    }
   }
 }

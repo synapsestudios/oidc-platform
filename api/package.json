@@ -44,6 +44,7 @@
     "lodash": "^4.17.4",
     "mailgun-js": "^0.8.1",
     "mysql": "^2.13.0",
+    "node-jose": "^0.10.0",
     "oidc-provider": "^2.3.2",
     "pg": "^6.1.2",
     "querystring": "^0.2.0",
