@@ -1,9 +1,12 @@
+const handlebars = require('handlebars');
+const ioc = require('electrolyte');
+const GoodWinston = require('good-winston');
+
 const config = require('./config');
 const formatError = require('./src/lib/format-error');
 const fetchKeystore = require('./src/lib/fetch-keystore');
-const handlebars = require('handlebars');
+const logger = require('./src/lib/logger');
 
-var ioc = require('electrolyte');
 ioc.use(ioc.dir('src/lib'));
 ioc.use(ioc.dir('src/application'));
 
@@ -70,11 +73,7 @@ module.exports = Promise.all([
           register: 'good',
           options: {
             reporters: {
-              consoleReporter: [
-                {module: 'good-squeeze', name: 'Squeeze', args: [{log: '*', response: '*', error: '*', request: '*'}]},
-                {module: 'good-console'},
-                'stdout'
-              ]
+              winston: [ new GoodWinston({ winston: logger }) ]
             }
           }
         },
@@ -83,6 +82,7 @@ module.exports = Promise.all([
         plugin: {
           register: './plugins/openid-connect/openid-connect',
           options: {
+            logger,
             vision: {
               engines: {
                 hbs: handlebars
