@@ -9,55 +9,56 @@ const q = require('queue')({
   autostart: true,
 });
 
-/**
- * Retry if the job hasn't reached max retrys
- */
-const attemptRetry = job => {
-  if (job.retries < maxRetries) {
-    ++job.retries;
-    setTimeout(() => q.push(job), retryDelay);
-  } else {
-    console.log(`job:${job.id} rety max. Won't try again.`);
-  }
-}
+module.exports = function getAdapter(post, report) {
 
-getJob = (data, post) => {
-  let job = cb => {
-    const timestamp = new Date().getTime()/1000|0;
-    console.log(`processing ${job.id}`);
-    post(data, (err, response) => {
-      job.attempts.push({
-        timestamp,
-        response,
-        error: err,
+  /**
+   * Retry if the job hasn't reached max retrys
+   */
+  const attemptRetry = job => {
+    if (job.retries < maxRetries) {
+      ++job.retries;
+      setTimeout(() => q.push(job), retryDelay);
+    } else {
+      report('abandon', job.id, job.data);
+    }
+  }
+
+  q.on('error', (err, job) => {
+    report('error', job.id, job.data, err);
+    attemptRetry(job);
+  });
+
+  q.on('timeout', (next, job) => {
+    report('timeout', job.id, job.data);
+    next();
+    attemptRetry(job);
+  });
+
+  getJob = (data, post) => {
+    let job = cb => {
+      post(data, (err, response) => {
+        job.attempts.push({response, err});
+        if (!err) {
+          report('success', job.id, data, response);
+        }
+
+        cb(err);
       });
+    }
 
-      cb(err);
-    });
+    job.id = uuid.v4();
+    job.retries = 0;
+    job.data = data;
+    job.attempts = [];
+
+    return job;
   }
 
-  job.id = uuid.v4();
-  job.retries = 0;
-  job.attempts = [];
-  job.data = data;
-  return job;
-}
-
-q.on('error', (err, job) => {
-  console.log(`we have an error! ${err.message}`);
-  attemptRetry(job);
-});
-
-q.on('timeout', (next, job) => {
-  console.log(`Timeout! Job id: ${job.id}, try: ${job.retries + 1}`);
-  next();
-  attemptRetry(job);
-});
-
-module.exports = function getAdapter(post) {
   return {
     enqueue(data) {
-      q.push(getJob(data, post));
+      const job = getJob(data, post);
+      report('start', job.id, data);
+      q.push(job);
     }
   }
 }

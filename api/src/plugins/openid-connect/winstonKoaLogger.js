@@ -1,3 +1,5 @@
+const Moment = require('moment');
+
 module.exports = logger => async (ctx,next) => {
   try {
     await next();
@@ -12,6 +14,6 @@ module.exports = logger => async (ctx,next) => {
   if(ctx.status >=500) { logLevel = 'error'; }
   else if(ctx.status >=400) { logLevel = 'warn'; }
   else if(ctx.status >=100) { logLevel = 'info'; }
-  let msg = `${ctx.method} ${ctx.originalUrl} ${ctx.status} ${ms}ms`;
+  let msg = `${Moment().format('YYMMDD/HHmmss.SSS')}, [open-id-connect] ${ctx.method} ${ctx.originalUrl} ${ctx.status} ${ms}ms`;
   logger.log(logLevel, msg);
 }
