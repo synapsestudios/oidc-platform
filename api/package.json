@@ -52,7 +52,8 @@
     "queue": "^4.4.2",
     "uuid": "^3.0.1",
     "vision": "^4.1.0",
-    "winston": "^2.4.0"
+    "winston": "^2.4.0",
+    "winston-koa-logger": "0.0.2"
   },
   "devDependencies": {
     "nodemon": "^1.4.1"

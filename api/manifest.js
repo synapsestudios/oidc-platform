@@ -82,6 +82,7 @@ module.exports = Promise.all([
         plugin: {
           register: './plugins/openid-connect/openid-connect',
           options: {
+            logger,
             vision: {
               engines: {
                 hbs: handlebars

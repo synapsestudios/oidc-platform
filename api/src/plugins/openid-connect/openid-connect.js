@@ -4,6 +4,8 @@ const cors = require('koa2-cors');
 const passwordGrant = require('./grants/password');
 const getConfig = require('./getConfig');
 const addRoutes = require('./addRoutes');
+const logger = require('../../lib/logger');
+const winstonKoaLogger = require('./winstonKoaLogger');
 
 exports.register = function (server, options, next) {
   const issuer = options.issuer || process.env.OIDC_BASE_URL || 'http://localhost:9000';
@@ -19,7 +21,8 @@ exports.register = function (server, options, next) {
       const { grantTypeFactory, params } = passwordGrant(options);
       provider.registerGrantType('password', grantTypeFactory, params);
 
-      provider.app.use(cors());
+      provider.app.middleware.unshift(winstonKoaLogger(options.logger));
+      provider.app.middleware.unshift(cors());
       provider.app.keys = options.cookieKeys;
       provider.app.proxy = true;
       server.ext('onRequest', function(request, reply) {
