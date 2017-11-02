@@ -34,6 +34,7 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
         appName: client.get('client_name'),
         user: user.serialize(),
         client: client.serialize({strictOidc:true}),
+        subject: 'Email Updated',
       };
 
       await renderAndSend(
