@@ -11,6 +11,12 @@ module.exports = (request, reply) => {
       console.log('responding with 4xx');
       reply(Boom.forbidden());
       break;
+    case (random >= 10 && random < 20):
+      console.log('responding with 10 second delay');
+      setTimeout(() => {
+        reply(request.payload);
+      }, 10000);
+      break;
     default:
       console.log('responding with 1 second delay');
       setTimeout(() => {

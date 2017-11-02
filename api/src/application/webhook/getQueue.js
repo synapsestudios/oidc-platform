@@ -1,6 +1,7 @@
 const Wreck = require('wreck');
 const Hoek = require('hoek');
 const IoRedis = require('ioredis');
+const Moment = require('moment');
 const {
   JWS: { createSign },
   JWK: { asKeyStore },
@@ -9,7 +10,10 @@ const {
 const adapters = require('./queue-adapters');
 const webhooksConfig = require('../../../config')('/webhooks');
 const fetchKeystore = require('../../lib/fetch-keystore');
+const logger = require('../../lib/logger');
 const redisConfig = require('../../../config')('/redis');
+const validateData = require('./validateData');
+const report = require('./report');
 
 const redis = new IoRedis(redisConfig, {
   keyPrefix: 'oidc-api:',
@@ -24,7 +28,7 @@ fetchKeystore()
   })
   .catch(e => {
     // keystore can't be initialized. something is wrong
-    console.error(e);
+    logger.error(e);
   });
 
 const getToken = async data => {
@@ -53,17 +57,11 @@ const getToken = async data => {
   return token;
 }
 
-const validateData = data => {
-  Hoek.assert(keystore, new Error('Keystore has not been initialized'));
-  Hoek.assert(data.alg, new Error('webhook data must contain algorithm'));
-  Hoek.assert(data.url, new Error('webhook data must contain url'));
-  Hoek.assert(data.payload, new Error('webhook data must contain payload'));
-  Hoek.assert(data.client_id, new Error('webhook data must contain client_id'));
-}
 
 const post = (data, cb) => {
   let valid = true;
   try {
+    Hoek.assert(keystore, new Error('Keystore has not been initialized'));
     validateData(data);
   } catch (err) {
     valid = false;
@@ -75,6 +73,7 @@ const post = (data, cb) => {
       .then(jwt => {
         const options = {
           payload: data.payload,
+          timeout: 2000, // use config value
           headers: {
             Authorization: 'Bearer ' + jwt,
           }
@@ -90,20 +89,22 @@ const post = (data, cb) => {
   }
 }
 
-
-queue = adapters[webhooksConfig.adapter](post);
-// validate the adapter
-// figure out what to do when webhooks are turned off
+queue = adapters[webhooksConfig.adapter](post, report);
 
 module.exports = function getQueue() {
   return {
     async enqueue(data) {
+      Hoek.assert(keystore, new Error('Keystore has not been initialized'));
       validateData(data);
+
       // initialize the auth token
       await getToken(data);
-      return queue.enqueue(data);
+
+      try {
+        queue.enqueue(data);
+      } catch(e) {
+        logger.error(e);
+      }
     }
   };
 };
-
-
