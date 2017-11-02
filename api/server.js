@@ -9,7 +9,7 @@ var options = {
 };
 
 manifestPromise.then(manifest => {
-  Glue.compose(manifest, options, function(err, server) {
+  Glue.compose(manifest, options, async function(err, server) {
     if (err) {
       throw err;
     }
@@ -56,31 +56,32 @@ manifestPromise.then(manifest => {
     });
 
     // Register routes
-    return Promise.all([
-      ioc.create('api/api-routes'),
-      ioc.create('user/user-routes'),
-    ])
-      .then(routes => {
-        try {
+    let routes;
+    try {
+      routes = [
+        await ioc.create('api/api-routes'),
+        await ioc.create('user/user-routes'),
+      ];
+    } catch(e) {
+      server.log(['error'], e);
+    }
 
-          server.route([{
-            method: 'GET',
-            path: '/health-check',
-            handler: (req, reply) => reply('all good'),
-          }]);
-          routes.forEach(routes => {
-            server.route(routes);
-          });
 
-          server.start(function () {
-            console.log('Server running at:', server.info.uri);
-          });
-        } catch (e) {
-          console.log(e);
-        }
-      })
-      .catch(e => {
-        server.log(['error'], e);
+    try {
+      server.route([{
+        method: 'GET',
+        path: '/health-check',
+        handler: (req, reply) => reply('all good'),
+      }]);
+      routes.forEach(routes => {
+        server.route(routes);
       });
+
+      server.start(function () {
+        server.log(['info'], `Server running at: ${server.info.uri}`);
+      });
+    } catch (e) {
+      server.log(['error'], e);
+    }
   });
 });

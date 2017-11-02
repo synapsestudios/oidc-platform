@@ -8,7 +8,7 @@ const {
 } = require('node-jose');
 
 const adapters = require('./queue-adapters');
-const webhooksConfig = require('../../../config')('/webhooks');
+const webhookConfig = require('../../../config')('/webhooks');
 const fetchKeystore = require('../../lib/fetch-keystore');
 const logger = require('../../lib/logger');
 const redisConfig = require('../../../config')('/redis');
@@ -73,7 +73,7 @@ const post = (data, cb) => {
       .then(jwt => {
         const options = {
           payload: data.payload,
-          timeout: 2000, // use config value
+          timeout: webhookConfig.timeout,
           headers: {
             Authorization: 'Bearer ' + jwt,
           }
@@ -89,22 +89,27 @@ const post = (data, cb) => {
   }
 }
 
-queue = adapters[webhooksConfig.adapter](post, report);
+if (webhookConfig) {
+  Hoek.assert(adapters[webhookConfig.adapter], new Error(`${webhookConfig.adapter} is not a valid webhook queue adapter`));
+  queue = adapters[webhookConfig.adapter](post, report);
+  module.exports = function getQueue() {
+    return {
+      async enqueue(data) {
+        Hoek.assert(keystore, new Error('Keystore has not been initialized'));
+        validateData(data);
 
-module.exports = function getQueue() {
-  return {
-    async enqueue(data) {
-      Hoek.assert(keystore, new Error('Keystore has not been initialized'));
-      validateData(data);
+        // initialize the auth token
+        await getToken(data);
 
-      // initialize the auth token
-      await getToken(data);
-
-      try {
-        queue.enqueue(data);
-      } catch(e) {
-        logger.error(e);
+        try {
+          queue.enqueue(data);
+        } catch(e) {
+          logger.error(e);
+        }
       }
-    }
+    };
   };
-};
+} else {
+  // webhooks disabled
+  module.exports = () => ({ enqueue: () => Promise.resolve() });
+}

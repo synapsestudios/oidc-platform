@@ -90,3 +90,14 @@ Users can upload profile pictures when editing their profile. The platform makes
 | OIDC_S3_BUCKET        | The bucket in s3 that files will be saved to |
 | AWS_ACCESS_KEY        | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 | AWS_SECRET_ACCESS_KEY | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
+
+## Webhooks
+
+| Environment Variables | Description |
+| --------------------- | ----------- |
+| ENABLE_WEBHOOKS | if this value is anything other than 'true' then webhooks will be disabled (default 'false') |
+| WEBHOOK_ADAPTER | 'memory' is the only adapter currently supported (default 'memory') |
+| WEBHOOK_TIMEOUT | time in ms to wait before stopping a webhook POST (default 2000) |
+| WEBHOOK_MAX_RETRIES | how many times to retry a failed POST. If max retries is 2, then you will have a total of 3 attempts. 1 attempt followed by 2 retries. (default 2) |
+| WEBHOOK_RETRY_DELAY | time in ms to wait before retrying a failed request (default 10000) |
+| WEBHOOK_CONCURRENCY | number of webhook POST requests to process at a time (default 1) |
