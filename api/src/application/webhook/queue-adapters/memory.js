@@ -1,11 +1,18 @@
 const uuid = require('uuid');
 
-const maxRetries = 2;    // make configurable
-const retryDelay = 1000; // make configurable
+const {
+  maxRetries,
+  retryDelay,
+  concurrency,
+  timeout,
+} = require('../../../../config')('/webhooks');
+
+// const maxRetries = 2;    // make configurable
+// const retryDelay = 1000; // make configurable
 
 const q = require('queue')({
-  concurrency: 2, // make configurable
-  timeout: 2000,   // make configurable
+  concurrency, // make configurable
+  timeout,   // make configurable
   autostart: true,
 });
 

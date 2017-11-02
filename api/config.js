@@ -28,7 +28,11 @@ var config = {
     clientInitiatedLogout: process.env.CLIENT_INITIATED_LOGOUT === 'true' ? true : false,
     userRegistration: process.env.ENABLE_USER_REGISTRATION === 'true' ? true : false,
     webhooks: process.env.ENABLE_WEBHOOKS === 'true' ? {
-      adapter: 'memory',
+      adapter: process.env.WEBHOOK_ADAPTER ? process.env.WEBHOOK_ADAPTER : 'memory',
+      timeout: process.env.WEBHOOK_TIMEOUT || 2000,
+      maxRetries: process.env.WEBHOOK_MAX_RETRIES || 2,
+      retryDelay: process.env.WEBHOOK_RETRY_DELAY || 10000,
+      concurrency: process.env.WEBHOOK_CONCURRENCY || 1,
     } : false,
   },
   'development': {},

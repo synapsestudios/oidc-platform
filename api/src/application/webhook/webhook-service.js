@@ -1,5 +1,9 @@
+const Hoek = require('hoek');
+
 const bookshelf = require('../../lib/bookshelf');
+const logger = require('../../lib/logger');
 const queue = require('./getQueue')();
+const webhookConfig = require('../../../config')('/webhooks');
 
 module.exports = {
   events: [
@@ -27,7 +31,10 @@ module.exports = {
   },
 
   async trigger(event, resource) {
-    // TODO: validate that event is in this.events
+    Hoek.assert(Hoek.contain(this.events, event), new Error(`WebhookService:trigger - ${event} is an invalid event`));
+
+    if (!webhookConfig) return; // webhooks disabled
+
     try {
       // get the webhooks for this event
       const webhookCollection = await bookshelf.model('webhook')
@@ -35,7 +42,6 @@ module.exports = {
           q.join('SIP_webhook_event', 'SIP_webhook.id', '=', 'SIP_webhook_event.webhook_id');
           q.where('SIP_webhook_event.event', event);
         }).fetchAll({withRelated: 'client'});
-
 
       // enqueue the webhook payload for each webhook
       webhookCollection.forEach(webhook => {
@@ -55,8 +61,7 @@ module.exports = {
         });
       });
     } catch(e) {
-      // log stuff once i figure that out
-      console.error(e);
+      logger.error(e);
     }
   }
 };
