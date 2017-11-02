@@ -17,7 +17,7 @@ When the OIDC server POSTs to your client application it will send a payload lik
 
 ### Authentication
 
-The POST request will have an `Authorization` header with a jwt bearer token. You should validate this jwt using the same methods as you validate users' id tokens. The difference is that the `sub` value of the jwt won't be a user id, but will be the client_id for the client that owns the webhook. Clients should validate that this client_id matches their own client_id.
+The POST request will have an `Authorization` header with a jwt bearer token. You should validate this jwt using the same methods as you validate users' id tokens. The difference is that the `aud` value of the jwt won't be a user id, but will be the client_id for the client that owns the webhook. Clients should validate that this client_id matches their own client_id.
 
 ## Webhook Events
 
