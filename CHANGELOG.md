@@ -1,5 +1,6 @@
 ## [v2.0.1](https://github.com/synapsestudios/oidc-platform/compare/v2.0.0...v2.1.0) - 2017-10-23
 ### Changed
+- [#203](https://github.com/synapsestudios/oidc-platform/issues/203) Implement a system for webhooks
 - [#200](https://github.com/synapsestudios/oidc-platform/issues/200) Allow templates to have "options" and use those options to set custom subjects for emails
 - [#67](https://github.com/synapsestudios/oidc-platform/issues/67) Make user registration configurable
 - [#137](https://github.com/synapsestudios/oidc-platform/issues/137) Stop hard coding the pairwise salt
