@@ -7,9 +7,6 @@ const {
   timeout,
 } = require('../../../../config')('/webhooks');
 
-// const maxRetries = 2;    // make configurable
-// const retryDelay = 1000; // make configurable
-
 const q = require('queue')({
   concurrency, // make configurable
   timeout,   // make configurable
