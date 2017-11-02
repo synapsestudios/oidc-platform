@@ -49,9 +49,6 @@ module.exports = (
         case 'reverify':
           await emailTokenService.destroyUserTokens(user);
           await userEmails.sendVerificationEmail(user, client, email, request.query);
-
-          // REMOVE THIS CALL ITS JUST FOR DEBUGGING
-          webhookService.trigger('user.update', user);
           break;
         case 'new_reverify':
           await emailTokenService.destroyUserTokens(user);
@@ -117,7 +114,8 @@ module.exports = (
         profile = Object.assign(profile, payload);
       }
 
-      await userService.update(user.get('id'), { profile });
+      user = await userService.update(user.get('id'), { profile });
+      webhookService.trigger('user.update', user);
 
       if (oldPicture) {
         await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
@@ -157,13 +155,13 @@ module.exports = (
           let title = 'Email Verified';
           const profile = user.get('profile');
           profile.email_verified = true;
-          await userService.update(user.get('id'), {
-            email: bookshelf.knex.raw('pending_email'),
-            email_lower: bookshelf.knex.raw('pending_email_lower'),
-            pending_email: null,
-            pending_email_lower: null,
-            profile
-          });
+          user.set('email', user.get('pending_email'));
+          user.set('email_lower', user.get('pending_email_lower'));
+          user.set('pending_email', null);
+          user.set('pending_email_lower', null);
+          user.save();
+
+          webhookService.trigger('user.update', user);
           await token.destroy();
         }
       }
