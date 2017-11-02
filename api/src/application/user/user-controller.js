@@ -159,7 +159,7 @@ module.exports = (
           user.set('email_lower', user.get('pending_email_lower'));
           user.set('pending_email', null);
           user.set('pending_email_lower', null);
-          user.save();
+          await user.save();
 
           webhookService.trigger('user.update', user);
           await token.destroy();
