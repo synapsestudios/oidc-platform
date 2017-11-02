@@ -8,8 +8,8 @@ const {
 } = require('../../../../config')('/webhooks');
 
 const q = require('queue')({
-  concurrency, // make configurable
-  timeout,   // make configurable
+  concurrency,
+  timeout,
   autostart: true,
 });
 
