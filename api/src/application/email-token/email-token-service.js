@@ -3,7 +3,9 @@ const bookshelf = require('../../lib/bookshelf');
 
 module.exports = () => {
   return {
-    create: function(userId, hoursTilExpiration, saveOptions) {
+    create: async function(userId, hoursTilExpiration, saveOptions) {
+      await this.destroyUserTokens(userId);
+
       hoursTilExpiration = hoursTilExpiration || 1;
       const expires = new Date();
       expires.setHours(expires.getHours() + hoursTilExpiration);
@@ -22,8 +24,8 @@ module.exports = () => {
         .fetch()
     },
 
-    destroyUserTokens: function(user) {
-      return bookshelf.model('email_token').where('user_id', user.get('id')).destroy();
+    destroyUserTokens: function(userId) {
+      return bookshelf.model('email_token').where('user_id', userId).destroy();
     }
   };
 };

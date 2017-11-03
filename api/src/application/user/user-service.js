@@ -48,7 +48,6 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
       };
       if (nonce) query.nonce = nonce;
 
-      await emailTokenService.destroyUserTokens(user);
       await userEmails.sendInviteEmail(user, client, hoursTillExpiration, template, query);
       return user;
     },
