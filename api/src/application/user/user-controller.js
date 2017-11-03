@@ -47,11 +47,9 @@ module.exports = (
       const { current, email } = request.payload;
       switch(request.payload.action) {
         case 'reverify':
-          await emailTokenService.destroyUserTokens(user);
           await userEmails.sendVerificationEmail(user, client, email, request.query);
           break;
         case 'new_reverify':
-          await emailTokenService.destroyUserTokens(user);
           await userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client);
           break;
         case 'cancel_new':
@@ -65,7 +63,6 @@ module.exports = (
             user.set('pending_email', email);
             user.set('pending_email_lower', email.toLowerCase());
             await user.save();
-            await emailTokenService.destroyUserTokens(user);
 
             await Promise.all([
               userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query),
@@ -206,6 +203,7 @@ module.exports = (
       const profile = user.get('profile');
       profile.email_verified = true;
       await userService.update(user.get('id'), { password, profile });
+      await emailTokenService.destroyUserTokens(user.get('id'));
 
       const viewContext = views.resetPasswordSuccess(request);
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
