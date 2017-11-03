@@ -6,6 +6,7 @@ The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com
 - [Installation](docs/installation.md)
 - [Implementation](docs/implementation.md)
 - [Theming](docs/theming.md)
+- [Webhooks](docs/webhooks.md)
 
 ## Setting up for development
 

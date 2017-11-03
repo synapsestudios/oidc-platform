@@ -2,6 +2,10 @@ const Joi = require('joi');
 const Readable = require('stream').Readable;
 const userFormData = require('./user-form-data');
 const Boom = require('boom');
+const views = require('./user-views');
+const clientInitiatedLogout = require('../../../config')('/clientInitiatedLogout');
+const userRegistration = require('../../../config')('/userRegistration');
+const bookshelf = require('../../lib/bookshelf');
 
 const queryValidation = {
   client_id : Joi.string().required(),
@@ -11,51 +15,164 @@ const queryValidation = {
   nonce : Joi.string().optional(),
 };
 
-const clientValidator = server => async (value, options) => {
-  const provider = server.plugins['open-id-connect'].provider;
+module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, clientValidator) => {
+  const emailValidator = async (value, options) => {
+    const userCollection = await bookshelf.model('user').where({email_lower: value.toLowerCase()}).fetchAll();
+    if (userCollection.length >= 1) {
+      throw new ValidationError('That email address is already in use');
+    }
 
-  const client = await provider.Client.find(value);
-  if (!client) throw Boom.notFound('Client not found');
+    return value;
+  }
 
-  const redirectUri = options.context.values.redirect_uri;
-  if (client.redirectUris.indexOf(redirectUri) < 0) throw Boom.forbidden('redirect_uri not in whitelist');
+  const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
+  const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
 
-  return value;
-}
-
-module.exports = (service, controller, mixedValidation, validationError, server) => {
-  return [
+  let routes = [
     {
-      method : 'GET',
-      path : '/user/register',
-      handler : controller.registerFormHandler,
-      config : {
-        validate : {
-          failAction : controller.registerFormHandler,
-          query : queryValidation,
+      method: 'GET',
+      path: '/user/email-settings',
+      handler: controller.emailSettingsHandler,
+      config: {
+        auth: {
+          strategy: 'oidc_session',
+        },
+        validate: {
+          query: mixedValidation({
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            profile: Joi.string(),
+          }, {
+            client_id: clientValidator,
+          }),
         }
+      }
+    },
+    {
+      method: 'POST',
+      path: '/user/email-settings',
+      handler: controller.emailSettingsHandler,
+      config: {
+        auth: {
+          strategy: 'oidc_session',
+        },
+        validate: {
+          failAction: controller.emailSettingsHandler,
+          query: mixedValidation({
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            profile: Joi.string(),
+          }, {
+            client_id: clientValidator,
+          }),
+          payload: mixedValidation({
+            action: Joi.any().valid(['reverify', 'new_reverify', 'change', 'cancel_new']).required(),
+            email : Joi.string().email().required(),
+            current : Joi.alternatives().when('action', {
+              is: 'change',
+              then: Joi.string().required(),
+              otherwise: Joi.any().forbidden()
+            }),
+          }, {
+            email: async (value, options) => {
+              if (options.context.values.action === 'change') {
+                return emailValidator(value, options);
+              } else {
+                return value;
+              }
+            },
+          })
+        },
       },
     },
     {
-      method : 'POST',
-      path : '/user/register',
-      handler : controller.registerFormHandler,
-      config : {
-        validate : {
-          payload : {
-            email : Joi.string().email().required(),
+      method: 'GET',
+      path: '/user/email-verify',
+      handler: controller.emailVerifySuccessHandler,
+      config: {
+        auth: {
+          strategy: 'email_token',
+        },
+        validate: {
+          failAction: controller.emailVerifySuccessHandler,
+          query: mixedValidation({
+            token: Joi.string().guid().required(),
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+          }, {
+            client_id: clientValidator,
+          }),
+        },
+      },
+    },
+    {
+      method: 'GET',
+      path: '/user/complete-email-update',
+      handler: controller.completeEmailUpdateHandler,
+      config: {
+        auth: {
+          strategy: 'email_token',
+        },
+        validate: {
+          failAction: controller.completeEmailUpdateHandler,
+          query: mixedValidation({
+            token: Joi.string().guid().required(),
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+          }, {
+            client_id: clientValidator,
+          }),
+        },
+      }
+    },
+    {
+      method: 'GET',
+      path: '/user/password',
+      handler: controller.changePasswordHandler,
+      config: {
+        auth: {
+          strategy: 'oidc_session',
+        },
+        validate: {
+          query: mixedValidation({
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            profile: Joi.string(),
+          }, {
+            client_id: clientValidator,
+          }),
+        }
+      }
+    },
+    {
+      method: 'POST',
+      path: '/user/password',
+      handler: controller.changePasswordHandler,
+      config: {
+        auth: {
+          strategy: 'oidc_session',
+        },
+        validate: {
+          failAction :controller.changePasswordHandler,
+          query: mixedValidation({
+            client_id: Joi.string().required(),
+            redirect_uri: Joi.string().required(),
+            profile: Joi.string(),
+          }, {
+            client_id: clientValidator,
+          }),
+          payload: {
+            current: Joi.string().required(),
             password : Joi.string().min(8).required(),
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
-          },
-          query : queryValidation,
-          failAction : controller.registerFormHandler,
-        }
+          }
+        },
       },
     },
     {
       method: 'GET',
       path: '/user/profile',
-      handler: controller.profileFormHandler,
+      handler: controller.profileHandler,
       config: {
         auth: {
           strategy: 'oidc_session',
@@ -65,7 +182,7 @@ module.exports = (service, controller, mixedValidation, validationError, server)
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
-            client_id: clientValidator(server),
+            client_id: clientValidator,
           }),
         }
       }
@@ -73,7 +190,7 @@ module.exports = (service, controller, mixedValidation, validationError, server)
     {
       method: 'POST',
       path: '/user/profile',
-      handler: controller.profileFormHandler,
+      handler: controller.profileHandler,
       config: {
         payload: {
           failAction: 'ignore', // set payload to null if picture is too large
@@ -86,12 +203,12 @@ module.exports = (service, controller, mixedValidation, validationError, server)
           strategy: 'oidc_session',
         },
         validate: {
-          failAction: controller.profileFormHandler,
+          failAction: controller.profileHandler,
           query: mixedValidation({
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
-            client_id: clientValidator(server),
+            client_id: clientValidator,
           }),
           payload: Joi.object().keys({
             name: Joi.string().allow(''),
@@ -124,10 +241,9 @@ module.exports = (service, controller, mixedValidation, validationError, server)
     {
       method : 'GET',
       path : '/user/forgot-password',
-      handler : controller.getForgotPasswordForm,
+      handler : controller.forgotPasswordHandler,
       config : {
         validate : {
-          failAction : controller.getForgotPasswordForm,
           query : queryValidation,
         },
       },
@@ -135,24 +251,26 @@ module.exports = (service, controller, mixedValidation, validationError, server)
     {
       method : 'POST',
       path : '/user/forgot-password',
-      handler : controller.postForgotPasswordForm,
+      handler : controller.forgotPasswordHandler,
       config : {
         validate : {
           payload : {
             email : Joi.string().email().required(),
           },
           query : queryValidation,
-          failAction : controller.getForgotPasswordForm,
+          failAction : controller.forgotPasswordHandler,
         }
       },
     },
     {
       method : 'GET',
       path : '/user/reset-password',
-      handler : controller.getResetPasswordForm('Reset Password'),
+      handler : resetPasswordHandler,
       config : {
+        auth: {
+          strategy: 'email_token',
+        },
         validate : {
-          failAction : controller.getResetPasswordForm('Reset Password'),
           query : Object.assign({
             token: Joi.string().required(),
             client_id: Joi.string().required(),
@@ -165,8 +283,11 @@ module.exports = (service, controller, mixedValidation, validationError, server)
     {
       method : 'POST',
       path : '/user/reset-password',
-      handler : controller.postResetPasswordForm('Reset Password'),
+      handler : resetPasswordHandler,
       config : {
+        auth: {
+          strategy: 'email_token',
+        },
         validate : {
           payload : {
             password : Joi.string().min(8).required(),
@@ -178,15 +299,18 @@ module.exports = (service, controller, mixedValidation, validationError, server)
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
           }, queryValidation),
-          failAction : controller.getResetPasswordForm('Reset Password'),
+          failAction : resetPasswordHandler,
         }
       },
     },
     {
       method: 'GET',
       path: '/user/accept-invite',
-      handler: controller.getResetPasswordForm('Set Password'),
+      handler: setPasswordHandler,
       config: {
+        auth: {
+          strategy: 'email_token',
+        },
         validate: {
           query: {
             token: Joi.string().guid().required(),
@@ -202,8 +326,11 @@ module.exports = (service, controller, mixedValidation, validationError, server)
     {
       method: 'POST',
       path: '/user/accept-invite',
-      handler: controller.postResetPasswordForm('Set Password'),
+      handler: setPasswordHandler,
       config: {
+        auth: {
+          strategy: 'email_token'
+        },
         validate: {
           payload : {
             password : Joi.string().min(8).required(),
@@ -217,11 +344,14 @@ module.exports = (service, controller, mixedValidation, validationError, server)
             response_type: Joi.string().required(),
             nonce: Joi.string(),
           },
-          failAction: controller.getResetPasswordForm('Set Password'),
+          failAction: setPasswordHandler,
         },
       },
     },
-    {
+  ];
+
+  if (clientInitiatedLogout) {
+    routes.push({
       method: 'GET',
       path: '/user/logout',
       handler: controller.logout,
@@ -232,8 +362,41 @@ module.exports = (service, controller, mixedValidation, validationError, server)
           },
         },
       },
-    },
-  ];
+    });
+  }
+
+  if (userRegistration) {
+    routes = [...routes, {
+      method : 'GET',
+      path : '/user/register',
+      handler : controller.registerHandler,
+      config : {
+        validate : {
+          failAction : controller.registerHandler,
+          query : queryValidation,
+        }
+      },
+    }, {
+      method : 'POST',
+      path : '/user/register',
+      handler : controller.registerHandler,
+      config : {
+        validate : {
+          payload : mixedValidation({
+            email : Joi.string().email().required(),
+            password : Joi.string().min(8).required(),
+            pass2 : Joi.any().valid(Joi.ref('password')).required(),
+          }, {
+            email: emailValidator,
+          }),
+          query : queryValidation,
+          failAction : controller.registerHandler,
+        }
+      },
+    }];
+  }
+
+  return routes;
 };
 
 module.exports['@singleton'] = true;
@@ -243,4 +406,7 @@ module.exports['@require'] = [
   'validator/mixed-validation',
   'validator/validation-error',
   'server',
+  'form-handler',
+  'validator/constraints/row-exists',
+  'validator/constraints/client-validator',
 ];

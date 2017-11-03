@@ -24,15 +24,20 @@ const getValidationMessages = function(error) {
 };
 
 module.exports = {
-  userRegistration : (request, error) => ({
-    title: 'Sign Up',
-    formAction: `/user/register?${querystring.stringify(request.query)}`,
-    returnTo: `${request.query.redirect_uri}?status=cancelled`,
-    error: !!error,
-    validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
-    email: request.payload.email || ''
-  }),
-  userProfile: (user, request, error) => {
+  userRegistration : (user, client, request, error) => {
+    const payload = request.payload || {};
+    return {
+      client: client.serialize({strictOidc:true}),
+      title: 'Sign Up',
+      formAction: `/user/register?${querystring.stringify(request.query)}`,
+      returnTo: request.query.login ? `/op/auth?${querystring.stringify(request.query)}` : request.query.redirect_uri,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+      email: payload.email || ''
+    }
+  },
+
+  userProfile: (user, client, request, error) => {
     let validationErrorMessages = {};
     if (error) {
       validationErrorMessages = getValidationMessages(error);
@@ -47,6 +52,18 @@ module.exports = {
     };
 
     return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
+      changePassUrl: `/user/password?${querystring.stringify({
+        client_id: request.query.client_id,
+        redirect_uri: request.query.redirect_uri,
+        profile: true,
+      })}`,
+      emailSettingsUrl: `/user/email-settings?${querystring.stringify({
+        client_id: request.query.client_id,
+        redirect_uri: request.query.redirect_uri,
+        profile: true,
+      })}`,
       returnTo: request.query.redirect_uri,
       title: 'User Profile',
       fields: [
@@ -195,34 +212,116 @@ module.exports = {
           error: validationErrorMessages['address.country'],
         },
       ]
-
     };
   },
-  forgotPassword : (request, error) => ({
+
+  forgotPassword : (user, client, request, error) => ({
+    client: client.serialize({strictOidc:true}),
     title: 'Forgot Password',
     formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
-    returnTo: `${request.query.redirect_uri}?status=cancelled`,
+    returnTo: `${request.query.redirect_uri}`,
     error: !!error,
     validationErrorMessages: getValidationMessages(error),
   }),
-  resetPassword : (title, request, error) => {
+
+  emailSettings : (user, client, request, error) => {
+    request.payload = request.payload || {};
+    let successMessage;
+    switch(request.payload.action) {
+      case 'reverify':
+        successMessage = 'Verification email sent';
+        break;
+      case 'change':
+      case 'new_reverify':
+        successMessage = 'A verification email has been sent to the address provided and is required before you can use it to log in.';
+        break;
+      case 'cancel_new':
+        successMessage = 'Email change has been cancelled'
+        break;
+      default:
+        successMessage = '';
+    }
+
+    return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
+      title: 'Email Settings',
+      returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
+        client_id: request.query.client_id,
+        redirect_uri: request.query.redirect_uri,
+      })}` : `${request.query.redirect_uri}`,
+      success: request.method === 'post' && !error ? true : false,
+      successMessage,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+      email: user.get('email'),
+      emailVerified: user.get('profile').email_verified,
+      pendingEmail: user.get('pending_email') || false,
+    }
+  },
+
+  changePassword : (user, client, request, error) => {
+    return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
+      title: 'Change Password',
+      returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
+        client_id: request.query.client_id,
+        redirect_uri: request.query.redirect_uri,
+      })}` : `${request.query.redirect_uri}`,
+      success: request.method === 'post' && !error ? true : false,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+    }
+  },
+
+  completeChangePassword : (user, client, request, error) => {
+    return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
+      title : error ? 'Email not verified' : 'Email verified',
+      returnTo : request.query.redirect_uri,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+    }
+  },
+
+  emailVerifySuccess : (user, client, request, error) => {
+    return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
+      title: error ? 'Email not verified' :'Email Verified',
+      returnTo: request.query.redirect_uri,
+      error: !!error,
+      validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
+    }
+  },
+
+  resetPassword : title => (user, client, request, error) => {
     const redirectSet = request.query.token != undefined;
     return {
+      user: user.serialize(),
+      client: client.serialize({strictOidc:true}),
       title: title,
-      returnTo: (redirectSet) ? false : `${request.query.redirect_uri}?status=cancelled`,
+      returnTo: (redirectSet) ? false : `${request.query.redirect_uri}`,
       error: !!error,
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     };
   },
-  resetPasswordSuccess : (title, request) => {
+
+  resetPasswordSuccess : request => {
     const { token, ...query } = request.query;
     return {
       title: 'Password Set',
       linkUrl: `/op/auth?${querystring.stringify(query)}`
     };
   },
-  inviteEmail : (appName, baseUrl, query) => ({
+
+  inviteEmail : (user, client, baseUrl, query) => ({
+    user: user.serialize(),
+    client: client.serialize({strictOidc:true}),
     url: `${baseUrl}/user/accept-invite?${querystring.stringify(query)}`.replace(' ', '%20'),
-    appName: appName,
+    appName: client.get('client_name'),
+    subject: `${client.get('client_name')} Invitation`,
   }),
 };

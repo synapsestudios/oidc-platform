@@ -1,0 +1,78 @@
+<div>
+  <h2>Email Status</h2>
+  <div>
+    {{email}}
+    {{#if emailVerified}}
+      verified
+    {{else}}
+      not verified
+      <form action="{{formAction}}" method="post">
+        <input type="hidden" name="action" value="reverify" />
+        <input type="hidden" name="email" value="{{email}}" />
+        <button type="submit">Resend Verification</button>
+      </form>
+    {{/if}}
+  </div>
+
+  {{#if pendingEmail}}
+    <div>
+      {{pendingEmail}} not verified
+      <form action="{{formAction}}" method="post">
+        <input type="hidden" name="action" value="new_reverify" />
+        <input type="hidden" name="email" value="{{pendingEmail}}" />
+        <button type="submit">Resend Verification</button>
+      </form>
+      <form action="{{formAction}}" method="post">
+        <input type="hidden" name="action" value="cancel_new" />
+        <input type="hidden" name="email" value="{{pendingEmail}}" />
+        <button type="submit">Cancel</button>
+      </form>
+    </div>
+  {{/if}}
+
+  <h2>Change Email</h2>
+  <form action="{{formAction}}" method="post">
+    <input type="hidden" name="action" value="change" />
+    <div class="input-scaffold">
+      <label>
+        <span class="input-scaffold__label">Current Password</span>
+        <input
+              class="input-scaffold__input"
+              type="password"
+              name="current"
+              />
+      </label>
+      {{#if error}}
+        <div class="input-scaffold__validation">
+          {{#each validationErrorMessages.current}}
+            <div class="validation-error">{{this}}</div>
+          {{/each}}
+        </div>
+      {{/if}}
+    </div>
+    <div class="input-scaffold">
+      <label>
+        <span class="input-scaffold__label">New Email</span>
+        <input
+          class="input-scaffold__input"
+          type="email"
+          name="email"
+        />
+      </label>
+      {{#if error}}
+        <div class="input-scaffold__validation">
+          {{#each validationErrorMessages.email}}
+            <div class="validation-error">{{this}}</div>
+          {{/each}}
+        </div>
+      {{/if}}
+    </div>
+
+    {{#if success}}
+      {{successMessage}}
+    {{/if}}
+
+    <a href="{{returnTo}}">Back</a>
+    <button type="submit">Submit</button>
+  </form>
+</div>

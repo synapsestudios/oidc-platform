@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 var ioc = require('./cli-app');
 
-var knex = ioc.create('knex');
+var knex = require('../lib/knex');
 
 if (process.env.NODE_ENV === 'production') {
   console.log('In production. Not going to drop tables.');
