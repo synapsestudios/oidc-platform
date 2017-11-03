@@ -235,9 +235,11 @@ module.exports = {
       case 'new_reverify':
         successMessage = 'A verification email has been sent to the address provided and is required before you can use it to log in.';
         break;
+      case 'cancel_new':
+        successMessage = 'Email change has been cancelled'
+        break;
       default:
         successMessage = '';
-        break;
     }
 
     return {
