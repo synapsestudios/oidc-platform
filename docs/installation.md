@@ -10,6 +10,9 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | OIDC_INITIAL_ACCESS_TOKEN | A strong token that will be used to create new clients |
 | COOKIE_KEY                | Set this to a long string to be used to encrypt session cookies |
 | OLD_COOKIE_KEY            | When you update COOKIE_KEY make sure to set OLD_COOKIE_KEY to the value that was in COOKIE_KEY. New cookies will be encrypted with the COOKIE_KEY. Old cookies will be decrypted with OLD_COOKIE_KEY to be validated then reencrypted with COOKIE_KEY |
+| CLIENT_INITIATED_LOGOUT   | Set to true if you want to enable client initiated logouts using the `/user/logout` endpoint |
+| OIDC_PAIRWISE_SALT        | The salt used to generate [OIDC Pairwise Subject Identifiers](http://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg) |
+| ENABLE_USER_REGISTRATION  | Set to true if you want to enable user registration at the `/user/register` endpoint. If this is disabled client initiated invites is the only way to make new users |
 
 ## Keystores
 
@@ -87,3 +90,14 @@ Users can upload profile pictures when editing their profile. The platform makes
 | OIDC_S3_BUCKET        | The bucket in s3 that files will be saved to |
 | AWS_ACCESS_KEY        | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 | AWS_SECRET_ACCESS_KEY | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
+
+## Webhooks
+
+| Environment Variables | Description |
+| --------------------- | ----------- |
+| ENABLE_WEBHOOKS | if this value is anything other than 'true' then webhooks will be disabled (default 'false') |
+| WEBHOOK_ADAPTER | 'memory' is the only adapter currently supported (default 'memory') |
+| WEBHOOK_TIMEOUT | time in ms to wait before stopping a webhook POST (default 2000) |
+| WEBHOOK_MAX_RETRIES | how many times to retry a failed POST. If max retries is 2, then you will have a total of 3 attempts. 1 attempt followed by 2 retries. (default 2) |
+| WEBHOOK_RETRY_DELAY | time in ms to wait before retrying a failed request (default 10000) |
+| WEBHOOK_CONCURRENCY | number of webhook POST requests to process at a time (default 1) |

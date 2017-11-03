@@ -1,3 +1,14 @@
+## [v2.0.1](https://github.com/synapsestudios/oidc-platform/compare/v2.0.0...v2.1.0) - 2017-10-23
+### Changed
+- [#203](https://github.com/synapsestudios/oidc-platform/issues/203) Implement a system for webhooks
+- [#200](https://github.com/synapsestudios/oidc-platform/issues/200) Allow templates to have "options" and use those options to set custom subjects for emails
+- [#67](https://github.com/synapsestudios/oidc-platform/issues/67) Make user registration configurable
+- [#137](https://github.com/synapsestudios/oidc-platform/issues/137) Stop hard coding the pairwise salt
+- [#112](https://github.com/synapsestudios/oidc-platform/issues/112) Env var to control client initiated logout
+- [#141](https://github.com/synapsestudios/oidc-platform/issues/141) Add user/client to templates
+- [#142](https://github.com/synapsestudios/oidc-platform/issues/142) Remove deprecated template schema
+- [#59](https://github.com/synapsestudios/oidc-platform/issues/59) Change password
+- [#114](https://github.com/synapsestudios/oidc-platform/issues/114) Email Settings
 ## [v2.0.0](https://github.com/synapsestudios/oidc-platform/compare/v1.4.0...v2.0.0) - 2017-10-10
 ### Changed
 - [#162](https://github.com/synapsestudios/oidc-platform/issues/162) Stop allowing the access token for auth on the profile screen

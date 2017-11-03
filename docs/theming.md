@@ -26,6 +26,17 @@ Templates are the individual screens that can be created. To create a new templa
 | login                   | The login form                                                                     |
 | end_session             | The identity provider logout screen                                                |
 | interaction             | Any other OIDC interactions                                                        |
+| change-password         | The change password form |
+| change-password-success-email | The email that alerts users that their password has changed |
+| email-settings | The email settings screen |
+| email-verify-success | The success screen users see after clicking the verify link from their email |
+| email-verify-email | The email address verification email |
+| change-email-verify-email | The email sent to the new address with a verify link after the user changes their email |
+| change-email-alert-email | The eamil sent to the old address with an alert that the user's email has changed |
+
+##### Options
+
+For each template record in the `SIP_template` table there is an `options` json field. The only thing this is currently used for is that if you set this to `{"subject":"hello"}` on an email template then the subject from your options object will be used when sending the email.
 
 ##### Variables
 
@@ -142,7 +153,8 @@ You'll receive a field object for each of these fields:
 ```
 {
   forgotPasswordPath, // link to the forgot password form
-  error, // string with an error message
+  error, // bool, true if there are errors
+  validationErrorMessages, // errors formatted like { field: ['message', 'message2'] }
 }
 ```
 
@@ -160,6 +172,75 @@ You'll receive a field object for each of these fields:
 }
 ```
 
+###### change-password
+```
+{
+  formAction, // url the form will post to
+  returnTo, // url to return the user to if they cancel
+  error, // bool, true if there are errors
+  validationErrorMessages, // errors formatted like { field: ['message', 'message2'] }
+}
+```
+
+###### change-password-success-email
+```
+{
+  appName, // the name of the client application
+}
+```
+
+###### email-settings
+The email settings screen allows the user to do one of four things:
+1. Change their email address
+1. Resend a verification email to their current address (if unverified)
+1. Resend a verification email to their new pending address
+1. Cancel a pending email change
+
+```
+{
+  formAction, // the url the forms should post to
+  email, // user's current email
+  emailVerified, // bool indicating whether or not the user has verified their email address
+  pendingEmail, // the user's new email. only shown if they haven't yet verified the new email
+  success, // bool indicating whether one of the forms was successfully submitted
+  successMessage, // A message to show the user when one of the form actions succeeds
+  returnTo, // url to return the user to if they cancel
+  error, // bool, true if there are errors
+  validationErrorMessages, // errors formatted like { field: ['message', 'message2'] }
+}
+```
+
+###### email-verify-success
+```
+{
+  returnTo, // url to return the user to if they cancel
+  validationErrorMessages, // errors formatted like { field: ['message', 'message2'] }
+}
+```
+
+###### email-verify-email
+```
+{
+  appName, // client application name
+  url, // the verification url
+}
+```
+
+###### change-email-verify-email
+```
+{
+  appName, // client application name
+  url, // the verification url
+}
+```
+
+###### change-email-alert-email
+```
+{
+  appName, // client application name
+}
+```
+
 ### Layout
 
 Layouts are the wrapping html that themplates are rendered into. Create a new layout by inserting a record into the `SIP_layout` table with a `name` and `code`. The code field should be a string that will be compiled using the handlebars templating engine. Update template records by setting their `layout_id` field in order to use your new layout.
@@ -169,12 +250,15 @@ Layouts are the wrapping html that themplates are rendered into. Create a new la
 ```
 {
   /* This is the client object from the oidc provider */
-  /* may not be provided */
   client,
 
   /* This is the cookie object set by the oidc provider */
-  /* may not be provided */
+  /* only provided for login and interaction screens */
   cookie,
+
+  /* This is the user object */
+  /* not provided when the user isn't logged in yet */
+  user,
 
   title
 }
@@ -210,6 +294,19 @@ Client {
   revocationEndpointAuthMethod: 'client_secret_basic',
   revocationEndpointAuthSigningAlg: undefined,
   introspectionEndpointAuthSigningAlg: undefined
+}
+```
+
+##### Example User Object
+```
+{
+  id: 'e0746f3a-9625-4ee3-99e3-7d72ac1bc79a',
+  email: 'aaron+user@something.com',
+  profile: { email_verified: false, phone_number_verified: false },
+  app_metadata: [],
+  email_lower: 'aaron+user@something.com',
+  pending_email: null,
+  pending_email_lower: null
 }
 ```
 

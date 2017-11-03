@@ -4,6 +4,4 @@ var knex = require('knex')({
   client : config('/dbAdapter'),
   connection : config('/dbConnection')
 });
-
-module.exports = () => knex;
-module.exports['@singleton'] = true;
+module.exports = knex;

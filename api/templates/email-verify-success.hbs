@@ -1,0 +1,17 @@
+{{#if validationErrorMessages.token}}
+  <div class="input-scaffold__validation">
+    {{#each validationErrorMessages.token}}
+      <div class="validation-error">{{this}}</div>
+    {{/each}}
+  </div>
+{{/if}}
+
+{{#if validationErrorMessages.email}}
+  <div class="input-scaffold__validation">
+    {{#each validationErrorMessages.email}}
+      <div class="validation-error">{{this}}</div>
+    {{/each}}
+  </div>
+{{/if}}
+
+<a href="{{returnTo}}">Ok!</a>

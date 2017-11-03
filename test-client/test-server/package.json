@@ -13,8 +13,9 @@
     "boom": "^4.3.1",
     "btoa": "^1.1.2",
     "hapi": "^16.1.1",
-    "hapi-auth-jwt2": "^7.2.4",
+    "hapi-auth-jwt2": "^7.3.0",
     "lodash": "^4.17.4",
+    "node-jose": "^0.10.0",
     "wreck": "^12.2.0"
   },
   "devDependencies": {

@@ -1,8 +1,9 @@
 const Joi = require('joi');
+const webhookService = require('../webhook/webhook-service');
 
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 
-module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists) => [
+module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator) => [
   {
     method: 'POST',
     path: '/api/invite',
@@ -17,7 +18,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       validate: {
         payload: mixedValidation(
           {
-            app_name: Joi.string().required(),
             client_id: Joi.string().required(),
             email: Joi.string().email().required(),
             redirect_uri: Joi.string().required(),
@@ -30,7 +30,8 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
             hours_till_expiration: hoursTillExpirationSchema,
           },
           {
-            email: rowNotExists('user', 'email', 'Email already in use')
+            email: rowNotExists('user', 'email', 'Email already in use'),
+            client_id: clientValidator,
           }
         )
       }
@@ -43,7 +44,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       reply(
         userService.resendUserInvite(
           request.params.userId,
-          request.payload.app_name,
           request.payload.client_id,
           request.payload.redirect_uri,
           request.payload.response_type,
@@ -60,16 +60,12 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
         scope: 'admin'
       },
       validate: {
-        params: mixedValidation(
-          {
-            userId: Joi.any().required(),
-          },
-          {
-            userId: rowExists('user', 'id', 'User not found')
-          }
-        ),
-        payload: {
-          app_name: Joi.string().required(),
+        params: mixedValidation({
+          userId: Joi.any().required(),
+        }, {
+          userId: rowExists('user', 'id', 'User not found')
+        }),
+        payload: mixedValidation({
           client_id: Joi.string().required(),
           redirect_uri: Joi.string().required(),
           response_type: Joi.string().required(),
@@ -77,7 +73,9 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           nonce: Joi.string(),
           hours_till_expiration: hoursTillExpirationSchema,
           template: Joi.string(),
-        }
+        }, {
+          client_id: clientValidator,
+        })
       },
     }
   },
@@ -122,6 +120,29 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       }
     }
   },
+  {
+    method: 'POST',
+    path: '/api/webhooks',
+    handler: (request, reply) => {
+      reply(webhookService.create(
+        request.auth.credentials.clientId,
+        request.payload.url,
+        request.payload.events
+      ));
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin',
+      },
+      validate: {
+        payload: {
+          events: Joi.array().items(Joi.any().valid(webhookService.events)).min(1),
+          url: Joi.string().required(),
+        }
+      }
+    }
+  }
 ];
 
 module.exports['@singleton'] = true;
@@ -131,4 +152,5 @@ module.exports['@require'] = [
   'validator/mixed-validation',
   'validator/constraints/row-not-exists',
   'validator/constraints/row-exists',
+  'validator/constraints/client-validator',
 ];
