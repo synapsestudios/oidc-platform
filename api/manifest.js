@@ -108,4 +108,8 @@ module.exports = Promise.all([
         }
       }
     ]
-  }));
+  }))
+  .catch(e => {
+    logger.error(e);
+    process.exit(1);
+  });
