@@ -52,6 +52,7 @@ Each template will receive the same variables as the [layout](#layout). In addit
 ###### forgot-password
 ```
 {
+  linkUrl, // url for the login page
   formAction, // url for the form to post to
   returnTo, // url to return the user to if they cancel
   error, // bool, true if there are errors
