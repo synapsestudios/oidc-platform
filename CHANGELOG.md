@@ -1,3 +1,6 @@
+## [v2.1.2](https://github.com/synapsestudios/oidc-platform/compare/v2.1.1...v2.1.2) - 2017-12-1
+### Changed
+- [#235](https://github.com/synapsestudios/oidc-platform/issues/235) Fix profile photo upload
 ## [v2.1.1](https://github.com/synapsestudios/oidc-platform/compare/v2.1.0...v2.1.1) - 2017-11-22
 ### Changed
 - [#230](https://github.com/synapsestudios/oidc-platform/issues/230) add login link to forgot password screen
