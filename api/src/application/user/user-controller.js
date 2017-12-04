@@ -2,7 +2,7 @@ const querystring = require('querystring');
 const formatError = require('../../lib/format-error');
 const get = require('lodash/get');
 const set = require('lodash/set');
-const uuid = require('uuid');
+const Uuid = require('uuid');
 const config = require('../../../config');
 const Boom = require('boom');
 const views = require('./user-views');
@@ -101,9 +101,9 @@ module.exports = (
       const pictureMIME = request.payload.picture.hapi.headers['content-type'];
 
       if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
-        const uuid = uuid();
+        const uuid = Uuid();
         const bucket = uuid.substring(0, 2);
-        const filename = await imageService.uploadImageStream(request.payload.picture, `pictures/${bucket}/${filename}`);
+        const filename = await imageService.uploadImageStream(request.payload.picture, `pictures/${bucket}/${uuid}`);
 
         profile = Object.assign(profile, payload, { picture: filename });
       } else {

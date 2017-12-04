@@ -218,6 +218,7 @@ module.exports = {
   forgotPassword : (user, client, request, error) => ({
     client: client.serialize({strictOidc:true}),
     title: 'Forgot Password',
+    linkUrl: `/op/auth?${querystring.stringify(request.query)}`,
     formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
     returnTo: `${request.query.redirect_uri}`,
     error: !!error,
