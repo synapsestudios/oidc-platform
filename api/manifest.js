@@ -13,15 +13,15 @@ console.log(env);
 ioc.use(ioc.dir('src/lib'));
 ioc.use(ioc.dir('src/application'));
 
-const connection = {
-  port: 9000,
-};
+const connections = [{ port: 9000 }];
 
 if (env === 'development') {
-  connection.tls = {
+  connections[0].tls = {
     key: fs.readFileSync('dev.key'),
     cert: fs.readFileSync('dev.crt'),
   }
+
+  connections.push({ port: 9001 });
 }
 
 module.exports = Promise.all([
@@ -53,7 +53,7 @@ module.exports = Promise.all([
         }
       }
     },
-    connections: [connection],
+    connections,
     registrations: [
       {
         plugin: {
