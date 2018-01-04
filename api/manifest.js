@@ -8,7 +8,6 @@ const formatError = require('./src/lib/format-error');
 const fetchKeystore = require('./src/lib/fetch-keystore');
 const logger = require('./src/lib/logger');
 const env = require('./config')('/env');
-console.log(env);
 
 ioc.use(ioc.dir('src/lib'));
 ioc.use(ioc.dir('src/application'));
