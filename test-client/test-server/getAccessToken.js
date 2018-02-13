@@ -3,7 +3,7 @@ const btoa = require('btoa');
 const config = require('../src/config');
 
 const wreck = Wreck.defaults({
-  baseUrl: 'http://localhost:9000',
+  baseUrl: 'http://localhost:9001',
   json: true,
 });
 
