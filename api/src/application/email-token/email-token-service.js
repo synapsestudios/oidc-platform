@@ -6,7 +6,7 @@ module.exports = () => {
     create: async function(userId, hoursTilExpiration, saveOptions) {
       await this.destroyUserTokens(userId);
 
-      hoursTilExpiration = hoursTilExpiration || 1;
+      hoursTilExpiration = hoursTilExpiration || 24;
       const expires = new Date();
       expires.setHours(expires.getHours() + hoursTilExpiration);
 
