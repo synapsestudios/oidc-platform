@@ -278,7 +278,7 @@ Client {
     'password'
   ],
   idTokenSignedResponseAlg: 'RS256',
-  postLogoutRedirectUris: [ 'https://sso-client.dev:3000/logout' ],
+  postLogoutRedirectUris: [ 'https://sso-client.test:3000/logout' ],
   requestUris: [],
   requireAuthTime: false,
   responseTypes: [ 'code id_token token' ],
@@ -290,7 +290,7 @@ Client {
   clientSecretExpiresAt: '0',
   contacts: [],
   defaultAcrValues: [],
-  redirectUris: [ 'https://sso-client.dev:3000/' ],
+  redirectUris: [ 'https://sso-client.test:3000/' ],
   introspectionEndpointAuthMethod: 'client_secret_basic',
   revocationEndpointAuthMethod: 'client_secret_basic',
   revocationEndpointAuthSigningAlg: undefined,
@@ -315,7 +315,7 @@ Client {
 
 ```
 Session {
-  returnTo: 'http://sso-client.dev:9000/op/auth/4e51909b-1b61-4795-92a4-ce4fe9ea5aeb',
+  returnTo: 'http://sso-client.test:9000/op/auth/4e51909b-1b61-4795-92a4-ce4fe9ea5aeb',
   interaction: { error: 'login_required',
      error_description: 'End-User authentication is required',
      reason: 'no_session',
@@ -325,7 +325,7 @@ Session {
   params: { acr_values: '',
      client_id: '25bb32fc-a9b4-4124-9b60-09961c5dcc28',
      nonce: 'nonce',
-     redirect_uri: 'https://sso-client.dev:3000/',
+     redirect_uri: 'https://sso-client.test:3000/',
      response_mode: 'fragment',
      response_type: 'code id_token token',
      scope: 'openid profile app_metadata'

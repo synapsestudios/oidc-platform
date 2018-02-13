@@ -24,7 +24,8 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
 
   return {
     async sendChangeEmailVerifyEmail(user, client, email, query) {
-      const token = await emailTokenService.create(user.get('id'));
+      const hoursTilExpiration = client.get('hours_til_expiration');
+      const token = await emailTokenService.create(user.get('id'), hoursTilExpiration);
 
       const viewContext = {
         url: `${base}/user/complete-email-update?${querystring.stringify({
@@ -62,7 +63,8 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
     },
 
     async sendVerificationEmail(user, client, email, query) {
-      const token = await emailTokenService.create(user.get('id'));
+      const hoursTilExpiration = client.get('hours_til_expiration');
+      const token = await emailTokenService.create(user.get('id'), hoursTilExpiration);
 
       const viewContext = {
         url: `${base}/user/email-verify?${querystring.stringify({
@@ -100,7 +102,8 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
     },
 
     async sendForgotPasswordEmail(user, client, email, query) {
-      const token = await emailTokenService.create(user.get('id'));
+      const hoursTilExpiration = client.get('hours_til_expiration');
+      const token = await emailTokenService.create(user.get('id'), client.get('hours_til_expiration'));
       const newQuery = querystring.stringify(Object.assign({}, query, { token: token.get('token') }));
       const viewContext = {
         user: user.serialize(),
@@ -124,6 +127,7 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
         ['client_id', 'redirect_uri', 'scope', 'response_type'],
       ), new Error('query must contain client_id, redirect_uri, response_type, and scope'));
 
+      const clientHoursTilExpiration = hoursTilExpiration ? hoursTilExpiration : client.get('hours_til_expiration')
       const token = await emailTokenService.create(user.get('id'), hoursTilExpiration, saveOptions);
       const viewContext = userViews.inviteEmail(user, client, config('/baseUrl'), {...query, token: token.get('token')});
 
