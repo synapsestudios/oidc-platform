@@ -5,7 +5,7 @@ const path = require('path');
 const getAccessToken = require('./getAccessToken');
 
 const wreck = Wreck.defaults({
-  baseUrl: 'http://localhost:9000',
+  baseUrl: 'http://localhost:9001',
   json: true,
 });
 
@@ -17,9 +17,9 @@ module.exports = (request, reply) => {
   options.payload = {};
   options.payload.email = request.payload.email;
   options.payload.client_id = clientId;
-  options.payload.redirect_uri = 'https://sso-client.dev:3000/';
+  options.payload.redirect_uri = 'https://sso-client.test:3000/';
+  options.payload.response_type= 'code';
   options.payload.scope = scope;
-  options.payload.app_name = 'Test Client';
   options.headers = {};
   if (request.payload.useTemplate) {
     options.payload.template = fs.readFileSync(path.join(__dirname, './templates/custom-email.hbs'), 'utf8');
