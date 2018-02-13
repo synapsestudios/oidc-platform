@@ -49,8 +49,8 @@ Body:
         "implicit",
         "client_credentials"
     ],
-    "redirect_uris": ["https://sso-client.dev:3000/"],
-    "post_logout_redirect_uris": ["https://sso-client.dev:3000/logout"]
+    "redirect_uris": ["https://sso-client.test:3000/"],
+    "post_logout_redirect_uris": ["https://sso-client.test:3000/logout"]
 }
 ```
 
@@ -67,7 +67,7 @@ Body:
   ],
   "id_token_signed_response_alg": "RS256",
   "post_logout_redirect_uris": [
-    "https://sso-client.dev:3000/logout"
+    "https://sso-client.test:3000/logout"
   ],
   "require_auth_time": false,
   "response_types": [
@@ -80,7 +80,7 @@ Body:
   "client_secret": "GRHH1fv71Fwngqv3gOc0zo479rNp37n3Acud2dXLC6oIUGazTcHktYJDVELtrqJ1",
   "client_secret_expires_at": 0,
   "redirect_uris": [
-    "https://sso-client.dev:3000/"
+    "https://sso-client.test:3000/"
   ],
   "registration_client_uri": "http://localhost:9000/op/reg/e5b9a7f5-bd1f-4aef-9c84-7f50e65b1f85",
   "registration_access_token": "ZjJlMjM2YmQtMzEwMy00NjMyLTg0MDctNDRiNzU0ZWU0NjE0s9qhQMTo92KhQ5KGeAMTsj4Y7IzWCvYNMFBjLc9UkAve4VRb7gyNQwmnlk1zSMD4qCc-prl0QrdEWAY4LhFyQg"
@@ -191,7 +191,7 @@ POST /op/token
 Host: ${providerDomain}
 Content-Type: application/x-www-form-urlencoded
 Authorization: Basic ${base64Encode(clientId:clientSecret)}
-grant_type=authorization_code&code=MWYyOWEzMjctNTQxZi00ODYyLWFlZGUtMzlhZTZmOGZlZjEx1LhZa4qZwM89-M3egd0q-gZI9s_iCvsXJNPPQdsGQDWEWkOg3jgLMkwCqylly1pOE1ND_0MJ1zIjp12GGVKYSQ&redirect_uri=https%3A%2F%2Fsso-client.dev%3A3000%2F
+grant_type=authorization_code&code=MWYyOWEzMjctNTQxZi00ODYyLWFlZGUtMzlhZTZmOGZlZjEx1LhZa4qZwM89-M3egd0q-gZI9s_iCvsXJNPPQdsGQDWEWkOg3jgLMkwCqylly1pOE1ND_0MJ1zIjp12GGVKYSQ&redirect_uri=https%3A%2F%2Fsso-client.test%3A3000%2F
 ```
 
 #### Example token response
