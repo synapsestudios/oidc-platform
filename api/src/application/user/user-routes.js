@@ -218,6 +218,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             nickname: Joi.string().allow(''),
             preferred_username: Joi.string().allow(''),
             profile: Joi.string().uri().allow(''),
+            shouldClearPicture: Joi.boolean(),
             picture: Joi.object().type(Readable).assert(
               'hapi.headers.content-type',
               Joi.any().valid(['image/jpeg', 'image/png', 'application/octet-stream'])
