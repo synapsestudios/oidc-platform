@@ -5,12 +5,14 @@ const options = {
   whitelist: process.env.OIDC_EMAIL_WHITELIST ? process.env.OIDC_EMAIL_WHITELIST.split(',') : null,
 };
 
+const nonAlphaNumericPattern = /\W/g;
+const domainPattern = /@(.*)$/;
+
 module.exports = (emailAddress, reject) => {
   if (!options.whitelist || !options.whitelist.length) {
     return emailAddress;
   }
 
-  const domainPattern = /@(.*)$/;
   const domain = emailAddress.match(domainPattern)[1];
 
   if (_.findIndex(options.whitelist, (whitelisted) => domain === whitelisted) >= 0) {
@@ -21,8 +23,9 @@ module.exports = (emailAddress, reject) => {
     reject('trap option must be set if using whitelist');
   }
   else {
-    return options.trap;
+    const intendedRecipient = emailAddress.replace(nonAlphaNumericPattern, '');
+    const [ user, host ] = options.trap.split('@');
+
+    return `${user}+${intendedRecipient}@${host}`;
   }
 };
-
-
