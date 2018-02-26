@@ -13,6 +13,8 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | CLIENT_INITIATED_LOGOUT   | Set to true if you want to enable client initiated logouts using the `/user/logout` endpoint |
 | OIDC_PAIRWISE_SALT        | The salt used to generate [OIDC Pairwise Subject Identifiers](http://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg) |
 | ENABLE_USER_REGISTRATION  | Set to true if you want to enable user registration at the `/user/register` endpoint. If this is disabled client initiated invites is the only way to make new users |
+| REDIS_HOST                | Set if different from default 'localhost' |
+| REDIS_PORT                | Set if different from default '6379' |
 
 ## Keystores
 
