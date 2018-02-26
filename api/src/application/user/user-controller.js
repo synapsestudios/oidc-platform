@@ -50,7 +50,7 @@ module.exports = (
           await userEmails.sendVerificationEmail(user, client, email, request.query);
           break;
         case 'new_reverify':
-          await userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client);
+          await userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query);
           break;
         case 'cancel_new':
           user.set('pending_email', null);
