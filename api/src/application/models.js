@@ -10,7 +10,6 @@ module.exports = [
   bookshelf => ({name: 'template', model: require('./theme/template-model')(bookshelf)}),
   bookshelf => ({name: 'theme', model: require('./theme/theme-model')(bookshelf)}),
   bookshelf => ({name: 'user', model: require('./user/user-model')(bookshelf)}),
-  bookshelf => ({name: 'user_password_reset_token', model: require('./user/user-password-reset-token-model')(bookshelf)}),
   bookshelf => ({name: 'layout', model: require('./theme/layout-model')(bookshelf)}),
   bookshelf => ({name: 'email_token', model: require('./email-token/email-token-model')(bookshelf)}),
   bookshelf => ({name: 'webhook', model: require('./webhook/webhook-model')(bookshelf)}),
