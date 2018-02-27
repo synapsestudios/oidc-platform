@@ -13,6 +13,7 @@ const queryValidation = {
   scope : Joi.string().required(),
   redirect_uri : Joi.string().required(),
   nonce : Joi.string().optional(),
+  login: Joi.string().optional(),
 };
 
 module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, clientValidator) => {
