@@ -8,8 +8,15 @@ exports.up = function(knex, Promise) {
     table.dropPrimary();
     table.dropForeign('user_id');
   }).then(() => {
+    return knex.raw(
+      `ALTER TABLE "SIP_user_password_reset_token" ALTER COLUMN user_id TYPE uuid USING user_id::uuid`
+    );
+  }).then(() => {
+    return knex.raw(
+      `ALTER TABLE "SIP_user_password_reset_token" ALTER COLUMN user_id SET NOT NULL`
+    );
+  }).then(() => {
     return knex.schema.alterTable('SIP_user_password_reset_token', table => {
-      table.uuid('user_id').notNull().alter();
       table.primary(['user_id', 'token']);
     });
   }).then(() => {

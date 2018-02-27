@@ -9,9 +9,15 @@ exports.up = function(knex, Promise) {
         }));
       });
     }).then(() => {
-      return knex.schema.alterTable('SIP_user', (table) => {
-        table.string('email_lower').notNullable().alter();
-      });
+      if (process.env.OIDC_DB_ADAPTER === 'mysql') {
+        return knex.raw(
+          `ALTER TABLE SIP_user CHANGE email_lower email_lower VARCHAR(255) NOT NULL`
+        );
+      } else {
+        return knex.raw(
+          `ALTER TABLE "SIP_user" ALTER COLUMN email_lower SET NOT NULL`
+        );
+      }
     });
 };
 
