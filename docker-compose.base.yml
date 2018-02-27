@@ -1,0 +1,16 @@
+version: '2'
+services:
+    api:
+        build:
+            context: .
+            dockerfile: ./api/Dockerfile
+            args:
+                PACKAGE_PATH: ./api
+                WORKING_DIR: /src/api
+        env_file:
+            - ./common.env
+        volumes:
+            - .:/src
+        command: ["npm", "run", "start-dev"]
+    redis:
+        image: redis
