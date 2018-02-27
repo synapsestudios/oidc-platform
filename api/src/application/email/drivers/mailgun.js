@@ -12,8 +12,10 @@ module.exports = function () {
 
   return {
     send : (emailObject) => {
-
       return new Promise((resolve, reject) => {
+        if (!process.env.MAILGUN_API_KEY) {
+          return reject('MAILGUN_API_KEY not set');
+        }
 
         if (!emailObject.to) {
           return reject('no to address provided');
