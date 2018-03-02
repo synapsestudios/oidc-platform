@@ -3,6 +3,7 @@ var Confidence = require('confidence');
 var config = {
   '$filter': 'env',
   '$base': {
+    env: process.env.NODE_ENV || 'development',
     dbAdapter: process.env.OIDC_DB_ADAPTER,
     dbConnection: {
       host: process.env.OIDC_DB_HOST,

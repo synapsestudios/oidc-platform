@@ -12,7 +12,7 @@ The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com
 
 0. Copy `common.template.env` as `common.env` and provide a mailgun key
 0. Set the OIDC_DB_* vars based on what RDBMS you are using.
-0. Run either `./compose-mysql up` or `./compose-postgres up`
+0. Run either `./compose-mysql up` or `./compose-postgres up`. You can also just do `docker-compose up` which will use postgres.
 0. Create an oauth client by posting to http://localhost:9000/op/reg with the following:
 ```
 Headers:
@@ -28,14 +28,14 @@ Body:
         "implicit",
         "client_credentials"
     ],
-    "redirect_uris": ["https://sso-client.dev:3000/"],
-    "post_logout_redirect_uris": ["https://sso-client.dev:3000/logout"]
+    "redirect_uris": ["https://sso-client.test:3000/"],
+    "post_logout_redirect_uris": ["https://sso-client.test:3000/logout"]
 }
 ```
 0. In `test-client/src` create a copy of `config.template.js` and call it `config.js`. Fill in the
 client_id and client_secret of the client you created in the previous step.
-0. Add `sso-client.dev`for `127.0.0.1` to your hosts file
-0. `npm i` and `npm start` in `test-client`
+0. Add `sso-client.test`for `127.0.0.1` to your hosts file
+0. `npm i` and `npm start` in `test-client` and `test-server`
 
 ## Session Management
 

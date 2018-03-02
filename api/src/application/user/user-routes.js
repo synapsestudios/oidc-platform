@@ -13,6 +13,7 @@ const queryValidation = {
   scope : Joi.string().required(),
   redirect_uri : Joi.string().required(),
   nonce : Joi.string().optional(),
+  login: Joi.string().optional(),
 };
 
 module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, clientValidator) => {
@@ -218,6 +219,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             nickname: Joi.string().allow(''),
             preferred_username: Joi.string().allow(''),
             profile: Joi.string().uri().allow(''),
+            shouldClearPicture: Joi.boolean(),
             picture: Joi.object().type(Readable).assert(
               'hapi.headers.content-type',
               Joi.any().valid(['image/jpeg', 'image/png', 'application/octet-stream'])

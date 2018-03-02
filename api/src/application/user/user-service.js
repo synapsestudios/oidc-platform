@@ -107,29 +107,6 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
       return bookshelf.model('user').where({ id }).fetch();
     },
 
-    /**
-     * @deprecated - use email tokens instead
-     */
-    findByPasswordToken: function(token) {
-      return bookshelf.model('user_password_reset_token')
-        .forge({ token })
-        .where('expires_at', '>', bookshelf.knex.fn.now())
-        .fetch()
-        .then(tokenModel => {
-          if (tokenModel) {
-            return self.findById(tokenModel.get('user_id'));
-          }
-          return null;
-        });
-    },
-
-    /**
-     * @deprecated - use email tokens instead
-     */
-    destroyPasswordToken: function(token) {
-      return bookshelf.model('user_password_reset_token').forge({ token }).destroy();
-    },
-
     invalidateSession(sessionId) {
       return self.redisAdapter.destroy(sessionId);
     },

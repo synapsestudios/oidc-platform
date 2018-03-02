@@ -1,14 +1,27 @@
 const handlebars = require('handlebars');
 const ioc = require('electrolyte');
 const GoodWinston = require('good-winston');
+const fs = require('fs');
 
 const config = require('./config');
 const formatError = require('./src/lib/format-error');
 const fetchKeystore = require('./src/lib/fetch-keystore');
 const logger = require('./src/lib/logger');
+const env = require('./config')('/env');
 
 ioc.use(ioc.dir('src/lib'));
 ioc.use(ioc.dir('src/application'));
+
+const connections = [{ port: 9000 }];
+
+if (env === 'development') {
+  connections[0].tls = {
+    key: fs.readFileSync('dev.key'),
+    cert: fs.readFileSync('dev.crt'),
+  }
+
+  connections.push({ port: 9001 });
+}
 
 module.exports = Promise.all([
   ioc.create('bookshelf'),
@@ -39,9 +52,7 @@ module.exports = Promise.all([
         }
       }
     },
-    connections: [{
-      port: 9000
-    }],
+    connections,
     registrations: [
       {
         plugin: {
@@ -108,4 +119,8 @@ module.exports = Promise.all([
         }
       }
     ]
-  }));
+  }))
+  .catch(e => {
+    logger.error(e);
+    process.exit(1);
+  });

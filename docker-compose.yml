@@ -7,10 +7,29 @@ services:
             args:
                 PACKAGE_PATH: ./api
                 WORKING_DIR: /src/api
+        environment:
+          - OIDC_DB_ADAPTER=postgresql
+          - OIDC_DB_USER=postgres
+          - OIDC_DB_PASSWORD=root
+          - OIDC_DB_NAME=postgres
+          - OIDC_DB_HOST=postgres
+          - OIDC_DB_PORT=5432
         env_file:
             - ./common.env
         volumes:
             - .:/src
+        depends_on:
+            - postgres
+            - redis
+        entrypoint: ./wait-for-it.sh -t 0 postgres:5432 --
         command: ["npm", "run", "start-dev"]
     redis:
         image: redis
+    postgres:
+        image: postgres:9.6.1
+        env_file:
+            - ./common.env
+        environment:
+            - POSTGRES_PASSWORD=root
+        ports:
+            - "5432:5432"

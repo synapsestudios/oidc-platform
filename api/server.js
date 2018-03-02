@@ -3,6 +3,7 @@ const ioc = require('electrolyte');
 const handlebars = require('handlebars');
 const manifestPromise = require('./manifest');
 const bookshelf = require('./src/lib/bookshelf');
+const logger = require('./src/lib/logger');
 
 var options = {
   relativeTo: __dirname + '/src'
@@ -78,10 +79,16 @@ manifestPromise.then(manifest => {
       });
 
       server.start(function () {
-        server.log(['info'], `Server running at: ${server.info.uri}`);
+        for (let i = 0; i < server.connections.length; i++) {
+          const message = `${server.connections[i].info.protocol === 'https' ? 'SSL ' : ''}Server running at: ${server.connections[i].info.uri}`
+          server.log(['info'], message);
+        }
       });
     } catch (e) {
       server.log(['error'], e);
     }
   });
+}).catch(e => {
+  logger.error(e);
+  process.exit(1);
 });

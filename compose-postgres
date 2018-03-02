@@ -1,2 +1,2 @@
 #! /usr/bin/env bash
-docker-compose -f docker-compose.yml -f docker-compose.postgres.yml -f docker-compose.override.yml $@
+docker-compose -f docker-compose.yml -f docker-compose.override.yml $@

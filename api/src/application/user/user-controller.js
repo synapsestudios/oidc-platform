@@ -50,7 +50,7 @@ module.exports = (
           await userEmails.sendVerificationEmail(user, client, email, request.query);
           break;
         case 'new_reverify':
-          await userEmails.sendChangeEmailVerifyEmail(email, request.query, user, client);
+          await userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query);
           break;
         case 'cancel_new':
           user.set('pending_email', null);
@@ -95,20 +95,25 @@ module.exports = (
 
     profileHandler: formHandler('user-profile', views.userProfile, async (request, reply, user, client) => {
       let profile = user.get('profile');
-      const payload = expandDotPaths(request.payload);
+      const { shouldClearPicture, ...originalPayload } = request.payload;
+      const payload = expandDotPaths(originalPayload);
 
       const oldPicture = profile.picture;
-      const pictureMIME = request.payload.picture.hapi.headers['content-type'];
+      const pictureMIME = originalPayload.picture.hapi.headers['content-type'];
 
       if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
         const uuid = Uuid();
         const bucket = uuid.substring(0, 2);
-        const filename = await imageService.uploadImageStream(request.payload.picture, `pictures/${bucket}/${uuid}`);
+        const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);
 
         profile = Object.assign(profile, payload, { picture: filename });
       } else {
-        delete request.payload.picture;
-        profile = Object.assign(profile, payload);
+        delete originalPayload.picture;
+        if (shouldClearPicture) {
+          profile = Object.assign(profile, payload, {picture: null});
+        } else {
+          profile = Object.assign(profile, payload);
+        }
       }
 
       user = await userService.update(user.get('id'), { profile });
