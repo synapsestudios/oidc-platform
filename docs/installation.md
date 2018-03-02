@@ -6,6 +6,7 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 
 | Environment Variable      | Description |
 | --------------------      | ----------- |
+| NODE_ENV                  | Set to `development` to use a self-signed certificate |
 | OIDC_BASE_URL             | The url that the OIDC Provider is hosted at |
 | OIDC_INITIAL_ACCESS_TOKEN | A strong token that will be used to create new clients |
 | COOKIE_KEY                | Set this to a long string to be used to encrypt session cookies |

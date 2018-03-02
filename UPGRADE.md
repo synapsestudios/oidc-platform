@@ -1,5 +1,8 @@
 # UPGRADE GUIDE
 
+## v2.1.0 -> v2.2.0
+- `NODE_ENV` variable must now be provided in the environment
+
 ## v2.0.0 -> v2.1.0
 - You _must_ run migrations before deploying the new oidc code. If you haven't yet deployed v2.0.0 then you should update to v2.0.0 first before updating to v2.1.0. The migrations in 2.1 will break your app if it's < 2.0.
 - app_name is no longer allowed in the body of the invite and reinvite endpoints. The client's `client_name` value will be used instead.
