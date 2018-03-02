@@ -1,3 +1,20 @@
+## [v2.2.0](https://github.com/synapsestudios/oidc-platform/compare/v2.1.2...v2.2.0) - 2018-03-2
+### Added
+- [#254](https://github.com/synapsestudios/oidc-platform/pull/254) Add Redis port to common.env and documentation
+- [#251](https://github.com/synapsestudios/oidc-platform/issues/251) Add ability to delete profile picture
+- [#240](https://github.com/synapsestudios/oidc-platform/issues/240) Add self signed SSL certificates to dev environment
+- [#227](https://github.com/synapsestudios/oidc-platform/pull/227) Add helpful logs and exits
+### Changed
+- [#178](https://github.com/synapsestudios/oidc-platform/issues/178) Remove user_password_reset_token table and associated models/methods
+- [#249](https://github.com/synapsestudios/oidc-platform/issues/249) Update trap email handling
+- [#248](https://github.com/synapsestudios/oidc-platform/pull/248) Change certs
+- [#247](https://github.com/synapsestudios/oidc-platform/pull/247) Make hoursTilExpire configurable for email tokens
+### Fixed
+- [#260](https://github.com/synapsestudios/oidc-platform/issues/260) Fix Validation failing when registration form linked from login form submitted #260
+- [#231](https://github.com/synapsestudios/oidc-platform/issues/231) Fix build scripts so docker-compose up always works #231
+- [#255](https://github.com/synapsestudios/oidc-platform/issues/255) Fix broken migrations
+- [#253](https://github.com/synapsestudios/oidc-platform/pull/253) Resend Verification button causing 500 errors
+
 ## [v2.1.2](https://github.com/synapsestudios/oidc-platform/compare/v2.1.1...v2.1.2) - 2017-12-1
 ### Changed
 - [#235](https://github.com/synapsestudios/oidc-platform/issues/235) Fix profile photo upload
