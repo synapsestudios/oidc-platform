@@ -6,9 +6,9 @@ module.exports = (server, ValidationError) => async (value, options) => {
   const token = await tokenQuery.fetch();
   const userQuery = bookshelf.model('user').where({id: token.get('user_id')})
   const user = await userQuery.fetch();
-  if (!user.get('pending_email_lower')) {
+  const badEmailToken = new ValidationError('That email token is no longer good');
+  if (!user.get('pending_email_lower') || !user.get('pending_email')) {
     // Email change has been canceled
-    const badEmailToken = new ValidationError('That email token is no longer good');
     throw badEmailToken;
   }
   return value
