@@ -23,8 +23,11 @@ manifestPromise.then(manifest => {
         try {
           let token = await bookshelf.model('email_token')
             .forge({ token: id })
-            .where('expires_at', '>', bookshelf.knex.fn.now())
             .fetch();
+          if (token && token.get('expires_at') < new Date()) {
+            // Token is expired
+            return false;
+          }
           if (!token) {
             token = await bookshelf.model('user_password_reset_token')
               .forge({ token })
