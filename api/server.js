@@ -20,11 +20,11 @@ manifestPromise.then(manifest => {
     server.auth.strategy('oidc_session', 'oidc_session');
     server.auth.strategy('email_token', 'email_token', {
       findToken: async id => {
+        try {
         let token = await bookshelf.model('email_token')
           .forge({ token: id })
           .where('expires_at', '>', bookshelf.knex.fn.now())
           .fetch();
-
         if (!token) {
           token = await bookshelf.model('user_password_reset_token')
             .forge({ token })
@@ -32,6 +32,10 @@ manifestPromise.then(manifest => {
             .fetch();
         }
         return token;
+        }
+        catch (error){
+          return error;
+        }
       },
       findUser: async(id) => {
         return await bookshelf.model('user').where({ id }).fetch();
