@@ -148,6 +148,10 @@ module.exports = (
       const user = request.auth.credentials.user;
       const client = await clientService.findById(request.query.client_id);
 
+      if (!user.get('pending_email_lower')) {
+        console.error('pending_email_lower returned falsy value');
+        return reply(Boom.forbidden());
+      }
       if (!error) {
         const userCollection = await bookshelf.model('user').where({email_lower: user.get('pending_email_lower')}).fetchAll();
 
@@ -172,9 +176,9 @@ module.exports = (
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
       if (template) {
-        reply(template);
+        return reply(template);
       } else {
-        reply.view('email-verify-success', viewContext);
+        return reply.view('email-verify-success', viewContext);
       }
     },
 
