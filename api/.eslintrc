@@ -2,7 +2,7 @@
     "parserOptions": {
         ecmaVersion: 8,
         sourceType: 'module'
-    }
+    },
     "extends": "eslint:recommended",
     "ecmaFeatures" : {
         "modules"        : true,
