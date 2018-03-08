@@ -1,7 +1,7 @@
 const Boom = require('boom');
 const bookshelf = require('../../bookshelf');
 
-module.exports = (server, ValidationError) => async (value, options) => {
+module.exports = (ValidationError) => async (value, options) => {
   const tokenQuery = bookshelf.model('email_token').where({token: value});
   const token = await tokenQuery.fetch();
   const userQuery = bookshelf.model('user').where({id: token.get('user_id')})
@@ -15,4 +15,4 @@ module.exports = (server, ValidationError) => async (value, options) => {
 }
 
 module.exports['@singleton'] = true;
-module.exports['@require'] = ['server', 'validator/validation-error'];
+module.exports['@require'] = ['validator/validation-error'];
