@@ -8,11 +8,11 @@ exports.register = function (server, pluginOptions, next) {
         try {
           var token = await schemeOptions.findToken(request.query.token);
           if (token.name === 'TypeError') {
-            reply(Boom.forbidden())
+            return reply(Boom.forbidden())
           }
           var user = token ? await schemeOptions.findUser(token.get('user_id')) : null;
         } catch(e) {
-          reply(e);
+          return reply(e);
         }
 
         if (token && user) {
@@ -23,7 +23,7 @@ exports.register = function (server, pluginOptions, next) {
             }
           });
         } else {
-          reply(Boom.forbidden());
+          return reply(Boom.forbidden());
         }
       }
 
