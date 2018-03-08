@@ -7,6 +7,9 @@ exports.register = function (server, pluginOptions, next) {
       async authenticate(request, reply) {
         try {
           var token = await schemeOptions.findToken(request.query.token);
+          if (token.name === 'TypeError') {
+            reply(Boom.forbidden())
+          }
           var user = token ? await schemeOptions.findUser(token.get('user_id')) : null;
         } catch(e) {
           reply(e);
