@@ -16,7 +16,7 @@ const queryValidation = {
   login: Joi.string().optional(),
 };
 
-module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, clientValidator) => {
+module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, tokenValidator, clientValidator) => {
   const emailValidator = async (value, options) => {
     const userCollection = await bookshelf.model('user').where({email_lower: value.toLowerCase()}).fetchAll();
     if (userCollection.length >= 1) {
@@ -121,6 +121,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
+            token: tokenValidator,
             client_id: clientValidator,
           }),
         },
@@ -410,5 +411,6 @@ module.exports['@require'] = [
   'server',
   'form-handler',
   'validator/constraints/row-exists',
+  'validator/constraints/token-validator',
   'validator/constraints/client-validator',
 ];
