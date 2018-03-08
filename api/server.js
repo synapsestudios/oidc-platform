@@ -21,20 +21,20 @@ manifestPromise.then(manifest => {
     server.auth.strategy('email_token', 'email_token', {
       findToken: async id => {
         try {
-        let token = await bookshelf.model('email_token')
-          .forge({ token: id })
-          .where('expires_at', '>', bookshelf.knex.fn.now())
-          .fetch();
-        if (!token) {
-          token = await bookshelf.model('user_password_reset_token')
-            .forge({ token })
+          let token = await bookshelf.model('email_token')
+            .forge({ token: id })
             .where('expires_at', '>', bookshelf.knex.fn.now())
             .fetch();
-        }
-        return token;
+          if (!token) {
+            token = await bookshelf.model('user_password_reset_token')
+              .forge({ token })
+              .where('expires_at', '>', bookshelf.knex.fn.now())
+              .fetch();
+          }
+          return token;
         }
         catch (error){
-          return error;
+          throw error;
         }
       },
       findUser: async(id) => {
