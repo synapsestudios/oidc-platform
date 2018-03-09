@@ -4,7 +4,6 @@ const handlebars = require('handlebars');
 const manifestPromise = require('./manifest');
 const bookshelf = require('./src/lib/bookshelf');
 const logger = require('./src/lib/logger');
-const moment = require('moment');
 
 var options = {
   relativeTo: __dirname + '/src'
