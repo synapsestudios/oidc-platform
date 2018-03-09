@@ -4,6 +4,7 @@ const handlebars = require('handlebars');
 const manifestPromise = require('./manifest');
 const bookshelf = require('./src/lib/bookshelf');
 const logger = require('./src/lib/logger');
+const moment = require('moment');
 
 var options = {
   relativeTo: __dirname + '/src'
@@ -24,15 +25,9 @@ manifestPromise.then(manifest => {
           let token = await bookshelf.model('email_token')
             .forge({ token: id })
             .fetch();
-          if (token && token.get('expires_at') < new Date()) {
+          if (token && moment().isAfter(token.get('expires_at'))) {
             // Token is expired
             return false;
-          }
-          if (!token) {
-            token = await bookshelf.model('user_password_reset_token')
-              .forge({ token })
-              .where('expires_at', '>', bookshelf.knex.fn.now())
-              .fetch();
           }
           return token;
         }
