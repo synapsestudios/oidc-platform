@@ -21,19 +21,11 @@ manifestPromise.then(manifest => {
     server.auth.strategy('oidc_session', 'oidc_session');
     server.auth.strategy('email_token', 'email_token', {
       findToken: async id => {
-        try {
-          let token = await bookshelf.model('email_token')
-            .forge({ token: id })
-            .fetch();
-          if (token && moment().isAfter(token.get('expires_at'))) {
-            // Token is expired
-            return false;
-          }
-          return token;
-        }
-        catch (error){
-          throw error;
-        }
+        let token = await bookshelf.model('email_token')
+          .forge({ token: id })
+          .where('expires_at', '>', bookshelf.knex.fn.now())
+          .fetch();
+        return token;
       },
       findUser: async(id) => {
         return await bookshelf.model('user').where({ id }).fetch();
