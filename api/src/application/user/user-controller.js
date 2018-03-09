@@ -53,9 +53,12 @@ module.exports = (
           await userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query);
           break;
         case 'cancel_new':
+          const emailToken = bookshelf.model('email_token').where({user_id:user.get('id')})
           user.set('pending_email', null);
           user.set('pending_email_lower', null);
+
           await user.save();
+          await emailToken.destroy();
           break;
         case 'change':
           const isAuthenticated = await comparePasswords(current, user);
