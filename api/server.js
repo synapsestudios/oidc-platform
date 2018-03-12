@@ -24,13 +24,6 @@ manifestPromise.then(manifest => {
           .forge({ token: id })
           .where('expires_at', '>', bookshelf.knex.fn.now())
           .fetch();
-
-        if (!token) {
-          token = await bookshelf.model('user_password_reset_token')
-            .forge({ token })
-            .where('expires_at', '>', bookshelf.knex.fn.now())
-            .fetch();
-        }
         return token;
       },
       findUser: async(id) => {
