@@ -45,7 +45,6 @@
     "koa2-cors": "^2.0.3",
     "lodash": "^4.17.4",
     "mailgun-js": "^0.8.1",
-    "moment": "^2.19.1",
     "mysql": "^2.13.0",
     "node-jose": "^0.10.0",
     "oidc-provider": "^2.3.2",
