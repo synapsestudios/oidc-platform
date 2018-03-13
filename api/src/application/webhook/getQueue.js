@@ -1,7 +1,6 @@
 const Wreck = require('wreck');
 const Hoek = require('hoek');
 const IoRedis = require('ioredis');
-const Moment = require('moment');
 const {
   JWS: { createSign },
   JWK: { asKeyStore },
