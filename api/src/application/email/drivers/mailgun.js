@@ -2,6 +2,7 @@
 
 const Mailgun = require('mailgun-js');
 const checkWhitelist = require('../check-whitelist');
+const logger = require('../../../lib/logger');
 
 module.exports = function () {
 
@@ -58,7 +59,7 @@ module.exports = function () {
 
         mailgunClient.messages().send(mail, (error, body) => {
           if (error) {
-            console.log(error, mail);
+            logger.info(error, mail);
             reject(error);
           }
           else {
