@@ -11,6 +11,7 @@ const userFormData = require('./user-form-data');
 const comparePasswords = require('../../lib/comparePasswords');
 const bookshelf = require('../../lib/bookshelf');
 const webhookService = require('../webhook/webhook-service');
+const logger = require('../../lib/logger');
 
 // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
 const expandDotPaths = function(object) {
@@ -225,7 +226,7 @@ module.exports = (
       const sessionId = request.state._session;
 
       if (!sessionId) {
-        console.error('Session id cookie not present');
+        logger.error('Session id cookie not present');
         reply(Boom.notFound());
       } else {
         userService.invalidateSession(sessionId)
