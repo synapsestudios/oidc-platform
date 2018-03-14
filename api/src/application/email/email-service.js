@@ -1,6 +1,7 @@
 const config = require('../../../config');
 const mailgun = require('./drivers/mailgun');
 const ses = require('./drivers/ses');
+const logger = require('../../lib/logger');
 
 const drivers = { mailgun, ses };
 
@@ -10,7 +11,7 @@ module.exports = () => {
   } else {
     return {
       send: () => {
-        console.log(`You're attempting to send an email without an email provider configured!`);
+        logger.error(`You're attempting to send an email without an email provider configured!`);
       }
     };
   }
