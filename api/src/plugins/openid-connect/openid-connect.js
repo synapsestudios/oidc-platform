@@ -38,14 +38,14 @@ exports.register = function (server, options, next) {
       });
 
       server.views(options.vision);
-      addRoutes(server, issuer, options)
+      addRoutes(server, issuer, options);
 
       server.expose('provider', provider);
 
       next();
     })
     .catch(e => {
-      console.error(e);
+      logger.error(e);
     });
 };
 
