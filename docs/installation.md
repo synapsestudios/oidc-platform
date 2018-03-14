@@ -18,6 +18,7 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | REDIS_PORT                | Set if different from default '6379' |
 
 ## Keystores
+DEPRECATION WARNING: The Synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but DO NOT USE THE DEFAULTS IN PRODUCTION. Use of these keys in a non-development environment will be removed in the next version and OIDC will not start.
 
 node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes YOU SHOULD PROVIDE YOUR OWN KEYS. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but PLEASE DO NOT USE THE DEFAULTS IN PRODUCTION.
 
