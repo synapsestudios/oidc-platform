@@ -1,5 +1,6 @@
 const s3 = require('aws-sdk').S3;
 const s3Bucket = require('../../../config')('/aws/s3Bucket');
+const logger = require('../../lib/logger');
 
 module.exports = () => ({
   uploadImageStream(stream, key) {
@@ -23,7 +24,8 @@ module.exports = () => ({
         });
     })
       .catch((error) => {
-        console.trace(error);
+        const trace = new Error(error);
+        logger.error(trace);
         throw error;
       });
   },
@@ -42,7 +44,8 @@ module.exports = () => ({
         });
     })
       .catch((error) => {
-        console.trace(error);
+        const trace = new Error(error);
+        logger.error(trace);
         throw error;
       });
   },
