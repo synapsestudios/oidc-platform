@@ -12,7 +12,7 @@ module.exports = function report(type, id, webhookData, result) {
   );
 
   let level = 'info';
-  let msg = `this is edited ${format(new Date(),'YYMMDD/HHmmss.SSS')}, [webhook] ${type} job:${id}`;
+  let msg = `${format(new Date(),'YYMMDD/HHmmss.SSS')}, [webhook] ${type} job:${id}`;
   let meta = null;
 
   switch (type) {
