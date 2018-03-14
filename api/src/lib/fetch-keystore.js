@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3({apiVersion: '2006-03-01'});
 const defaultKeystore = require('../../keystore');
+const logger = require('./logger');
 
 module.exports = function() {
   return new Promise((resolve, reject) => {
@@ -11,8 +12,9 @@ module.exports = function() {
       };
       s3.getObject(params, function(err, data) {
         if (err) {
-          console.error('Error fetching keystores from s3');
-          console.trace(err);
+          logger.error('Error fetching keystores from s3');
+          const trace = new Error(err);
+          logger.error(trace);
           reject(err);
         } else {
           resolve(JSON.parse(data.Body.toString()));
