@@ -1,4 +1,4 @@
-const Moment = require('moment');
+const format = require('date-fns/format');
 
 module.exports = logger => async (ctx,next) => {
   try {
@@ -14,6 +14,6 @@ module.exports = logger => async (ctx,next) => {
   if(ctx.status >=500) { logLevel = 'error'; }
   else if(ctx.status >=400) { logLevel = 'warn'; }
   else if(ctx.status >=100) { logLevel = 'info'; }
-  let msg = `${Moment().format('YYMMDD/HHmmss.SSS')}, [open-id-connect] ${ctx.method} ${ctx.originalUrl} ${ctx.status} ${ms}ms`;
+  let msg = `${format(new Date(),'YYMMDD/HHmmss.SSS')}, [open-id-connect] ${ctx.method} ${ctx.originalUrl} ${ctx.status} ${ms}ms`;
   logger.log(logLevel, msg);
-}
+};

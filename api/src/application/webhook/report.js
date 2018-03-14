@@ -1,5 +1,5 @@
 const Hoek = require('hoek');
-const Moment = require('moment');
+const format = require('date-fns/format');
 
 const logger = require('../../lib/logger');
 
@@ -12,7 +12,7 @@ module.exports = function report(type, id, webhookData, result) {
   );
 
   let level = 'info';
-  let msg = `${Moment().format('YYMMDD/HHmmss.SSS')}, [webhook] ${type} job:${id}`;
+  let msg = `${format(new Date(),'YYMMDD/HHmmss.SSS')}, [webhook] ${type} job:${id}`;
   let meta = null;
 
   switch (type) {
