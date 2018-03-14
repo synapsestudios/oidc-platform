@@ -53,8 +53,10 @@ module.exports = (
           await userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query);
           break;
         case 'cancel_new':
+          await bookshelf.model('email_token').where({user_id:user.get('id')}).destroy()
           user.set('pending_email', null);
           user.set('pending_email_lower', null);
+
           await user.save();
           break;
         case 'change':
@@ -172,9 +174,9 @@ module.exports = (
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
       if (template) {
-        reply(template);
+        return reply(template);
       } else {
-        reply.view('email-verify-success', viewContext);
+        return reply.view('email-verify-success', viewContext);
       }
     },
 
