@@ -1,3 +1,4 @@
+const Joi = require('joi');
 const querystring = require('querystring');
 const views = require('./views');
 
@@ -29,6 +30,14 @@ module.exports = (server, issuer, options) => {
       }
     },
     config: {
+      validate: {
+        headers: {
+          cookie: Joi.string().required(),
+        },
+        options: {
+          allowUnknown: true,
+        }
+      },
       state: {
         parse: false // hapi fails to parse oidc cookie...
       }
@@ -43,6 +52,14 @@ module.exports = (server, issuer, options) => {
       server.plugins['open-id-connect'].provider.interactionFinished(request.raw.req, request.raw.res, result);
     },
     config: {
+      validate: {
+        headers: {
+          cookie: Joi.string().required(),
+        },
+        options: {
+          allowUnknown: true,
+        }
+      },
       state: {
         parse: false
       }
@@ -81,9 +98,17 @@ module.exports = (server, issuer, options) => {
       }
     },
     config: {
+      validate: {
+        headers: {
+          cookie: Joi.string().required(),
+        },
+        options: {
+          allowUnknown: true,
+        }
+      },
       state: {
         parse: false
       }
     }
   });
-}
+};
