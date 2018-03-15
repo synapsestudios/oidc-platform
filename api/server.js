@@ -4,6 +4,10 @@ const handlebars = require('handlebars');
 const manifestPromise = require('./manifest');
 const bookshelf = require('./src/lib/bookshelf');
 const logger = require('./src/lib/logger');
+const Raven = require('raven');
+if (process.env.SENTRY_DSN) {
+  Raven.config(process.env.SENTRY_DSN).install();
+}
 
 var options = {
   relativeTo: __dirname + '/src'
