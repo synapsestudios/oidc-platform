@@ -7,16 +7,18 @@ const clientInitiatedLogout = require('../../../config')('/clientInitiatedLogout
 const userRegistration = require('../../../config')('/userRegistration');
 const bookshelf = require('../../lib/bookshelf');
 
-const queryValidation = {
-  client_id : Joi.string().required(),
-  response_type : Joi.string().required(),
-  scope : Joi.string().required(),
-  redirect_uri : Joi.string().required(),
-  nonce : Joi.string().optional(),
-  login: Joi.string().optional(),
-};
 
 module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, emailChangeTokenValidator, clientValidator) => {
+  const queryValidation = mixedValidation({
+    client_id: Joi.string().required(),
+    response_type: Joi.string().required(),
+    scope: Joi.string().required(),
+    redirect_uri: Joi.string().required(),
+    nonce: Joi.string().optional(),
+    login: Joi.string().optional(),
+  },{
+    client_id: clientValidator,
+  });
   const emailValidator = async (value, options) => {
     const userCollection = await bookshelf.model('user').where({email_lower: value.toLowerCase()}).fetchAll();
     if (userCollection.length >= 1) {
