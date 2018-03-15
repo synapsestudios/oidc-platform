@@ -59,7 +59,7 @@ module.exports = function () {
 
         mailgunClient.messages().send(mail, (error, body) => {
           if (error) {
-            logger.info(error, mail);
+            logger.error(error, mail);
             reject(error);
           }
           else {
