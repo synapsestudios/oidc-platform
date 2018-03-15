@@ -12,8 +12,9 @@ module.exports = function() {
       };
       s3.getObject(params, function(err, data) {
         if (err) {
-          console.error('Error fetching keystores from s3');
-          console.trace(err);
+          logger.error('Error fetching keystores from s3');
+          const trace = new Error(err);
+          logger.error(trace);
           reject(err);
         } else {
           resolve(JSON.parse(data.Body.toString()));
