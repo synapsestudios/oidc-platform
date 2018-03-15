@@ -6,6 +6,9 @@ module.exports = (
   clientService
 ) => {
   return (templateName, getView, postHandler) => async (request, reply, source, error) => {
+    if (error && error.output.statusCode === 404) {
+      reply(error);
+    }
     try {
       const client = await clientService.findById(request.query.client_id);
       let user = null;
