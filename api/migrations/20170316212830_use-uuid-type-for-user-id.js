@@ -4,7 +4,7 @@ exports.up = function(knex, Promise) {
     return Promise.resolve();
   }
 
-  return knex.schema.alterTable('SIP_user_password_reset_token', table => {
+  return knex.schema.table('SIP_user_password_reset_token', table => {
     table.dropPrimary();
     table.dropForeign('user_id');
   }).then(() => {
@@ -24,8 +24,12 @@ exports.up = function(knex, Promise) {
       table.dropPrimary();
     });
   }).then(() => {
+    return knex.raw(
+      `ALTER TABLE "SIP_user" ALTER COLUMN id TYPE uuid USING id::uuid`
+    );
+  }).then(() => {
     return knex.schema.alterTable('SIP_user', table => {
-      table.uuid('id').notNull().alter().primary();
+      table.primary('id');
     });
   }).then(() => {
     return knex.schema.alterTable('SIP_user_password_reset_token', table => {
