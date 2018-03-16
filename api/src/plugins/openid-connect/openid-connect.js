@@ -30,7 +30,7 @@ exports.register = function (server, options, next) {
       provider.app.keys = options.cookieKeys;
       provider.app.proxy = true;
       server.ext('onRequest', function(request, reply) {
-        if (request.path.substring(0, prefix.length) === prefix) {
+        if (request.path.substring(0, prefix.length) === prefix || request.path.startsWith('/.well-known')) {
           provider.callback(request.raw.req, request.raw.res);
         } else {
           return reply.continue();
