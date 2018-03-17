@@ -1,36 +1,20 @@
+const RollbarTransport = require('winston-rollbar-transport').default;
+const Sentry = require('winston-raven-sentry');
 const winston = require('winston');
-const util = require('util');
 const transports = [new winston.transports.Console()];
 
 if (process.env.SENTRY_DSN) {
-  const Raven = require('raven');
-  const sentryLogger = winston.transports.CustomLogger = function () {
-    this.name = 'sentryLogger';
-    this.level = 'error';
-  };
-  util.inherits(sentryLogger, winston.Transport);
-  sentryLogger.prototype.log = function (level, msg, meta, callback) {
-    Raven.captureException(meta);
-    callback(null, true);
-  };
-  transports.push(new sentryLogger());
+  transports.push(new Sentry({
+    dsn: process.env.SENTRY_DSN,
+    level: 'error'}));
 }
 
 
 if (process.env.ROLLBAR_ACCESS_TOKEN) {
-  const Rollbar = require('rollbar');
-  const rollbar = new Rollbar(process.env.ROLLBAR_ACCESS_TOKEN);
-
-  const rollbarLogger = winston.transports.CustomLogger = function () {
-    this.name = 'rollbarLogger';
-    this.level = 'error';
-  };
-  util.inherits(rollbarLogger, winston.Transport);
-  rollbarLogger.prototype.log = function (level, msg, meta, callback) {
-    rollbar.error(meta.message, meta);
-    callback(null, true);
-  };
-  transports.push(new rollbarLogger());
+  transports.push(new RollbarTransport({
+    rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN,
+    level: 'error',
+  }));
 }
 
 module.exports = new winston.Logger({
