@@ -55,7 +55,9 @@
     "rollbar": "^2.3.9",
     "uuid": "^3.0.1",
     "vision": "^4.1.0",
-    "winston": "^2.4.0"
+    "winston": "^2.4.1",
+    "winston-raven-sentry": "^1.0.1",
+    "winston-rollbar-transport": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.4.1"
