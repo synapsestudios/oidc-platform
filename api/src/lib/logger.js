@@ -6,7 +6,8 @@ const transports = [new winston.transports.Console()];
 if (process.env.SENTRY_DSN) {
   transports.push(new Sentry({
     dsn: process.env.SENTRY_DSN,
-    level: 'error'}));
+    level: 'error',
+  }));
 }
 
 
