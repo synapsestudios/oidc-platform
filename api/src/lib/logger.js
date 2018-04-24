@@ -2,11 +2,13 @@ const RollbarTransport = require('winston-rollbar-transport').default;
 const Sentry = require('winston-raven-sentry');
 const winston = require('winston');
 const transports = [new winston.transports.Console()];
+const config = require('../../config');
 
 if (process.env.SENTRY_DSN) {
   transports.push(new Sentry({
     dsn: process.env.SENTRY_DSN,
     level: 'error',
+    environment: config('/env'),
   }));
 }
 
