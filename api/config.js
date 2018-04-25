@@ -24,6 +24,7 @@ var config = {
     },
     baseUrl: process.env.OIDC_BASE_URL,
     aws: {
+      region: process.env.AWS_REGION || 'us-west-2',
       s3Bucket: process.env.OIDC_S3_BUCKET,
     },
     clientInitiatedLogout: process.env.CLIENT_INITIATED_LOGOUT === 'true' ? true : false,
