@@ -1,5 +1,6 @@
+const config = require('../../../../config');
 const AWS = require('aws-sdk');
-AWS.config.update({region: 'us-west-2'});
+AWS.config.update({region: config('/aws/region')});
 const ses = new AWS.SES({apiVersion: '2010-12-01'});
 const checkWhitelist = require('../check-whitelist');
 const Boom = require('boom');
