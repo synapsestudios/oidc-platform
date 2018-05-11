@@ -9,6 +9,14 @@ const nonAlphaNumericPattern = /\W/g;
 const domainPattern = /@(.*)$/;
 
 module.exports = (emailAddress, reject) => {
+  if (options.whitelist && !options.trap) {
+    reject('trap option must be set if using whitelist');
+  }
+
+  if (options.trap && (!options.whitelist || !options.whitelist.length) ) {
+    reject('whitelist option must be set if using email trap');
+  }
+
   if (!options.whitelist || !options.whitelist.length) {
     return emailAddress;
   }
