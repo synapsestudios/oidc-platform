@@ -15,7 +15,7 @@ module.exports = (emailAddress, reject) => {
 
   const domain = emailAddress.match(domainPattern)[1];
 
-  if (_.findIndex(options.whitelist, (whitelisted) => domain === whitelisted) >= 0) {
+  if (_.findIndex(options.whitelist, (whitelisted) => domain.toLowerCase() === whitelisted.toLowerCase()) >= 0) {
     return emailAddress;
   }
 
