@@ -87,7 +87,7 @@ module.exports = (server, issuer, options) => {
       } else {
         const cookie = await provider.interactionDetails(request.raw.req);
         const client = await provider.Client.find(cookie.params.client_id);
-        const viewContext = views.login(cookie, client, options, 'Invalid email password combination');
+        const viewContext = views.login(cookie, client, options, 'Invalid email password combination', request.payload.login);
         const template = await options.getTemplate(client.clientId, 'login', viewContext);
 
         if (template) {
