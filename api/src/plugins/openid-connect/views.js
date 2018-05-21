@@ -1,7 +1,7 @@
 const querystring = require('querystring');
 
 module.exports = {
-  login: (cookie, client, options, error) => {
+  login: (cookie, client, options, error, login) => {
     const queryString = querystring.stringify({
       client_id: cookie.params.client_id,
       response_type: cookie.params.response_type,
@@ -17,7 +17,8 @@ module.exports = {
       title: 'Log In',
       forgotPasswordPath: `/user/forgot-password?${queryString}`,
       userRegistrationPath: `/user/register?${queryString}&login=true`,
-      error
+      error,
+      login,
     }
   },
 

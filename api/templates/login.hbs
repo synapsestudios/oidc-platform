@@ -14,7 +14,13 @@
         class="input-scaffold__input"
         type="text"
         name="login"
-        {{#if cookie.params.login_hint}}value="{{cookie.params.login_hint}}"{{else}}autofocus="on"{{/if}}
+        {{#if login}}
+          value="{{login}}"
+        {{else if cookie.params.login_hint}}
+          value="{{cookie.params.login_hint}}"
+        {{else}}
+          autofocus="on"
+        {{/if}}
       />
     </label>
     {{#if error}}
@@ -33,7 +39,7 @@
         class="input-scaffold__input"
         type="password"
         name="password"
-        {{#if cookie.params.login_hint}}autofocus="on"{{/if}}
+        {{#if login}}autofocus="on"{{else if cookie.params.login_hint}}autofocus="on"{{/if}}
       />
     </label>
     {{#if error}}

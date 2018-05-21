@@ -30,6 +30,7 @@
     "boom": "^4.2.0",
     "btoa": "^1.1.2",
     "confidence": "^3.0.0",
+    "date-fns": "^1.29.0",
     "electrolyte": "^0.4.0",
     "glue": "^4.1.0",
     "good": "^7.1.0",
@@ -44,16 +45,19 @@
     "koa2-cors": "^2.0.3",
     "lodash": "^4.17.4",
     "mailgun-js": "^0.8.1",
-    "moment": "^2.19.1",
     "mysql": "^2.13.0",
     "node-jose": "^0.10.0",
     "oidc-provider": "^2.3.2",
     "pg": "^6.1.2",
     "querystring": "^0.2.0",
     "queue": "^4.4.2",
+    "raven": "^2.4.2",
+    "rollbar": "^2.3.9",
     "uuid": "^3.0.1",
     "vision": "^4.1.0",
-    "winston": "^2.4.0"
+    "winston": "^2.4.1",
+    "winston-raven-sentry": "^1.0.1",
+    "winston-rollbar-transport": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.4.1"

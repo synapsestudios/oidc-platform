@@ -7,16 +7,18 @@ const clientInitiatedLogout = require('../../../config')('/clientInitiatedLogout
 const userRegistration = require('../../../config')('/userRegistration');
 const bookshelf = require('../../lib/bookshelf');
 
-const queryValidation = {
-  client_id : Joi.string().required(),
-  response_type : Joi.string().required(),
-  scope : Joi.string().required(),
-  redirect_uri : Joi.string().required(),
-  nonce : Joi.string().optional(),
-  login: Joi.string().optional(),
-};
 
-module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, clientValidator) => {
+module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, emailChangeTokenValidator, clientValidator) => {
+  const queryValidation = mixedValidation({
+    client_id: Joi.string().required(),
+    response_type: Joi.string().required(),
+    scope: Joi.string().required(),
+    redirect_uri: Joi.string().required(),
+    nonce: Joi.string().optional(),
+    login: Joi.string().optional(),
+  },{
+    client_id: clientValidator,
+  });
   const emailValidator = async (value, options) => {
     const userCollection = await bookshelf.model('user').where({email_lower: value.toLowerCase()}).fetchAll();
     if (userCollection.length >= 1) {
@@ -121,6 +123,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
           }, {
+            token: emailChangeTokenValidator,
             client_id: clientValidator,
           }),
         },
@@ -278,6 +281,8 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
+            response_type: Joi.string().required(),
+            nonce: Joi.string(),
           }, queryValidation),
         },
       },
@@ -300,6 +305,8 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             scope: Joi.string().required(),
+            response_type: Joi.string().required(),
+            nonce: Joi.string(),
           }, queryValidation),
           failAction : resetPasswordHandler,
         }
@@ -410,5 +417,6 @@ module.exports['@require'] = [
   'server',
   'form-handler',
   'validator/constraints/row-exists',
+  'validator/constraints/email-change-token-validator',
   'validator/constraints/client-validator',
 ];

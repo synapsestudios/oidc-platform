@@ -1,8 +1,9 @@
 var Boom = require('boom');
+const logger = require('./logger');
 
 module.exports = function(error) {
   if (!error.data || !error.data.details) {
-    console.error(error);
+    logger.error(error);
     return error.isBoom ? error : Boom.badImplementation(error);
   }
 

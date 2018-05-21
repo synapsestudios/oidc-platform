@@ -6,6 +6,9 @@ module.exports = (
   clientService
 ) => {
   return (templateName, getView, postHandler) => async (request, reply, source, error) => {
+    if (error && error.output.statusCode === 404) {
+      return reply(error);
+    }
     try {
       const client = await clientService.findById(request.query.client_id);
       let user = null;
@@ -19,9 +22,9 @@ module.exports = (
         const viewContext = getView(user, client, request, e);
         const template = await themeService.renderThemedTemplate(request.query.client_id, templateName, viewContext);
         if (template) {
-          reply(template);
+          return reply(template);
         } else {
-          reply.view(templateName, viewContext);
+          return reply.view(templateName, viewContext);
         }
       }
 
@@ -31,7 +34,7 @@ module.exports = (
         await render(error);
       }
     } catch(e) {
-      reply(e);
+      return reply(e);
     }
   };
 };

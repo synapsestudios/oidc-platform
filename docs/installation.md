@@ -18,8 +18,9 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | REDIS_PORT                | Set if different from default '6379' |
 
 ## Keystores
+**DEPRECATION WARNING:** The Synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but **DO NOT USE THE DEFAULTS IN PRODUCTION**. Use of these keys in a non-development environment will be removed in the next version and OIDC will not start.
 
-node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes YOU SHOULD PROVIDE YOUR OWN KEYS. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but PLEASE DO NOT USE THE DEFAULTS IN PRODUCTION.
+node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes **YOU SHOULD PROVIDE YOUR OWN KEYS**. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but **PLEASE DO NOT USE THE DEFAULTS IN PRODUCTION.**
 
 ### Generating Keys
 
@@ -104,3 +105,13 @@ Users can upload profile pictures when editing their profile. The platform makes
 | WEBHOOK_MAX_RETRIES | how many times to retry a failed POST. If max retries is 2, then you will have a total of 3 attempts. 1 attempt followed by 2 retries. (default 2) |
 | WEBHOOK_RETRY_DELAY | time in ms to wait before retrying a failed request (default 10000) |
 | WEBHOOK_CONCURRENCY | number of webhook POST requests to process at a time (default 1) |
+
+
+## Error Logging
+
+If you want to log any errors that happen you can set these values and errors will automatically be sent to the service you use.
+
+| Environment Variables     | Description |
+| ------------------------- | ----------- |
+| SENTRY_DSN                | (Optional) Sentry DSN value if you want to use sentry for logging |
+| ROLLBAR_ACCESS_TOKEN      | (Optional) Rollbar Access Token value if you want to use Rollbar for logging |

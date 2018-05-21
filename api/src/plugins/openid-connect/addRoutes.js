@@ -1,3 +1,4 @@
+const Joi = require('joi');
 const querystring = require('querystring');
 const views = require('./views');
 
@@ -29,6 +30,14 @@ module.exports = (server, issuer, options) => {
       }
     },
     config: {
+      validate: {
+        headers: {
+          cookie: Joi.string().required(),
+        },
+        options: {
+          allowUnknown: true,
+        }
+      },
       state: {
         parse: false // hapi fails to parse oidc cookie...
       }
@@ -43,6 +52,14 @@ module.exports = (server, issuer, options) => {
       server.plugins['open-id-connect'].provider.interactionFinished(request.raw.req, request.raw.res, result);
     },
     config: {
+      validate: {
+        headers: {
+          cookie: Joi.string().required(),
+        },
+        options: {
+          allowUnknown: true,
+        }
+      },
       state: {
         parse: false
       }
@@ -70,7 +87,7 @@ module.exports = (server, issuer, options) => {
       } else {
         const cookie = await provider.interactionDetails(request.raw.req);
         const client = await provider.Client.find(cookie.params.client_id);
-        const viewContext = views.login(cookie, client, options, 'Invalid email password combination');
+        const viewContext = views.login(cookie, client, options, 'Invalid email password combination', request.payload.login);
         const template = await options.getTemplate(client.clientId, 'login', viewContext);
 
         if (template) {
@@ -81,9 +98,17 @@ module.exports = (server, issuer, options) => {
       }
     },
     config: {
+      validate: {
+        headers: {
+          cookie: Joi.string().required(),
+        },
+        options: {
+          allowUnknown: true,
+        }
+      },
       state: {
         parse: false
       }
     }
   });
-}
+};

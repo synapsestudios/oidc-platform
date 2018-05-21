@@ -2,8 +2,9 @@ const fs = require('fs');
 const { createKeyStore } = require('oidc-provider');
 const certificateKeystore = createKeyStore();
 const integrityKeystore = createKeyStore();
+const logger = require('../lib/logger');
 
-console.log('Generating keys. This will take a few seconds...');
+logger.info('Generating keys. This will take a few seconds...');
 Promise.all([
   certificateKeystore.generate('RSA', 2048, {
     kid: 'sig-rs-0',
@@ -41,6 +42,6 @@ Promise.all([
   fs.open('./keystore.json', 'w', (err, fd) => {
     const keystores = certificateKeystore.toJSON(true);
     fs.write(fd, JSON.stringify(keystores));
-    console.log('Done! Created keystore.json\n');
+    logger.info('Done! Created keystore.json\n');
   });
 });
