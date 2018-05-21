@@ -1,3 +1,23 @@
+## [v2.3.0](https://github.com/synapsestudios/oidc-platform/compare/v2.2.0...v2.3.0) - 2018-05-21
+### Added
+- [#278](https://github.com/synapsestudios/oidc-platform/issues/278) Rollbar and Sentry support
+- [#296](https://github.com/synapsestudios/oidc-platform/issues/296) Rejected promise if email whitelist misconfigured
+- [#292](https://github.com/synapsestudios/oidc-platform/issues/292) Ability to use different AWS regions for SES
+- [#273](https://github.com/synapsestudios/oidc-platform/issues/273) Cookie validation
+- [#290](https://github.com/synapsestudios/oidc-platform/issues/290) Certificate for localhost.test
+- [#280](https://github.com/synapsestudios/oidc-platform/issues/280) Sentry and rollbar documentation
+- [#268](https://github.com/synapsestudios/oidc-platform/issues/268) Warning when using default keystore
+### Changed
+- [#266](https://github.com/synapsestudios/oidc-platform/issues/266) Replace moment with date-fns
+- [#269](https://github.com/synapsestudios/oidc-platform/issues/269) All logging to use Winston
+### Fixed
+- [#286](https://github.com/synapsestudios/oidc-platform/issues/286) Error resetting password
+- [#287](https://github.com/synapsestudios/oidc-platform/issues/287) Error address field clearing on failed logins
+- [#295](https://github.com/synapsestudios/oidc-platform/issues/295) Case sensitive email whitelist
+- [#64](https://github.com/synapsestudios/oidc-platform/issues/64) Discovery endpoints
+- [#228](https://github.com/synapsestudios/oidc-platform/issues/228) 500 error when using canceled email verification link
+- [#274](https://github.com/synapsestudios/oidc-platform/issues/274) 500 error when using invalid client_id
+
 ## [v2.2.0](https://github.com/synapsestudios/oidc-platform/compare/v2.1.2...v2.2.0) - 2018-03-2
 ### Added
 - [#254](https://github.com/synapsestudios/oidc-platform/pull/254) Add Redis port to common.env and documentation
