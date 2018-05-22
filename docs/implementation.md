@@ -129,7 +129,7 @@ You will also be able to trigger reinvites for users that have not yet responded
 
 ### User Registration
 
-If your users are allowed to create their own accounts then you can send your users to a register url to fill out a form that will create their user. nclude a Register link on your site that looks like this:
+If your users are allowed to create their own accounts then you can send your users to a register url to fill out a form that will create their user. Include a Register link on your site that looks like this:
 
 ```
 ${providerDomain}/user/register
