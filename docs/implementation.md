@@ -144,7 +144,7 @@ When your user has successfully created their account and logged in they will be
 
 ## Logging your users in and getting tokens
 
-This is where the rubber hits the road. Once you have a Client configured and your users have been invited or registered then your application will be able to use the OIDC Platform to verify their identity. The OIDC Platform will authenticate the user (your app doesn't have to handle passwords) and give your app an [id token](http://openid.net/specs/openid-connect-core-1_0.html#IDToken) in the form of a [jwt](https://jwt.io/). Your app then can use that JWT to validate the users making requests to your application are indead authenticated valid users.
+This is where the rubber hits the road. Once you have a Client configured and your users have been invited or registered then your application will be able to use the OIDC Platform to verify their identity. The OIDC Platform will authenticate the user (your app doesn't have to handle passwords) and give your app an [id token](http://openid.net/specs/openid-connect-core-1_0.html#IDToken) in the form of a [jwt](https://jwt.io/). Your app then can use that JWT to validate the users making requests to your application are indeed authenticated valid users.
 
 OpenID Connect uses the old familiar OAuth 2.0 login workflows. You should pick one or more workflow for your application based on whether or not your app lives on a server that is capable of keeping secrets or if your app is distributed to untrusted client machines that should not be given your client secret.
 
@@ -184,7 +184,7 @@ ${redirect_uri}
 
 #### Example token request
 
-Once you've received an authorization code you can use that code to obtain an access token and an id token. The token endopint uses Basic auth. Use your client id as the username and the client secret as the password.
+Once you've received an authorization code you can use that code to obtain an access token and an id token. The token endpoint uses Basic auth. Use your client id as the username and the client secret as the password.
 
 ```
 POST /op/token
@@ -261,7 +261,7 @@ grant_type=client_credentials&scope=admin
 
 ### Password Grant
 
-The password grant is used when an application is logging in on behalf of the user _without_ using any of the redirect workflows. This method requires your client app to collect the user's username and password and pass that along to the token endpoint which of course has security implecations. You should only use the password grant if the client app is controlled by you or is otherwise trusted. Make sure to use HTTPS to issue this request.
+The password grant is used when an application is logging in on behalf of the user _without_ using any of the redirect workflows. This method requires your client app to collect the user's username and password and pass that along to the token endpoint which of course has security implications. You should only use the password grant if the client app is controlled by you or is otherwise trusted. Make sure to use HTTPS to issue this request.
 
 #### Example token request
 
