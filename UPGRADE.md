@@ -1,5 +1,8 @@
 # UPGRADE GUIDE
 
+## v2.2.0 -> v2.3.0
+- `AWS_REGION` variable must now be provided in the environment for the SES driver
+
 ## v2.1.0 -> v2.2.0
 - `NODE_ENV` variable must now be provided in the environment
 
