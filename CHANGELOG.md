@@ -1,3 +1,7 @@
+## [v2.3.1](https://github.com/synapsestudios/oidc-platform/compare/v2.3.0...v2.3.1) - 2018-06-01
+### Fixed
+- [#308](https://github.com/synapsestudios/oidc-platform/issues/308) Sentry logger not reporting environment
+
 ## [v2.3.0](https://github.com/synapsestudios/oidc-platform/compare/v2.2.0...v2.3.0) - 2018-05-21
 ### Added
 - [#278](https://github.com/synapsestudios/oidc-platform/issues/278) Rollbar and Sentry support
