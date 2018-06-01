@@ -8,7 +8,9 @@ if (process.env.SENTRY_DSN) {
   transports.push(new Sentry({
     dsn: process.env.SENTRY_DSN,
     level: 'error',
-    environment: config('/env'),
+    config: {
+      environment: config('/env'),
+    },
   }));
 }
 
