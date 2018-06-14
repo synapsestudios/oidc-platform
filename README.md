@@ -13,7 +13,7 @@ The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com
 0. Copy `common.template.env` as `common.env` and provide a mailgun key
 0. Set the OIDC_DB_* vars based on what RDBMS you are using.
 0. Run either `./compose-mysql up` or `./compose-postgres up`. You can also just do `docker-compose up` which will use postgres.
-0. Create an oauth client by posting to http://localhost:9000/op/reg with the following:
+0. Create an oauth client by posting to http://localhost:9001/op/reg with the following:
 ```
 Headers:
 {

@@ -43,6 +43,17 @@
       {{/if}}
     </div>
   {{/each}}
+  <!-- An arbitrary input that is not part of the default profile -->
+  <div class="input-scaffold">
+    <label for="jobTitle" class="input-scaffold__label">
+      Job Title
+    </label>
+    <input
+      name="jobTitle"
+      class="input-scaffold__input"
+      value="{{user.profile.jobTitle}}"
+    />
+  </div>
 
   <button type="submit">Submit</button>
 </form>
