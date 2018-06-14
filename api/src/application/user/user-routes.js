@@ -207,6 +207,9 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
           strategy: 'oidc_session',
         },
         validate: {
+          options: {
+            allowUnknown: true,
+          },
           failAction: controller.profileHandler,
           query: mixedValidation({
             client_id: Joi.string().required(),
@@ -214,7 +217,33 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
           }, {
             client_id: clientValidator,
           }),
-        },
+          payload: Joi.object().keys({
+            name: Joi.string().allow(''),
+            given_name: Joi.string().allow(''),
+            family_name: Joi.string().allow(''),
+            middle_name: Joi.string().allow(''),
+            nickname: Joi.string().allow(''),
+            preferred_username: Joi.string().allow(''),
+            profile: Joi.string().uri().allow(''),
+            shouldClearPicture: Joi.boolean(),
+            picture: Joi.object().type(Readable).assert(
+              'hapi.headers.content-type',
+              Joi.any().valid(['image/jpeg', 'image/png', 'application/octet-stream'])
+            ),
+            website: Joi.string().uri().allow(''),
+            email: Joi.string().email().allow(''),
+            gender: Joi.string().allow(''),
+            birthdate: Joi.string().isoDate().allow(''),
+            zoneinfo: Joi.string().valid(userFormData.timezones),
+            locale: Joi.string().valid(Object.keys(userFormData.locales)),
+            phone_number: Joi.string().allow(''),
+            'address.street_address': Joi.string().allow(''),
+            'address.locality': Joi.string().allow(''),
+            'address.region': Joi.string().allow(''),
+            'address.postal_code': Joi.string().allow(''),
+            'address.country': Joi.string().allow(''),
+          }).invalid(null).label('picture') // null payload means picture size validation failed
+        }
       },
     },
     {
