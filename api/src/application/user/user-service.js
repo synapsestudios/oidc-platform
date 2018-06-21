@@ -95,6 +95,19 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
         }).save({}, Object.assign({method: 'insert'}, saveOptions)));
     },
 
+    async sendUserVerification(userId, clientId, redirectUri) {
+      const user = await bookshelf.model('user').where({ id: userId }).fetch();
+      if (!user) throw Boom.notFound();
+      const client = await clientService.findById(clientId);
+      const query = {
+        client_id: clientId,
+        redirect_uri: redirectUri,
+      };
+
+      await userEmails.sendVerificationEmail(user, client, user.get('email'), query);
+      return user;
+    },
+
     update: function(id, payload) {
       return bookshelf.model('user').forge({ id }).save(payload, { patch: true });
     },
