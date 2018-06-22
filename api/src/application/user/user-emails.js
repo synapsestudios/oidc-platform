@@ -131,12 +131,16 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       const token = await emailTokenService.create(user.get('id'), hoursTilExpiration, saveOptions);
       const viewContext = userViews.inviteEmail(user, client, config('/baseUrl'), {...query, token: token.get('token')});
 
+      if(query.subject) {
+        viewContext.subject = query.subject;
+      }
+
       if (templateOverride) {
         const emailTemplate = handlebars.compile(templateOverride);
         const emailBody = emailTemplate(viewContext);
         await emailService.send({
           to: user.get('email'),
-          subject: query.subject || viewContext.subject,
+          subject: viewContext.subject,
           html: emailBody,
         });
       } else {
