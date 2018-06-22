@@ -323,6 +323,6 @@ module.exports = {
     client: client.serialize({strictOidc:true}),
     url: `${baseUrl}/user/accept-invite?${querystring.stringify(query)}`.replace(' ', '%20'),
     appName: client.get('client_name'),
-    subject: `${client.get('client_name')} Invitation`,
+    subject: query.subject ? query.subject : `${client.get('client_name')} Invitation`,
   }),
 };
