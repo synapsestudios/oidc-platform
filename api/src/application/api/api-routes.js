@@ -26,6 +26,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
             nonce: Joi.string(),
             app_metadata: Joi.object(),
             profile: Joi.object(),
+            subject: Joi.string(),
             template: Joi.string(),
             hours_till_expiration: hoursTillExpirationSchema,
           },
