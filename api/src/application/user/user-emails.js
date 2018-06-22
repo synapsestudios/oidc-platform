@@ -136,7 +136,7 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
         const emailBody = emailTemplate(viewContext);
         await emailService.send({
           to: user.get('email'),
-          subject: viewContext.subject,
+          subject: templateOverride.subject || viewContext.subject,
           html: emailBody,
         });
       } else {
