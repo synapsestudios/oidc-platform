@@ -130,10 +130,13 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       const clientHoursTilExpiration = hoursTilExpiration ? hoursTilExpiration : client.get('hours_til_expiration')
       const token = await emailTokenService.create(user.get('id'), hoursTilExpiration, saveOptions);
       const viewContext = userViews.inviteEmail(user, client, config('/baseUrl'), {...query, token: token.get('token')});
+      console.log('viewContext', viewContext)
 
       if(query.subject) {
         viewContext.subject = query.subject;
       }
+
+      console.log('viewContext after', viewContext);
 
       if (templateOverride) {
         const emailTemplate = handlebars.compile(templateOverride);
