@@ -36,7 +36,7 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
       return model.fetchAll();
     },
 
-    async resendUserInvite(userId, clientId, redirectUri, responseType, scope, hoursTillExpiration, template, nonce) {
+    async resendUserInvite(userId, clientId, redirectUri, responseType, scope, hoursTillExpiration, subject, template, nonce) {
       const user = await bookshelf.model('user').where({ id: userId }).fetch();
       if (!user) throw Boom.notFound();
       const client = await clientService.findById(clientId);
@@ -44,6 +44,7 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
         client_id: clientId,
         redirect_uri: redirectUri,
         response_type: responseType,
+        subject,
         scope,
       };
       if (nonce) query.nonce = nonce;

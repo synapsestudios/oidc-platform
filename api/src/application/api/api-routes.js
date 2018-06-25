@@ -50,6 +50,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           request.payload.response_type,
           request.payload.scope,
           request.payload.hours_till_expiration,
+          request.payload.subject,
           request.payload.template,
           request.payload.nonce
         )
@@ -71,6 +72,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           redirect_uri: Joi.string().required(),
           response_type: Joi.string().required(),
           scope: Joi.string().required(),
+          subject: Joi.string(),
           nonce: Joi.string(),
           hours_till_expiration: hoursTillExpirationSchema,
           template: Joi.string(),
