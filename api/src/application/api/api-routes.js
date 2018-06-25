@@ -42,19 +42,8 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
     method: 'POST',
     path: '/api/resend-invite/{userId}',
     handler: (request, reply) => {
-      reply(
-        userService.resendUserInvite(
-          request.params.userId,
-          request.payload.client_id,
-          request.payload.redirect_uri,
-          request.payload.response_type,
-          request.payload.scope,
-          request.payload.hours_till_expiration,
-          request.payload.subject,
-          request.payload.template,
-          request.payload.nonce
-        )
-      );
+      const { params, payload } = request
+      reply(userService.resendUserInvite({ userId: params.userId, ...payload}));
     },
     config: {
       auth: {
