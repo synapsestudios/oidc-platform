@@ -319,9 +319,10 @@ module.exports = {
   },
 
   inviteEmail : (user, client, baseUrl, query) => ({
+    const { subject, ...restQuery } = query;
     user: user.serialize(),
     client: client.serialize({strictOidc:true}),
-    url: `${baseUrl}/user/accept-invite?${querystring.stringify(query)}`.replace(' ', '%20'),
+    url: `${baseUrl}/user/accept-invite?${querystring.stringify(restQuery)}`.replace(' ', '%20'),
     appName: client.get('client_name'),
     subject: query.subject ? query.subject : `${client.get('client_name')} Invitation`,
   }),
