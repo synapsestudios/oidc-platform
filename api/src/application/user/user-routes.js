@@ -207,6 +207,9 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
           strategy: 'oidc_session',
         },
         validate: {
+          options: {
+            allowUnknown: true,
+          },
           failAction: controller.profileHandler,
           query: mixedValidation({
             client_id: Joi.string().required(),

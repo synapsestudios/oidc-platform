@@ -1,3 +1,9 @@
+## [v2.3.2](https://github.com/synapsestudios/oidc-platform/compare/v2.3.1...v2.3.2) - 2018-06-27
+### Added
+- [#313](https://github.com/synapsestudios/oidc-platform/issues/313) Un-restrict profile field information on POST route
+- [#315](https://github.com/synapsestudios/oidc-platform/issues/315) Send User Verification Email Endpoint
+- [#317](https://github.com/synapsestudios/oidc-platform/issues/317) Allow overriding the subject on the invitation email
+
 ## [v2.3.1](https://github.com/synapsestudios/oidc-platform/compare/v2.3.0...v2.3.1) - 2018-06-01
 ### Fixed
 - [#308](https://github.com/synapsestudios/oidc-platform/issues/308) Sentry logger not reporting environment
