@@ -225,7 +225,7 @@ module.exports = {
     validationErrorMessages: getValidationMessages(error),
   }),
 
-  forgotPasswordSuccess : (user, client, request, error) => ({
+  forgotPasswordSuccess : (client, request) => ({
     client: client.serialize({strictOidc:true}),
     title: 'Forgot Password',
     linkUrl: `/op/auth?${querystring.stringify(request.query)}`,

@@ -136,7 +136,7 @@ module.exports = (
         await userEmails.sendForgotPasswordEmail(user, client, request.payload.email, request.query);
       }
 
-      const viewContext = views.forgotPasswordSuccess(request);
+      const viewContext = views.forgotPasswordSuccess(client, request);
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
       if (template) {
         reply(template);
