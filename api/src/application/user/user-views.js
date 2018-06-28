@@ -225,6 +225,12 @@ module.exports = {
     validationErrorMessages: getValidationMessages(error),
   }),
 
+  forgotPasswordSuccess : (user, client, request, error) => ({
+    client: client.serialize({strictOidc:true}),
+    title: 'Forgot Password',
+    linkUrl: `/op/auth?${querystring.stringify(request.query)}`,
+  }),
+
   emailSettings : (user, client, request, error) => {
     request.payload = request.payload || {};
     let successMessage;
@@ -251,7 +257,7 @@ module.exports = {
         client_id: request.query.client_id,
         redirect_uri: request.query.redirect_uri,
       })}` : `${request.query.redirect_uri}`,
-      success: request.method === 'post' && !error ? true : false,
+      success: request.method === 'post' && !error,
       successMessage,
       error: !!error,
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
@@ -270,7 +276,7 @@ module.exports = {
         client_id: request.query.client_id,
         redirect_uri: request.query.redirect_uri,
       })}` : `${request.query.redirect_uri}`,
-      success: request.method === 'post' && !error ? true : false,
+      success: request.method === 'post' && !error,
       error: !!error,
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     }
@@ -299,7 +305,7 @@ module.exports = {
   },
 
   resetPassword : title => (user, client, request, error) => {
-    const redirectSet = request.query.token != undefined;
+    const redirectSet = request.query.token !== undefined;
     return {
       user: user.serialize(),
       client: client.serialize({strictOidc:true}),

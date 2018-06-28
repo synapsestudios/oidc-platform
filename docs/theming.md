@@ -60,18 +60,18 @@ Each template will receive the same variables as the [layout](#layout). In addit
 }
 ```
 
+###### forgot-password-success
+```
+{
+  linkUrl, // url for the login page
+}
+```
+
 ###### invite-email
 ```
 {
   url, // the url used to build the link the user clicks to set their new password
   appName, // the name of the application the user is being invited to
-}
-```
-
-###### forgot-password-success
-```
-{
-  // nothing
 }
 ```
 

@@ -132,12 +132,11 @@ module.exports = (
     forgotPasswordHandler: formHandler('forgot-password', views.forgotPassword, async (request, reply, user, client, render) => {
       user = await userService.findByEmail(request.payload.email);
 
-      let token;
       if (user) {
         await userEmails.sendForgotPasswordEmail(user, client, request.payload.email, request.query);
       }
 
-      const viewContext = { title: 'Forgot Password' };
+      const viewContext = views.forgotPasswordSuccess(request);
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
       if (template) {
         reply(template);
