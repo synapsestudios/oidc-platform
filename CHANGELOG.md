@@ -1,3 +1,7 @@
+## [v2.4.0](https://github.com/synapsestudios/oidc-platform/compare/v2.3.2...v2.4.0) - 2018-06-29
+### Added
+- [#104](https://github.com/synapsestudios/oidc-platform/issues/104) Add "Return to Login" option on Forgot Password Success view
+
 ## [v2.3.2](https://github.com/synapsestudios/oidc-platform/compare/v2.3.1...v2.3.2) - 2018-06-27
 ### Added
 - [#313](https://github.com/synapsestudios/oidc-platform/issues/313) Un-restrict profile field information on POST route
