@@ -25,6 +25,7 @@ if (process.env.ROLLBAR_ACCESS_TOKEN) {
 module.exports = new winston.Logger({
   transports: transports,
   filters: [
-    (level, msg, meta) => msg.trim(),  // shouldn't be necessary, but good-winston is adding \n
+    (level, msg) => msg.replace(/"id_token_hint":".*"/i, `"id_token_hint":"[redacted]"`),
+    (level, msg) => msg.trim(),  // shouldn't be necessary, but good-winston is adding \n
   ],
 });
