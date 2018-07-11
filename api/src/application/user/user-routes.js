@@ -1,7 +1,6 @@
 const Joi = require('joi');
 const Readable = require('stream').Readable;
 const userFormData = require('./user-form-data');
-const Boom = require('boom');
 const views = require('./user-views');
 const clientInitiatedLogout = require('../../../config')('/clientInitiatedLogout');
 const userRegistration = require('../../../config')('/userRegistration');
@@ -19,14 +18,14 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
   },{
     client_id: clientValidator,
   });
-  const emailValidator = async (value, options) => {
+  const emailValidator = async (value) => {
     const userCollection = await bookshelf.model('user').where({email_lower: value.toLowerCase()}).fetchAll();
     if (userCollection.length >= 1) {
       throw new ValidationError('That email address is already in use');
     }
 
     return value;
-  }
+  };
 
   const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
   const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
@@ -45,6 +44,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
+            id_token_hint: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -65,6 +65,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
+            id_token_hint: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -142,6 +143,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
+            id_token_hint: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -162,6 +164,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
+            id_token_hint: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -185,6 +188,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
           query: mixedValidation({
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
+            id_token_hint: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -214,6 +218,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
           query: mixedValidation({
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
+            id_token_hint: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
