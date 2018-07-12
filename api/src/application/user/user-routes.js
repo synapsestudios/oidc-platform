@@ -15,7 +15,6 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
     redirect_uri: Joi.string().required(),
     nonce: Joi.string().optional(),
     login: Joi.string().optional(),
-    id_token_hint: Joi.string(),
   },{
     client_id: clientValidator,
   });
@@ -377,7 +376,6 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
         validate: {
           query: {
             post_logout_redirect_uri: Joi.string().required(),
-            id_token_hint: Joi.string(),
           },
         },
       },
