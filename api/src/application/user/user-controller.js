@@ -225,8 +225,8 @@ module.exports = (
       const sessionId = request.state._session;
 
       if (!sessionId) {
-        logger.error('Session id cookie not present');
-        reply(Boom.notFound());
+        logger.warn('Logout attempt without session cookie present');
+        reply.redirect(request.query.post_logout_redirect_uri);
       } else {
         userService.invalidateSession(sessionId)
           .then(() => reply.redirect(request.query.post_logout_redirect_uri))
