@@ -18,6 +18,7 @@ Once you've gone through the [Installation](installation.md) you're ready for Im
   - [Log them out of just your app](#log-them-out-of-just-your-app)
   - [Log them out of the OIDC provider explicitly](#log-them-out-of-the-oidc-provider-explicitly)
   - [Log them out of the OIDC provider implicitly](#log-them-out-of-the-oidc-provider-implicitly)
+- [Session Recovery](#session-recovery)
 
 ## Clients
 
@@ -356,3 +357,9 @@ ${providerDomain}user/logout
 ```
 
 - post_logout_redirect_uri: where to send your user once they've been logged out
+
+## Session Recovery
+
+We've run into situations where a client has erroneously lost access to the oidc platform's session cookies. For us this is happening in react native Webview components. When an app is closed and reopened cookies are all lost. Because the session is not actually terminated, and we have a valid id token, we want to be able to recover the session for activities like profile editing, email settings, and other features like that.
+
+All of the feature screens take a `id_token_hint=${idToken}` GET variable. If you pass your id token along to the screens we can use it as a hint to find and recover the session. This will also reestablish the session cookies.

@@ -66,7 +66,7 @@ module.exports = Promise.all([
       },
       {
         plugin: {
-          register: './plugins/access-token-scheme'
+          register: './plugins/access-token-scheme',
         }
       },
       {
@@ -99,7 +99,6 @@ module.exports = Promise.all([
                 hbs: handlebars
               },
               path: './templates',
-              layout: true,
               layoutPath: './templates/layout',
               layout: 'default',
             },
