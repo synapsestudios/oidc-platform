@@ -1,3 +1,7 @@
+## [v2.5.0](https://github.com/synapsestudios/oidc-platform/compare/v2.4.0...v2.5.0) - 2018-07-13
+### Added
+- [#329](https://github.com/synapsestudios/oidc-platform/issues/329) Session Recovery
+
 ## [v2.4.0](https://github.com/synapsestudios/oidc-platform/compare/v2.3.2...v2.4.0) - 2018-06-29
 ### Added
 - [#104](https://github.com/synapsestudios/oidc-platform/issues/104) Add "Return to Login" option on Forgot Password Success view
