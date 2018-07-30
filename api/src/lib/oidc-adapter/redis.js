@@ -12,6 +12,10 @@ module.exports = (userService) => {
     return `grant:${id}`;
   }
 
+  function userKeyFor(userId) {
+    return `user:${userId}`;
+  }
+
   class RedisAdapter {
     constructor(name) {
       this.name = name;
@@ -28,6 +32,16 @@ module.exports = (userService) => {
         .then(grantId => client.lrange(grantKeyFor(grantId), 0, -1))
         .then(tokens => Promise.all(_.map(tokens, token => client.del(token))))
         .then(() => client.del(key));
+    }
+
+    async getAndDestroySessionsByUserId(userId) {
+      const userKey = userKeyFor(userId);
+      const activeSessions = await client.smembers(userKey);
+      return Promise.all(activeSessions.reduce((promises, sessionId) => {
+        return promises.concat(this.destroy(sessionId));
+      }, [
+        client.del(userKeyFor(userId))
+      ]));
     }
 
     consume(id) {
@@ -83,6 +97,13 @@ module.exports = (userService) => {
       if (toStore.grantId) {
         const grantKey = grantKeyFor(toStore.grantId);
         multi.rpush(grantKey, key);
+      }
+
+      if (redisConfig.userSessionTrackingEnabled && this.name === 'Session') {
+        const userId = typeof payload === 'object' ? payload.account : null;
+        if (userId) {
+          multi.sadd(userKeyFor(userId), id);
+        }
       }
 
       return multi.exec();
