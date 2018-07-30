@@ -26,3 +26,6 @@
 - Update your keystore file to contain only the certificates keystore. JSON goes from `{certificates: /*certificates keystore json object*/, integrity: /*integrity keystore json object*/}` to just this `/*certificates keystore json object*/`.
 - You _must_ run migrations before deploying the new oidc code.
 - You must not provide the access token when linking a user to the edit profile page. The url will now look like this: `{oidc-domain}/user/profile?client_id={clientId}&redirect_uri={redirectUri}`
+
+## v2.0.0 -> v2.6.0
+- You must set the `ENABLE_USER_SESSION_TRACKING` environment variable to 'true' if you want your users to be able to use the /user/invalidate-user-sessions url
