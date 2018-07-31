@@ -385,7 +385,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
 
   if (userSessionTracking) {
     routes.push({
-      method: 'GET',
+      method: 'DELETE',
       path: '/user/invalidate-user-sessions',
       handler: controller.invalidateUserSessions,
       config: {
