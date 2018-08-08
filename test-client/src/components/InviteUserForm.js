@@ -25,6 +25,7 @@ class InviteUserForm extends Component {
     const data = {
       name: this.state.name,
       email: this.state.email,
+      from: this.state.from,
       useTemplate: this.state.useTemplate,
     };
     fetch('/invite', {

@@ -67,7 +67,7 @@ module.exports = (
           query: mixedValidation(
             {
               client_id: Joi.string().required(),
-              from: Joi.string(),
+              from: Joi.string().allow(null, ''),
               redirect_uri: Joi.string().required(),
               profile: Joi.string(),
               id_token_hint: Joi.string(),
@@ -92,7 +92,7 @@ module.exports = (
           query: mixedValidation(
             {
               client_id: Joi.string().required(),
-              from: Joi.string(),
+              from: Joi.string().allow(null, ''),
               redirect_uri: Joi.string().required(),
               profile: Joi.string(),
               id_token_hint: Joi.string(),
@@ -191,7 +191,7 @@ module.exports = (
           query: mixedValidation(
             {
               client_id: Joi.string().required(),
-              from: Joi.string(),
+              from: Joi.string().allow(null, ''),
               redirect_uri: Joi.string().required(),
               profile: Joi.string(),
               id_token_hint: Joi.string(),
@@ -216,7 +216,7 @@ module.exports = (
           query: mixedValidation(
             {
               client_id: Joi.string().required(),
-              from: Joi.string(),
+              from: Joi.string().allow(null, ''),
               redirect_uri: Joi.string().required(),
               profile: Joi.string(),
               id_token_hint: Joi.string(),

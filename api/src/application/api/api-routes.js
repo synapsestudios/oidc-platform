@@ -20,7 +20,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           {
             client_id: Joi.string().required(),
             email: Joi.string().email().required(),
-            from: Joi.string(),
+            from: Joi.string().allow(null, ''),
             redirect_uri: Joi.string().required(),
             response_type: Joi.string().required(),
             scope: Joi.string().required(),
@@ -59,7 +59,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
         }),
         payload: mixedValidation({
           client_id: Joi.string().required(),
-          from: Joi.string(),
+          from: Joi.string().allow(null, ''),
           redirect_uri: Joi.string().required(),
           response_type: Joi.string().required(),
           scope: Joi.string().required(),
@@ -140,7 +140,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           userId: rowExists('user', 'id', 'User not found'),
         }),
         payload: mixedValidation({
-          from: Joi.string(),
+          from: Joi.string().allow(null, ''),
           client_id: Joi.string().required(),
           redirect_uri: Joi.string().required(),
         }, {

@@ -80,12 +80,13 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
       await renderAndSend(email, restQuery.client_id, 'email-verify-email', viewContext);
     },
 
-    async sendPasswordChangeEmail(user, client, email) {
+    async sendPasswordChangeEmail(user, client, email, from) {
       const viewContext = {
         user: user.serialize(),
         client: client.serialize({strictOidc: true}),
         appName: client.get('client_name'),
         subject: 'Password Changed',
+        from
       };
 
       await renderAndSend(email, client.get('client_id'), 'change-password-success-email', viewContext);
