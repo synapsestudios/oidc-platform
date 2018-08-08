@@ -55,7 +55,6 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
     },
 
     async inviteUser({email, hours_till_expiration, template, app_metadata, profile, ...payload}) {
-      console.log('payload', payload);
       const client = await clientService.findById(payload.client_id);
       return bookshelf.transaction(async trx => {
         const user = await self.create(email, uuid.v4(), {
