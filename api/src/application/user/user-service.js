@@ -36,12 +36,13 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
       return model.fetchAll();
     },
 
-    async resendUserInvite({userId, client_id, redirect_uri, response_type, scope, hours_till_expiration, subject, template, nonce}) {
+    async resendUserInvite({userId, client_id, from, redirect_uri, response_type, scope, hours_till_expiration, subject, template, nonce}) {
       const user = await bookshelf.model('user').where({ id: userId }).fetch();
       if (!user) throw Boom.notFound();
       const client = await clientService.findById(client_id);
       const query = {
         client_id,
+        from,
         redirect_uri,
         response_type,
         subject,
@@ -96,13 +97,14 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
         }).save({}, Object.assign({method: 'insert'}, saveOptions)));
     },
 
-    async sendUserVerification(userId, clientId, redirectUri) {
+    async sendUserVerification(userId, clientId, redirectUri, from) {
       const user = await bookshelf.model('user').where({ id: userId }).fetch();
       if (!user) throw Boom.notFound();
       const client = await clientService.findById(clientId);
       const query = {
         client_id: clientId,
         redirect_uri: redirectUri,
+        from
       };
 
       await userEmails.sendVerificationEmail(user, client, user.get('email'), query);

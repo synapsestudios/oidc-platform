@@ -30,7 +30,7 @@ module.exports = (request, reply) => {
     wreck.post('/api/invite', options, (error, response, payload) => {
       if (error) {
         console.log('Error while inviting user.');
-        console.log(error);
+        console.log('test', error.data.payload);
         reply(error);
       } else {
         console.log('User invite successful.');

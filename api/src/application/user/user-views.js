@@ -304,7 +304,7 @@ module.exports = {
     }
   },
 
-  resetPassword : title => (user, client, request, error) => {
+  resetPassword: title => (user, client, request, error) => {
     const redirectSet = request.query.token !== undefined;
     return {
       user: user.serialize(),
@@ -325,13 +325,14 @@ module.exports = {
   },
 
   inviteEmail: (user, client, baseUrl, query) => {
-    const { subject, ...restQuery } = query;
+    const { subject, from, ...restQuery } = query;
     return {
       user: user.serialize(),
       client: client.serialize({ strictOidc: true }),
       url: `${baseUrl}/user/accept-invite?${querystring.stringify(restQuery)}`.replace(' ', '%20'),
       appName: client.get('client_name'),
       subject: subject ? subject : `${client.get('client_name')} Invitation`,
+      from: from ? from : null
     }
   },
 };
