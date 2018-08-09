@@ -9,7 +9,7 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
   const renderAndSend = async (to, clientId, page, context) => {
     const {template, renderedTemplate} = await themeService.getThemedTemplate(clientId, page, context);
 
-    let html, subject = context.subject;
+    let from, html, subject = context.subject;
     if (!template) {
       html = await renderTemplate(page, context, {
         layout: 'email',
@@ -17,9 +17,10 @@ module.exports = (emailService, themeService, renderTemplate, emailTokenService)
     } else {
       html = renderedTemplate;
       subject = template.get('options') && template.get('options').subject || subject;
+      from = template.get('options') && template.get('options').from || from;
     }
 
-    await emailService.send({to, subject, html});
+    await emailService.send({to, subject, html, from});
   };
 
   return {
