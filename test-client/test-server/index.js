@@ -49,7 +49,6 @@ server.route({
   config: {
     validate: {
       payload: {
-        from: Joi.string().allow(null, ''),
         name: Joi.string().required(),
         email: Joi.string().email().required(),
         useTemplate: Joi.boolean(),

@@ -3,7 +3,6 @@ const Joi = require('joi');
 // Mix JOI validation with our own custom validators
 const mixedValidation = (joiSchema, customSchema) => {
   return (values, options, next) => {
-
     const schema = Joi.object().keys(joiSchema);
     options.context.values = values;
 

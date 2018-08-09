@@ -16,7 +16,6 @@ module.exports = (request, reply) => {
   const options = {};
   options.payload = {};
   options.payload.email = request.payload.email;
-  options.payload.from = request.payload.from;
   options.payload.client_id = clientId;
   options.payload.redirect_uri = 'https://sso-client.test:3000/';
   options.payload.response_type= 'code';
@@ -31,7 +30,7 @@ module.exports = (request, reply) => {
     wreck.post('/api/invite', options, (error, response, payload) => {
       if (error) {
         console.log('Error while inviting user.');
-        console.log('test', error.data.payload);
+        console.log(error);
         reply(error);
       } else {
         console.log('User invite successful.');

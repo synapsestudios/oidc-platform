@@ -69,7 +69,7 @@ module.exports = (
 
             await Promise.all([
               userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query),
-              userEmails.sendChangeEmailAlertEmail(user, client, user.get('email', request.query.from)),
+              userEmails.sendChangeEmailAlertEmail(user,client, user.get('email')),
             ]);
 
           } else {
@@ -81,23 +81,20 @@ module.exports = (
       await render(error);
     }),
 
-    changePasswordHandler: formHandler(
-      'change-password',
-      views.changePassword,
-      async (request, reply, user, client, render) => {
-        const { current, password } = request.payload;
-        const isAuthenticated = await comparePasswords(current, user);
-        let error;
+    changePasswordHandler: formHandler('change-password', views.changePassword, async (request, reply, user, client, render) => {
+      const { current, password } = request.payload;
+      const isAuthenticated = await comparePasswords(current, user);
+      let error;
 
-        if (isAuthenticated) {
-          const hashedPassword = await userService.encryptPassword(password);
-          await userService.update(user.get('id'), { password: hashedPassword });
-          await userEmails.sendPasswordChangeEmail(user, client, user.get('email', request.query.from));
-        } else {
-          error = { current: ['Password is incorrect'] };
-        }
-        await render(error);
-      }),
+      if (isAuthenticated) {
+        const hashedPassword = await userService.encryptPassword(password);
+        await userService.update(user.get('id'), { password: hashedPassword });
+        await userEmails.sendPasswordChangeEmail(user, client, user.get('email'));
+      } else {
+        error = { current: ['Password is incorrect'] };
+      }
+      await render(error);
+    }),
 
     profileHandler: formHandler('user-profile', views.userProfile, async (request, reply, user, client) => {
       let profile = user.get('profile');
