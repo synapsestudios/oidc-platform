@@ -234,6 +234,12 @@ module.exports = (
       }
     },
 
+    invalidateUserSessions: function(request, reply) {
+      userService.invalidateSessionByUserId(request.query.user_id)
+        .then(reply)
+        .catch(reply);
+    },
+
   };
 };
 

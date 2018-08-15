@@ -124,6 +124,11 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
     invalidateSession(sessionId) {
       return self.redisAdapter.destroy(sessionId);
     },
+
+    invalidateSessionByUserId(userId) {
+      return self.redisAdapter.getAndDestroySessionsByUserId(userId);
+    },
+
   };
 
   return self;

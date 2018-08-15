@@ -14,7 +14,8 @@ var config = {
     },
     redis: {
       host: process.env.REDIS_HOST || 'localhost',
-      port: process.env.REDIS_PORT || 6379
+      port: process.env.REDIS_PORT || 6379,
+      userSessionTrackingEnabled: process.env.ENABLE_USER_SESSION_TRACKING || false,
     },
     email: process.env.OIDC_EMAIL_DRIVER,
     oidc: {

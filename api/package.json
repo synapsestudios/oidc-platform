@@ -1,6 +1,6 @@
 {
   "name": "identity-platform-api",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "OpenID Connect provider for synapse projects",
   "main": "server.js",
   "scripts": {
@@ -41,7 +41,7 @@
     "hapi": "^16.1.0",
     "hapi-auth-jwt2": "^7.2.4",
     "ioredis": "^2.5.0",
-    "knex": "^0.12.7",
+    "knex": "^0.15.2",
     "koa2-cors": "^2.0.3",
     "lodash": "^4.17.4",
     "mailgun-js": "^0.8.1",

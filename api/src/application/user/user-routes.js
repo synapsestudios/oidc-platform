@@ -3,6 +3,7 @@ const Readable = require('stream').Readable;
 const userFormData = require('./user-form-data');
 const views = require('./user-views');
 const clientInitiatedLogout = require('../../../config')('/clientInitiatedLogout');
+const userSessionTracking = require('../../../config')('/redis/userSessionTrackingEnabled');
 const userRegistration = require('../../../config')('/userRegistration');
 const bookshelf = require('../../lib/bookshelf');
 
@@ -380,6 +381,23 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
         },
       },
     });
+  }
+
+  if (userSessionTracking) {
+    routes.push({
+      method: 'DELETE',
+      path: '/user/invalidate-user-sessions',
+      handler: controller.invalidateUserSessions,
+      config: {
+        validate: {
+          query: mixedValidation({
+            user_id: Joi.string().guid().required()
+          }, {
+            user_id: rowExists('user', 'id', 'User not found'),
+          }),
+        },
+      },
+    })
   }
 
   if (userRegistration) {
