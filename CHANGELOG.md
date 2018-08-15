@@ -1,3 +1,7 @@
+## [v2.6.0](https://github.com/synapsestudios/oidc-platform/compare/v2.5.0...v2.6.0) - 2018-08-15
+### Added
+- [#305](https://github.com/synapsestudios/oidc-platform/issues/305) From address overriding for themes
+
 ## [v2.5.0](https://github.com/synapsestudios/oidc-platform/compare/v2.4.0...v2.5.0) - 2018-07-13
 ### Added
 - [#329](https://github.com/synapsestudios/oidc-platform/issues/329) Session Recovery
