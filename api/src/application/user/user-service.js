@@ -30,7 +30,14 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
       }
 
       if (query.email) {
-        model = model.where('email_lower', query.email.toLowerCase());
+        const email = query.email.replace(/[\*%]+/g, '%');
+        const wildcardSearch = email.indexOf('%') > -1;
+
+        if (wildcardSearch) {
+          model = model.where('email_lower', 'LIKE', email.toLowerCase());
+        } else {
+          model = model.where('email_lower', query.email.toLowerCase());
+        }
       }
 
       return model.fetchAll();

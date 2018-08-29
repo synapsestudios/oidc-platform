@@ -85,7 +85,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       validate: {
         query: {
           ids: Joi.array().items(Joi.string()).single(),
-          email: Joi.string().email()
+          email: Joi.string().email().regex(/[\*%]+/g, { invert: true }),
         }
       }
     }
