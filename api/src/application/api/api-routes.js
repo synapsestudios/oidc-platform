@@ -19,7 +19,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
         payload: mixedValidation(
           {
             client_id: Joi.string().required(),
-            email: Joi.string().email().required(),
+            email: Joi.string().email().regex(/[\*%]+/g, { invert: true }).required(),
             redirect_uri: Joi.string().required(),
             response_type: Joi.string().required(),
             scope: Joi.string().required(),
