@@ -166,7 +166,39 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
         }
       }
     }
-  }
+  },
+  {
+    method: 'POST',
+    path: '/api/forgot-password/{userId}',
+    handler: (request, reply) => {
+      reply(
+        userService.sendForgotPassword(
+          request.params.userId,
+          request.payload.client_id,
+          request.payload.redirect_uri,
+        )
+      );
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin',
+      },
+      validate: {
+        params: mixedValidation({
+          userId: Joi.any().required(),
+        }, {
+          userId: rowExists('user', 'id', 'User not found'),
+        }),
+        payload: mixedValidation({
+          client_id: Joi.string().required(),
+          redirect_uri: Joi.string().required(),
+        }, {
+          client_id: clientValidator,
+        }),
+      },
+    },
+  },
 ];
 
 module.exports['@singleton'] = true;
