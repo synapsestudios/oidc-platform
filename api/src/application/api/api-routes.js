@@ -85,7 +85,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       validate: {
         query: {
           ids: Joi.array().items(Joi.string()).single(),
-          email: Joi.string().email().regex(/[\*%]+/g, { invert: true }),
+          email: Joi.string(),
         }
       }
     }
@@ -104,7 +104,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       },
       validate: {
         payload: mixedValidation({
-          email: Joi.string().email().required(),
+          email: Joi.string().email().regex(/[\*%]+/g, { invert: true }).required(),
           password: Joi.string(),
         }, {
           email: rowNotExists('user', 'email', 'Email already in use')

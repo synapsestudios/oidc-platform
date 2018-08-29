@@ -418,7 +418,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
       config : {
         validate : {
           payload : mixedValidation({
-            email : Joi.string().email().required(),
+            email: Joi.string().email().regex(/[\*%]+/g, { invert: true }).required(),
             password : Joi.string().min(8).required(),
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
           }, {
