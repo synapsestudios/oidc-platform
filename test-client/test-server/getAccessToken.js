@@ -14,7 +14,7 @@ module.exports = () => {
   console.log('Getting Access Token for user invite.');
   return new Promise((resolve, reject) => {
     wreck.post('/op/token', {
-      payload: `grant_type=client_credentials&scope=admin`,
+      payload: `grant_type=client_credentials&scope=admin&scope=superadmin`,
       headers: {
         Authorization: 'Basic ' + btoa(`${clientId}:${clientSecret}`),
         'Content-Type': 'application/x-www-form-urlencoded'
