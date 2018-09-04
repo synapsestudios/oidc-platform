@@ -68,7 +68,7 @@ exports.register = function (server, pluginOptions, next) {
                   return reply(Boom.notFound('Client not found'));
                 }
 
-                if (!client.superclient) {
+                if (!client.superadmin) {
                   reply(Boom.forbidden('invalid superadmin scope'))
                 }
               });

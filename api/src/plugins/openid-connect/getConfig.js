@@ -53,7 +53,7 @@ module.exports = options => {
       backchannelLogout: false,
     },
     extraClientMetadata: {
-      properties: ['superclient'],
+      properties: ['superadmin'],
     },
     logoutSource: async function renderLogoutSource(ctx, form) {
       const clientId = ctx.oidc.session.logout.clientId;
