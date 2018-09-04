@@ -69,12 +69,14 @@ exports.register = function (server, pluginOptions, next) {
                 }
 
                 if (!client.superadmin) {
-                  reply(Boom.forbidden('invalid superadmin scope'))
+                  return reply(Boom.forbidden('invalid superadmin scope'));
                 }
-              });
-            }
 
-            reply.continue({ credentials: token });
+                reply.continue({ credentials: token });
+              });
+            } else {
+              reply.continue({ credentials: token });
+            }
           } else {
             return onInvalidAccessToken(request, reply);
           }
