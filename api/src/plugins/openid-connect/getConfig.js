@@ -52,6 +52,9 @@ module.exports = options => {
       sessionManagement: true,
       backchannelLogout: false,
     },
+    extraClientMetadata: {
+      properties: ['superclient'],
+    },
     logoutSource: async function renderLogoutSource(ctx, form) {
       const clientId = ctx.oidc.session.logout.clientId;
       const template = await options.getTemplate(clientId, 'end-session', { form });

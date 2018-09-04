@@ -62,19 +62,13 @@ exports.register = function (server, pluginOptions, next) {
 
             if (includes(token.scope, 'superadmin')) {
               const provider = server.plugins['open-id-connect'].provider;
-              const clientId = get(request, 'query.client_id') || get(request, 'payload.client_id');
-              const redirectUri = get(request, 'query.redirect_uri') || get(request, 'payload.redirect_uri');
-              provider.Client.find(clientId).then(client => {
+              provider.Client.find(token.clientId).then(client => {
+
                 if (!client) {
                   return reply(Boom.notFound('Client not found'));
                 }
-                if (client.redirectUris.indexOf(request.query.redirect_uri) < 0) {
-                  return reply(Boom.forbidden('redirect_uri not in whitelist'));
-                } else {
-                  return reply.redirect(`${redirectUri}?error=unauthorized&error_description=invalid access token`);
-                }
 
-                if (!client.superadmin) {
+                if (!client.superclient) {
                   reply(Boom.forbidden('invalid superadmin scope'))
                 }
               });
