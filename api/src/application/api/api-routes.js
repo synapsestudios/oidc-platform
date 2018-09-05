@@ -206,7 +206,8 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       const { email } = request.payload;
       const email_lower = email.toLowerCase();
       const client = await clientService.findById(request.query.client_id);
-      const user = await userService.update(request.params.userId, { pending_email: email, pending_email_lower: email.toLowerCase() });
+      await userService.update(request.params.userId, { pending_email: email, pending_email_lower: email.toLowerCase() });
+      const user = await userService.findById(request.params.userId);
       await Promise.all([
         userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query),
         userEmails.sendChangeEmailAlertEmail(user, client, user.attributes.email),
