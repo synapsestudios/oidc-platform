@@ -3,7 +3,7 @@ const webhookService = require('../webhook/webhook-service');
 
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 
-module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator) => [
+module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator, userEmails) => [
   {
     method: 'POST',
     path: '/api/invite',
@@ -199,6 +199,46 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       },
     },
   },
+  {
+    method: 'POST',
+    path: '/api/update-email/{userId}',
+    handler: async (request, reply) => {
+      const { email } = request.payload;
+      const client = await clientService.findById(request.query.client_id);
+      await userService.update(request.params.userId, { pending_email: email, pending_email_lower: email.toLowerCase() });
+      const user = await userService.findById(request.params.userId);
+      await Promise.all([
+        userEmails.sendChangeEmailVerifyEmail(user, client, email, request.query),
+        userEmails.sendChangeEmailAlertEmail(user, client, user.attributes.email),
+      ]);
+
+      reply().send(204);
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: ['admin', 'superadmin']
+      },
+      validate: {
+        params: mixedValidation({
+          userId: Joi.any().required(),
+        }, {
+          userId: rowExists('user', 'id', 'User not found')
+        }),
+        payload: mixedValidation({
+          email: Joi.string().email().regex(/[\*%]+/g, { invert: true }).required(),
+        }, {
+          email: rowNotExists('user', 'email', 'Email already in use')
+        }),
+        query: mixedValidation({
+          client_id: Joi.string().required(),
+          redirect_uri: Joi.string().required(),
+        }, {
+          client_id: clientValidator,
+        }),
+      }
+    }
+  },
 ];
 
 module.exports['@singleton'] = true;
@@ -209,4 +249,5 @@ module.exports['@require'] = [
   'validator/constraints/row-not-exists',
   'validator/constraints/row-exists',
   'validator/constraints/client-validator',
+  'user/user-emails',
 ];
