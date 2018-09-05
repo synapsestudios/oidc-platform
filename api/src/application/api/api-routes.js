@@ -217,7 +217,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
     config: {
       auth: {
         strategy: 'client_credentials',
-        scope: ['admin', 'superadmin']
+        scope: 'superadmin',
       },
       validate: {
         params: mixedValidation({
