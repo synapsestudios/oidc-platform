@@ -204,7 +204,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
     path: '/api/update-email/{userId}',
     handler: async (request, reply) => {
       const { email } = request.payload;
-      const email_lower = email.toLowerCase();
       const client = await clientService.findById(request.query.client_id);
       await userService.update(request.params.userId, { pending_email: email, pending_email_lower: email.toLowerCase() });
       const user = await userService.findById(request.params.userId);
