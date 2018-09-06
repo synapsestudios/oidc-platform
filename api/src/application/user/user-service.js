@@ -123,6 +123,8 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
       const query = {
         client_id: clientId,
         redirect_uri: redirectUri,
+        response_type: 'code id_token',
+        scope: 'openid',
       };
 
       await userEmails.sendForgotPasswordEmail(user, client, user.get('email'), query);
