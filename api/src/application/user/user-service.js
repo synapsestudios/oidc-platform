@@ -30,7 +30,14 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
       }
 
       if (query.email) {
-        model = model.where('email_lower', query.email.toLowerCase());
+        const email = query.email.replace(/[\*%]+/g, '%');
+        const wildcardSearch = email.indexOf('%') > -1;
+
+        if (wildcardSearch) {
+          model = model.where('email_lower', 'LIKE', email.toLowerCase());
+        } else {
+          model = model.where('email_lower', query.email.toLowerCase());
+        }
       }
 
       return model.fetchAll();
@@ -106,6 +113,21 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
       };
 
       await userEmails.sendVerificationEmail(user, client, user.get('email'), query);
+      return user;
+    },
+
+    async sendForgotPassword(userId, clientId, redirectUri) {
+      const user = await bookshelf.model('user').where({ id: userId }).fetch();
+      if (!user) throw Boom.notFound();
+      const client = await clientService.findById(clientId);
+      const query = {
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        response_type: 'code id_token',
+        scope: 'openid',
+      };
+
+      await userEmails.sendForgotPasswordEmail(user, client, user.get('email'), query);
       return user;
     },
 

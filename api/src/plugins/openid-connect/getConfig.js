@@ -52,6 +52,9 @@ module.exports = options => {
       sessionManagement: true,
       backchannelLogout: false,
     },
+    extraClientMetadata: {
+      properties: ['superadmin'],
+    },
     logoutSource: async function renderLogoutSource(ctx, form) {
       const clientId = ctx.oidc.session.logout.clientId;
       const template = await options.getTemplate(clientId, 'end-session', { form });
@@ -69,6 +72,6 @@ module.exports = options => {
     subjectTypes: ['public', 'pairwise'],
     pairwiseSalt: options.pairwiseSalt,
     interactionUrl: async (ctx, interaction) => `/interaction/${ctx.oidc.uuid}`,
-    scopes: ['admin'],
+    scopes: ['admin', 'superadmin'],
   }
 }

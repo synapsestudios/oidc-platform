@@ -1,5 +1,6 @@
 const Boom = require('boom');
 const get = require('lodash/get');
+const includes = require('lodash/includes');
 
 exports.register = function (server, pluginOptions, next) {
   server.auth.scheme('access_token', (server, schemeOptions) => {
@@ -58,7 +59,24 @@ exports.register = function (server, pluginOptions, next) {
         provider[TokenModel].find(tokenString).then(token => {
           if (token) {
             token.scope = token.scope.split(' ');
-            reply.continue({ credentials: token });
+
+            if (includes(token.scope, 'superadmin')) {
+              const provider = server.plugins['open-id-connect'].provider;
+              provider.Client.find(token.clientId).then(client => {
+
+                if (!client) {
+                  return reply(Boom.notFound('Client not found'));
+                }
+
+                if (!client.superadmin) {
+                  return reply(Boom.forbidden('invalid superadmin scope'));
+                }
+
+                reply.continue({ credentials: token });
+              });
+            } else {
+              reply.continue({ credentials: token });
+            }
           } else {
             return onInvalidAccessToken(request, reply);
           }
