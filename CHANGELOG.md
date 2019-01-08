@@ -1,5 +1,6 @@
 ## [v2.7.0](https://github.com/synapsestudios/oidc-platform/compare/v2.6.0...v2.7.0) - 2018-09-07
 ### Added
+
 - [#353](https://github.com/synapsestudios/oidc-platform/issues/355) Add api endpoint for triggering forgot password
 - [#354](https://github.com/synapsestudios/oidc-platform/issues/354) Allow `getUsers` endpoint to accept wildcard values
 - [#355](https://github.com/synapsestudios/oidc-platform/issues/355) Add rules for `superadmin` client/scope
