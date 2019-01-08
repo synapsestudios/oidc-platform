@@ -1,6 +1,6 @@
 {
   "name": "identity-platform-api",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "description": "OpenID Connect provider for synapse projects",
   "main": "server.js",
   "scripts": {
