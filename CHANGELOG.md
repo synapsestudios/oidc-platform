@@ -1,3 +1,7 @@
+## [v2.7.0](https://github.com/synapsestudios/oidc-platform/compare/v2.7.0...v2.7.1) - 2010-01-08
+### Added
+- [#368](https://github.com/synapsestudios/oidc-platform/issues/368) Updated the dev ssl cert to use new CA
+
 ## [v2.7.0](https://github.com/synapsestudios/oidc-platform/compare/v2.6.0...v2.7.0) - 2018-09-07
 ### Added
 
