@@ -397,7 +397,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
           }),
         },
       },
-    })
+    });
   }
 
   if (userRegistration) {
