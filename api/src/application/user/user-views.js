@@ -252,14 +252,21 @@ module.exports = {
         successMessage = '';
     }
 
+    const query = {
+      client_id: request.query.client_id,
+      redirect_uri: request.query.redirect_uri,
+    };
+    if (request.query.access_token) {
+      query.access_token = request.query.access_token;
+    }
+
     return {
       user: user.serialize(),
       client: client.serialize({strictOidc:true}),
       title: 'Email Settings',
-      returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
-        client_id: request.query.client_id,
-        redirect_uri: request.query.redirect_uri,
-      })}` : `${request.query.redirect_uri}`,
+      returnTo: request.query.profile
+        ? `/user/profile?${querystring.stringify(query)}`
+        : `${request.query.redirect_uri}`,
       success: request.method === 'post' && !error,
       successMessage,
       error: !!error,
