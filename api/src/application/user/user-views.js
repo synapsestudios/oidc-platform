@@ -51,19 +51,22 @@ module.exports = {
       return (request.payload && request.payload[field]) || get(profile, field, '');
     };
 
+    const query = {
+      client_id: request.query.client_id,
+      redirect_uri: request.query.redirect_uri,
+      profile: true,
+    }
+
+    if (request.query.access_token) {
+      query.access_token = request.query.access_token;
+    }
+    const queryString = querystring.stringify(query);
+
     return {
       user: user.serialize(),
       client: client.serialize({strictOidc:true}),
-      changePassUrl: `/user/password?${querystring.stringify({
-        client_id: request.query.client_id,
-        redirect_uri: request.query.redirect_uri,
-        profile: true,
-      })}`,
-      emailSettingsUrl: `/user/email-settings?${querystring.stringify({
-        client_id: request.query.client_id,
-        redirect_uri: request.query.redirect_uri,
-        profile: true,
-      })}`,
+      changePassUrl: `/user/password?${queryString}`,
+      emailSettingsUrl: `/user/email-settings?${queryString}`,
       returnTo: request.query.redirect_uri,
       title: 'User Profile',
       fields: [
