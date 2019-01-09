@@ -70,7 +70,7 @@ class App extends Component {
         </div>
         <div>
           <InviteUserForm />
-          <div><a href={`https://sso-client.test:9000/user/profile?client_id=${config.clientId}&redirect_uri=${config.redirectUri}`}>Edit Profile</a></div>
+          <div><a href={`https://sso-client.test:9000/user/profile?client_id=${config.clientId}&redirect_uri=${config.redirectUri}&access_token=${this.state.accessToken}`}>Edit Profile</a></div>
           <div><a href={`https://sso-client.test:9000/user/password?client_id=${config.clientId}&redirect_uri=${config.redirectUri}`}>Change Password</a></div>
           <div><a href={`https://sso-client.test:9000/user/email-settings?client_id=${config.clientId}&redirect_uri=${config.redirectUri}`}>Email Settings</a></div>
           <div><a href={`https://sso-client.test:9000/op/session/end?id_token_hint=${this.state.idToken}&post_logout_redirect_uri=${config.postLogoutRedirectUri}`}>Log Out</a></div>

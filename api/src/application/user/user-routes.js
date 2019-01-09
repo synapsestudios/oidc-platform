@@ -38,7 +38,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
       handler: controller.emailSettingsHandler,
       config: {
         auth: {
-          strategy: 'oidc_session',
+          strategies: ['oidc_session', 'access_token'],
         },
         validate: {
           query: mixedValidation({
@@ -46,6 +46,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
             id_token_hint: Joi.string(),
+            access_token: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -58,7 +59,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
       handler: controller.emailSettingsHandler,
       config: {
         auth: {
-          strategy: 'oidc_session',
+          strategies: ['oidc_session', 'access_token'],
         },
         validate: {
           failAction: controller.emailSettingsHandler,
@@ -67,6 +68,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
             id_token_hint: Joi.string(),
+            access_token: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -137,7 +139,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
       handler: controller.changePasswordHandler,
       config: {
         auth: {
-          strategy: 'oidc_session',
+          strategies: ['oidc_session', 'access_token'],
         },
         validate: {
           query: mixedValidation({
@@ -145,6 +147,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
             id_token_hint: Joi.string(),
+            access_token: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -157,7 +160,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
       handler: controller.changePasswordHandler,
       config: {
         auth: {
-          strategy: 'oidc_session',
+          strategies: ['oidc_session', 'access_token'],
         },
         validate: {
           failAction :controller.changePasswordHandler,
@@ -166,6 +169,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             profile: Joi.string(),
             id_token_hint: Joi.string(),
+            access_token: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -183,13 +187,14 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
       handler: controller.profileHandler,
       config: {
         auth: {
-          strategy: 'oidc_session',
+          strategies: ['oidc_session', 'access_token'],
         },
         validate: {
           query: mixedValidation({
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             id_token_hint: Joi.string(),
+            access_token: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -209,7 +214,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
           allow: 'multipart/form-data',
         },
         auth: {
-          strategy: 'oidc_session',
+          strategies: ['oidc_session', 'access_token'],
         },
         validate: {
           options: {
@@ -220,6 +225,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             client_id: Joi.string().required(),
             redirect_uri: Joi.string().required(),
             id_token_hint: Joi.string(),
+            access_token: Joi.string(),
           }, {
             client_id: clientValidator,
           }),
@@ -397,7 +403,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
           }),
         },
       },
-    })
+    });
   }
 
   if (userRegistration) {
