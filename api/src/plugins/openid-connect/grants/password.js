@@ -8,7 +8,7 @@ module.exports = (options) => ({
       if (account) {
         const { AccessToken, IdToken } = providerInstance;
         const at = new AccessToken({
-          accountId: 'foo',
+          accountId: account.accountId,
           clientId: ctx.oidc.client.clientId,
           grantId: ctx.oidc.uuid,
         });
@@ -21,6 +21,7 @@ module.exports = (options) => ({
           ctx.oidc.client.sectorIdentifier
         );
         token.set('at_hash', accessToken);
+        token.set('sub', account.accountId);
 
         const idToken = await token.sign(ctx.oidc.client);
 
