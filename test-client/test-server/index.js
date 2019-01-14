@@ -10,6 +10,7 @@ const keys = require('../../api/keystore');
 
 
 const inviteHandler = require('./inviteHandler');
+const tokenHandler = require('./tokenHandler');
 const webhookHandler = require('./webhookHandler');
 
 const server = new Hapi.Server();
@@ -55,6 +56,12 @@ server.route({
       }
     }
   }
+});
+
+server.route({
+  method: 'POST',
+  path: '/token',
+  handler: tokenHandler,
 });
 
 server.start((err) => {
