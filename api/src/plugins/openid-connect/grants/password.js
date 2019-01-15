@@ -11,6 +11,7 @@ module.exports = (options) => ({
           accountId: account.accountId,
           clientId: ctx.oidc.client.clientId,
           grantId: ctx.oidc.uuid,
+          scope: ctx.oidc.params.scope || '',
         });
 
         const accessToken = await at.save();
