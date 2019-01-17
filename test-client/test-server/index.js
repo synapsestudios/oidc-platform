@@ -14,7 +14,12 @@ const tokenHandler = require('./tokenHandler');
 const webhookHandler = require('./webhookHandler');
 
 const server = new Hapi.Server();
-server.connection({ port: 8080 });
+server.connection({
+  port: 8080,
+  routes: {
+    cors: { origin: ['*'] }
+  }
+});
 
 const validate = async (decoded, request, callback) => {
   try {
