@@ -4,4 +4,6 @@ module.exports = {
   postLogoutRedirectUri: 'https://sso-client.test:3000/logout',
   clientId: '',
   clientSecret: '',
+  identityServer: 'https://sso-client.test:9000/',
+  testServer: 'https://localhost:8080/',
 };

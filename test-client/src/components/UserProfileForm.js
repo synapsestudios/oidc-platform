@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import localstorage from 'store2';
+import config from '../config';
 
 const fields = [
   { label: 'Name', id: 'name' },
@@ -55,7 +56,7 @@ class UserProfileForm extends Component {
     const headers = new Headers();
     headers.append('Authorization', `Bearer ${localstorage('accessToken')}`);
 
-    fetch('/api/user/profile', {
+    fetch(`${config.identityServer}api/user/profile`, {
       method: 'PUT',
       headers,
       body: data,

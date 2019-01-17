@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
+import config from '../config';
 
 class InviteUserForm extends Component {
   constructor(props){
     super(props);
 
-    this.state = { 
+    this.state = {
       name: '',
       email: '',
       showMessage: false,
@@ -15,7 +16,7 @@ class InviteUserForm extends Component {
 
   updateForm(fieldName, e) {
     const field = {};
-    field[fieldName] = (e.target.type === 'checkbox') 
+    field[fieldName] = (e.target.type === 'checkbox')
       ? e.target.checked : e.target.value;
     this.setState(field);
   }
@@ -27,7 +28,7 @@ class InviteUserForm extends Component {
       email: this.state.email,
       useTemplate: this.state.useTemplate,
     };
-    fetch('/invite', {
+    fetch(`${config.testServer}invite`, {
       method: 'POST',
       body: JSON.stringify(data),
     }).then((data) => {
@@ -36,7 +37,7 @@ class InviteUserForm extends Component {
       const message = `Message sent to ${data.email}`;
       this.setState({ showMessage: true, message });
       setTimeout(() => {
-        this.setState({ 
+        this.setState({
           name: '',
           email: '',
           showMessage: false,
@@ -51,8 +52,8 @@ class InviteUserForm extends Component {
     return (
       <div>
         <form
-          onSubmit={this.submitForm.bind(this)} 
-          style={{ 
+          onSubmit={this.submitForm.bind(this)}
+          style={{
             border: 'thin solid black',
             padding: '10px',
             width: '400px',
@@ -63,11 +64,11 @@ class InviteUserForm extends Component {
             padding: '10px',
           }}>
             <label htmlFor="name" style={{ width: '100px', textAlign: 'left' }}>Name:</label>
-            <input 
-              type="text" 
-              name="name" 
-              id="name" 
-              value={this.state.name} 
+            <input
+              type="text"
+              name="name"
+              id="name"
+              value={this.state.name}
               placeholder="Enter a name"
               onChange={(e) => this.updateForm.call(this, 'name', e)}
               required
@@ -79,12 +80,12 @@ class InviteUserForm extends Component {
             padding: '10px',
           }}>
             <label htmlFor="email" style={{ width: '100px', textAlign: 'left' }}>Email:</label>
-            <input 
-              type="email" 
-              name="email" 
-              id="email" 
-              value={this.state.email} 
-              placeholder="Enter an email" 
+            <input
+              type="email"
+              name="email"
+              id="email"
+              value={this.state.email}
+              placeholder="Enter an email"
               onChange={(e) => this.updateForm.call(this, 'email', e)}
               required
               style={{
@@ -95,10 +96,10 @@ class InviteUserForm extends Component {
             padding: '10px',
           }}>
             <label htmlFor="use-template" style={{ width: '100px', textAlign: 'left' }}>Use Email Template:</label>
-            <input 
-              type="checkbox" 
-              name="use-template" 
-              id="use-template" 
+            <input
+              type="checkbox"
+              name="use-template"
+              id="use-template"
               checked={this.state.useTemplate}
               onChange={(e) => this.updateForm.call(this, 'useTemplate', e)}
               style={{
@@ -108,9 +109,9 @@ class InviteUserForm extends Component {
           <div style={{
             padding: '10px',
           }}>
-            <input 
-              type="submit"  
-              value="Invite User"  
+            <input
+              type="submit"
+              value="Invite User"
               style={{
                 width: '150px',
             }} />
