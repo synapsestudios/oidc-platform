@@ -37,7 +37,7 @@ class UserProfileForm extends Component {
 
   updateForm(fieldName, e) {
     const field = {};
-    field[fieldName] = (e.target.type === 'checkbox') 
+    field[fieldName] = (e.target.type === 'checkbox')
       ? e.target.checked : e.target.value;
     this.setState(field);
   }
@@ -63,7 +63,7 @@ class UserProfileForm extends Component {
       .then((data) => {
         this.setState({ showMessage: true, message: 'Profile Updated' });
         setTimeout(() => {
-          this.setState({ 
+          this.setState({
             ...defaultFields,
             showMessage: false,
             message: '',
@@ -79,11 +79,11 @@ class UserProfileForm extends Component {
         padding: '10px',
       }} key={id} >
         <label htmlFor={id} style={{ width: '100px', textAlign: 'left' }}>{label}:</label>
-        <input 
-          type="text" 
+        <input
+          type="text"
           name={id}
-          id={id} 
-          value={this.state[id]} 
+          id={id}
+          value={this.state[id]}
           placeholder={`Enter a ${label.toLowerCase()}`}
           onChange={(e) => this.updateForm.call(this, id, e)}
           style={{
@@ -99,12 +99,12 @@ class UserProfileForm extends Component {
         padding: '10px',
       }}>
         <label htmlFor="picture" style={{ width: '100px', textAlign: 'left' }}>Picture:</label>
-        <input 
-          type="file" 
+        <input
+          type="file"
           name="picture"
           id="picture"
           accept="image/*"
-          value={this.state.picture.name} 
+          value={this.state.picture.name}
           placeholder="Upload a picture"
           onChange={(e) => {
             const field = {picture: e.target.value};
@@ -122,8 +122,8 @@ class UserProfileForm extends Component {
     return (
       <div>
         <form
-          onSubmit={this.submitForm.bind(this)} 
-          style={{ 
+          onSubmit={this.submitForm.bind(this)}
+          style={{
             border: 'thin solid black',
             padding: '10px',
             width: '400px',
@@ -135,9 +135,9 @@ class UserProfileForm extends Component {
           <div style={{
             padding: '10px',
           }}>
-            <input 
-              type="submit"  
-              value="Update User Profile"  
+            <input
+              type="submit"
+              value="Update User Profile"
               style={{
                 width: '150px',
               }} />
