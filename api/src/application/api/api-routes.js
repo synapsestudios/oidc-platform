@@ -1,9 +1,47 @@
 const Joi = require('joi');
 const webhookService = require('../webhook/webhook-service');
-
+const userFormData = require('../user/user-form-data');
+const Readable = require('stream').Readable;
+const bookshelf = require('../../lib/bookshelf');
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 
-module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator, userEmails) => [
+const ONE_MEGABYTE = 1048576;
+const filePayloadConfig = {
+  failAction: 'ignore', // set payload to null if picture is too large
+  output: 'stream',
+  maxBytes: ONE_MEGABYTE,
+  parse: true,
+  allow: 'multipart/form-data'
+};
+
+const userProfilePayloadValidation = Joi.object().keys({
+  name: Joi.string().allow(''),
+  given_name: Joi.string().allow(''),
+  family_name: Joi.string().allow(''),
+  middle_name: Joi.string().allow(''),
+  nickname: Joi.string().allow(''),
+  preferred_username: Joi.string().allow(''),
+  profile: Joi.string().uri().allow(''),
+  shouldClearPicture: Joi.boolean(),
+  picture: Joi.object().type(Readable).assert(
+    'hapi.headers.content-type',
+    Joi.any().valid(['image/jpeg', 'image/png', 'application/octet-stream'])
+  ),
+  website: Joi.string().uri().allow(''),
+  email: Joi.string().email().allow(''),
+  gender: Joi.string().allow(''),
+  birthdate: Joi.string().isoDate().allow(''),
+  zoneinfo: Joi.string().valid(userFormData.timezones),
+  locale: Joi.string().valid(Object.keys(userFormData.locales)),
+  phone_number: Joi.string().allow(''),
+  'address.street_address': Joi.string().allow(''),
+  'address.locality': Joi.string().allow(''),
+  'address.region': Joi.string().allow(''),
+  'address.postal_code': Joi.string().allow(''),
+  'address.country': Joi.string().allow(''),
+}).invalid(null).label('picture') // null payload means picture size validation failed
+
+module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator, userEmails, apiService) => [
   {
     method: 'POST',
     path: '/api/invite',
@@ -239,6 +277,56 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       }
     }
   },
+  {
+    method: 'PUT',
+    path: '/api/user/profile',
+    handler: async (request, reply) => {
+      const user = await bookshelf.model('user')
+        .where({id: request.auth.credentials.accountId})
+        .fetch();
+      reply(apiService.updateUserProfile(user, request.payload));
+    },
+    config: {
+      payload: filePayloadConfig,
+      auth: {
+        strategy: 'access_token',
+      },
+      validate: {
+        options: {
+          allowUnknown: true,
+        },
+        payload: userProfilePayloadValidation,
+      }
+    }
+  },
+  // {
+  //   method: 'PUT',
+  //   path: '/api/user/{user}/profile',
+  //   handler: async (request, reply) => {
+  //     reply(apiService.updateUserProfile(request.params.user, request.payload));
+  //   },
+  //   config: {
+  //     payload: filePayloadConfig,
+  //     auth: {
+  //       strategy: 'client_credentials',
+  //       scope: 'admin',
+  //     },
+  //     validate: {
+  //       params: mixedValidation({
+  //         user: Joi.any().required(),
+  //       }, {
+  //         user: rowExists('user', 'id', 'User not found')
+  //       }),
+  //       payload: userProfilePayloadValidation,
+  //       query: mixedValidation({
+  //         client_id: Joi.string().required(),
+  //         redirect_uri: Joi.string().required(),
+  //       }, {
+  //         client_id: clientValidator,
+  //       }),
+  //     }
+  //   }
+  // },
 ];
 
 module.exports['@singleton'] = true;
@@ -250,4 +338,5 @@ module.exports['@require'] = [
   'validator/constraints/row-exists',
   'validator/constraints/client-validator',
   'user/user-emails',
+  'api/api-service',
 ];
