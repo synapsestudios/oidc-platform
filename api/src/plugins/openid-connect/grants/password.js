@@ -37,6 +37,7 @@ module.exports = (options) => ({
           error: 'invalid_grant',
           error_description: 'invalid credentials provided',
         };
+        ctx.status = 400;
       }
 
       await next();
