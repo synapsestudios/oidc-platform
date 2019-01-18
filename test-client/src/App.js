@@ -6,6 +6,7 @@ import config from './config';
 import './App.css';
 
 import InviteUserForm from './components/InviteUserForm';
+import UserProfileForm from './components/UserProfileForm';
 
 const history = createHistory();
 
@@ -97,6 +98,7 @@ class App extends Component {
         </div>
         <div>
           <InviteUserForm />
+          <UserProfileForm />
           <div><a href={`https://sso-client.test:9000/user/profile?client_id=${config.clientId}&redirect_uri=${config.redirectUri}&access_token=${this.state.accessToken}`}>Edit Profile</a></div>
           <div><a href={`https://sso-client.test:9000/user/password?client_id=${config.clientId}&redirect_uri=${config.redirectUri}`}>Change Password</a></div>
           <div><a href={`https://sso-client.test:9000/user/email-settings?client_id=${config.clientId}&redirect_uri=${config.redirectUri}`}>Email Settings</a></div>
