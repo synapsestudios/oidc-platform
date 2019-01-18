@@ -299,34 +299,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       }
     }
   },
-  // {
-  //   method: 'PUT',
-  //   path: '/api/user/{user}/profile',
-  //   handler: async (request, reply) => {
-  //     reply(apiService.updateUserProfile(request.params.user, request.payload));
-  //   },
-  //   config: {
-  //     payload: filePayloadConfig,
-  //     auth: {
-  //       strategy: 'client_credentials',
-  //       scope: 'admin',
-  //     },
-  //     validate: {
-  //       params: mixedValidation({
-  //         user: Joi.any().required(),
-  //       }, {
-  //         user: rowExists('user', 'id', 'User not found')
-  //       }),
-  //       payload: userProfilePayloadValidation,
-  //       query: mixedValidation({
-  //         client_id: Joi.string().required(),
-  //         redirect_uri: Joi.string().required(),
-  //       }, {
-  //         client_id: clientValidator,
-  //       }),
-  //     }
-  //   }
-  // },
 ];
 
 module.exports['@singleton'] = true;
