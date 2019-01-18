@@ -32,7 +32,6 @@ exports.register = function (server, pluginOptions, next) {
   server.auth.scheme('oidc_session', () => {
     return {
       async authenticate(request, reply) {
-
         if (!request.state._session) {
           if (request.query.id_token_hint) {
             // only do this when cookies aren't present and some token hint is provided or whatever
@@ -54,13 +53,13 @@ exports.register = function (server, pluginOptions, next) {
               reply(e);
             }
           } else {
-            reply(Boom.forbidden());
+            reply(Boom.unauthorized(null, 'oidc_session'));
           }
         } else {
           try {
             var session = await request.server.plugins['open-id-connect'].provider.Session.find(request.state._session);
             if (!session.accountId()) {
-              reply(Boom.forbidden());
+              reply(Boom.unauthorized(null, 'oidc_session'));
             } else {
               reply.continue({
                 credentials: session,

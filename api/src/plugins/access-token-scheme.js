@@ -37,7 +37,7 @@ exports.register = function (server, pluginOptions, next) {
           }
         });
       } else {
-        return reply(Boom.forbidden('invalid access token'));
+        return reply(Boom.unauthorized(null, 'access_token'));
       }
     };
 
