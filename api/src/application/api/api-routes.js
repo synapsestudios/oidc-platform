@@ -25,7 +25,7 @@ const userProfilePayloadValidation = Joi.object().keys({
   shouldClearPicture: Joi.boolean(),
   picture: Joi.object().type(Readable).assert(
     'hapi.headers.content-type',
-    Joi.any().valid(['image/jpeg', 'image/png', 'application/octet-stream'])
+    Joi.any().valid(['image/jpeg', 'image/jpg', 'image/png', 'application/octet-stream'])
   ),
   website: Joi.string().uri().allow(''),
   email: Joi.string().email().allow(''),
