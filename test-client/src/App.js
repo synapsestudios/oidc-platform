@@ -77,6 +77,7 @@ class App extends Component {
           <input type="text" id="email" value={this.state.email} onChange={({ target }) => this.setState(() => ({ email: target.value }))} />
           <input type="password" id="password" value={this.state.password} onChange={({ target }) => this.setState(() => ({ password: target.value }))}/>
           <button onClick={this.login}>login with password grant</button>
+          <a href={`https://sso-client.test:9000/user/forgot-password?client_id=${config.clientId}&redirect_uri=${config.redirectUri}`}>Forgot Password</a>
         </div>
       </div>
     );
