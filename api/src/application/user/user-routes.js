@@ -264,7 +264,16 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
       handler : controller.forgotPasswordHandler,
       config : {
         validate : {
-          query : queryValidation,
+          query : mixedValidation({
+            client_id: Joi.string().required(),
+            response_type: Joi.string(), //.required(),
+            scope: Joi.string(), //.required(),
+            redirect_uri: Joi.string().required(),
+            nonce: Joi.string().optional(),
+            login: Joi.string().optional(),
+          },{
+            client_id: clientValidator,
+          })
         },
       },
     },

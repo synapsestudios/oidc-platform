@@ -218,15 +218,20 @@ module.exports = {
     };
   },
 
-  forgotPassword : (user, client, request, error) => ({
-    client: client.serialize({strictOidc:true}),
-    title: 'Forgot Password',
-    linkUrl: `/op/auth?${querystring.stringify(request.query)}`,
-    formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
-    returnTo: `${request.query.redirect_uri}`,
-    error: !!error,
-    validationErrorMessages: getValidationMessages(error),
-  }),
+  forgotPassword : (user, client, request, error) => {
+    const query = request.query;
+    const shouldLink = query.response_type && query.scope;
+
+    return {
+      client: client.serialize({strictOidc:true}),
+      title: 'Forgot Password',
+      linkUrl: shouldLink ? `/op/auth?${querystring.stringify(request.query)}` : false,
+      formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
+      returnTo: `${request.query.redirect_uri}`,
+      error: !!error,
+      validationErrorMessages: getValidationMessages(error),
+    }
+  },
 
   forgotPasswordSuccess : (client, request) => ({
     client: client.serialize({strictOidc:true}),
