@@ -12,23 +12,6 @@ const comparePasswords = require('../../lib/comparePasswords');
 const bookshelf = require('../../lib/bookshelf');
 const webhookService = require('../webhook/webhook-service');
 const logger = require('../../lib/logger');
-const http = require('http');
-const fs = require('fs');
-
-const download = function(url, dest, cb) {
-  const file = fs.createWriteStream(dest);
-  let downloaded = 0;
-  const request = http.get(url, function(response) {
-    response.pipe(file);
-    response.on('data', function(chunk){
-      downloaded += chunk.length;
-      console.log(downloaded);
-    })
-    file.on('finish', function() {
-      file.close(cb);
-    });
-  });
-}
 
 // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
 const expandDotPaths = function(object) {
