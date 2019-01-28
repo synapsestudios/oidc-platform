@@ -101,10 +101,11 @@ module.exports = (
       const { shouldClearPicture, ...originalPayload } = request.payload;
       const payload = expandDotPaths(originalPayload);
 
+      const uploadingNewPicture = !!originalPayload.picture._data.byteLength;
       const oldPicture = profile.picture;
       const pictureMIME = originalPayload.picture.hapi.headers['content-type'];
 
-      if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
+      if (uploadingNewPicture && (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png')) {
         const uuid = Uuid();
         const bucket = uuid.substring(0, 2);
         const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);
@@ -122,7 +123,7 @@ module.exports = (
       user = await userService.update(user.get('id'), { profile });
       webhookService.trigger('user.update', user);
 
-      if (oldPicture) {
+      if ((uploadingNewPicture && oldPicture) || shouldClearPicture) {
         await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
       }
 
