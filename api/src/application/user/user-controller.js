@@ -12,7 +12,7 @@ const comparePasswords = require('../../lib/comparePasswords');
 const bookshelf = require('../../lib/bookshelf');
 const webhookService = require('../webhook/webhook-service');
 const logger = require('../../lib/logger');
-const allowedImageMimes = require('../image/image-service');
+const allowedImageMimes = require('../image/allowed-image-mimes');
 
 // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
 const expandDotPaths = function(object) {
@@ -106,7 +106,7 @@ module.exports = (
       const oldPicture = profile.picture;
       const pictureMIME = originalPayload.picture.hapi.headers['content-type'];
 
-      if (allowedImageMimes.includes(pictureMIME)) {
+      if (allowedImageMimes.indexOf(pictureMIME) >= 0) {
         const uuid = Uuid();
         const bucket = uuid.substring(0, 2);
         const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);

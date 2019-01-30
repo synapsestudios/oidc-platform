@@ -4,7 +4,7 @@ const userFormData = require('../user/user-form-data');
 const Readable = require('stream').Readable;
 const bookshelf = require('../../lib/bookshelf');
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
-const allowedImageMimes = require('../image/image-service');
+const allowedImageMimes = require('../image/allowed-image-mimes');
 
 const ONE_MEGABYTE = 1048576;
 const filePayloadConfig = {
@@ -26,7 +26,7 @@ const userProfilePayloadValidation = Joi.object().keys({
   shouldClearPicture: Joi.boolean(),
   picture: Joi.object().type(Readable).assert(
     'hapi.headers.content-type',
-    Joi.any().valid([...allowedImageMimes,  'application/octet-stream'])
+    Joi.any().valid([...allowedImageMimes, 'application/octet-stream'])
   ),
   website: Joi.string().uri().allow(''),
   email: Joi.string().email().allow(''),
