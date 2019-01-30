@@ -1,6 +1,7 @@
 const webhookService = require('../webhook/webhook-service');
 const Uuid = require('uuid');
 const set = require('lodash/set');
+const allowedImageMimes = require('../image/image-service');
 
 // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
 const expandDotPaths = function(object) {
@@ -26,7 +27,7 @@ module.exports = (userService, imageService) => {
         ? originalPayload.picture.hapi.headers['content-type']
         : null;
 
-      if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png' || pictureMIME === 'image/jpg') {
+      if (allowedImageMimes.includes(pictureMIME)) {
         const uuid = Uuid();
         const bucket = uuid.substring(0, 2);
         const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);
