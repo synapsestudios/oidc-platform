@@ -106,7 +106,7 @@ module.exports = (
       const oldPicture = profile.picture;
       const pictureMIME = originalPayload.picture.hapi.headers['content-type'];
 
-      if (allowedImageMimes.indexOf(pictureMIME) >= 0) {
+      if (uploadingNewPicture && allowedImageMimes.indexOf(pictureMIME) >= 0) {
         const uuid = Uuid();
         const bucket = uuid.substring(0, 2);
         const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);
