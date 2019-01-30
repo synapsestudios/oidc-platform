@@ -26,7 +26,7 @@ module.exports = (userService, imageService) => {
         ? originalPayload.picture.hapi.headers['content-type']
         : null;
 
-      if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
+      if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png' || pictureMIME === 'image/jpg') {
         const uuid = Uuid();
         const bucket = uuid.substring(0, 2);
         const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);
