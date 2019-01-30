@@ -1,4 +1,11 @@
 # UPGRADE GUIDE
+## v2.x -> v3.0.0
+- client_id and client_secret must be uri encoded individually when used as part of the Authorization header (like when using the client_credentials grant).
+```
+...
+  Authorization: 'Basic ' + btoa(`${encodeURIComponent(clientId)}:${encodeURIComponent(clientSecret)}`),
+...
+```
 
 ## v2.2.0 -> v2.3.0
 - `AWS_REGION` variable must now be provided in the environment for the SES driver

@@ -256,7 +256,7 @@ Calling the token endpoint this way will return an access token, but will not re
 POST /op/token
 Host: ${providerDomain}
 Content-Type: application/x-www-form-urlencoded
-Authorization: Basic ${base64Encode(clientId:clientSecret)}
+Authorization: Basic ${base64Encode(encodeURIComponent(clientId):encodeURIComponent(clientSecret))}
 grant_type=client_credentials&scope=admin
 ```
 
