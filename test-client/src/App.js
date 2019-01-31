@@ -27,13 +27,17 @@ class App extends Component {
     })
       .then(res => res.json())
       .then(json => {
-        localstorage({
-          accessToken: json.access_token,
-          expiresIn: json.expires_in,
-          idToken: json.id_token,
-          tokenType: json.token_type,
-        });
-        this.setState(localstorage());
+        if (json.statusCode >= 300) {
+          console.error(json)
+        } else {
+          localstorage({
+            accessToken: json.access_token,
+            expiresIn: json.expires_in,
+            idToken: json.id_token,
+            tokenType: json.token_type,
+          });
+          this.setState(localstorage());
+        }
       })
       .catch(e => console.error(e));
   }
