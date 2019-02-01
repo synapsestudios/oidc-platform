@@ -1,5 +1,3 @@
-const logger = require('./logger');
-
 module.exports = (
   userService,
   themeService,
@@ -13,9 +11,18 @@ module.exports = (
       const client = await clientService.findById(request.query.client_id);
       let user = null;
       if (request.auth.isAuthenticated) {
-        user = request.auth.strategy === 'email_token'
-          ? request.auth.credentials.user
-          : await userService.findById(request.auth.credentials.accountId());
+        switch(request.auth.strategy) {
+          case 'email_token':
+            user = request.auth.credentials.user;
+            break;
+          case 'oidc_session':
+            user = await userService.findById(request.auth.credentials.accountId());
+            break;
+          case 'access_token':
+            user =  await userService.findById(request.auth.credentials.accountId);
+            break;
+          default:
+        }
       }
 
       const render = async e => {
@@ -26,7 +33,7 @@ module.exports = (
         } else {
           return reply.view(templateName, viewContext);
         }
-      }
+      };
 
       if (!error && request.method === 'post') {
         error = await postHandler(request, reply, user, client, render);

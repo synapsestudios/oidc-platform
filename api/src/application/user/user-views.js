@@ -51,19 +51,22 @@ module.exports = {
       return (request.payload && request.payload[field]) || get(profile, field, '');
     };
 
+    const query = {
+      client_id: request.query.client_id,
+      redirect_uri: request.query.redirect_uri,
+      profile: true,
+    }
+
+    if (request.query.access_token) {
+      query.access_token = request.query.access_token;
+    }
+    const queryString = querystring.stringify(query);
+
     return {
       user: user.serialize(),
       client: client.serialize({strictOidc:true}),
-      changePassUrl: `/user/password?${querystring.stringify({
-        client_id: request.query.client_id,
-        redirect_uri: request.query.redirect_uri,
-        profile: true,
-      })}`,
-      emailSettingsUrl: `/user/email-settings?${querystring.stringify({
-        client_id: request.query.client_id,
-        redirect_uri: request.query.redirect_uri,
-        profile: true,
-      })}`,
+      changePassUrl: `/user/password?${queryString}`,
+      emailSettingsUrl: `/user/email-settings?${queryString}`,
       returnTo: request.query.redirect_uri,
       title: 'User Profile',
       fields: [
@@ -215,15 +218,20 @@ module.exports = {
     };
   },
 
-  forgotPassword : (user, client, request, error) => ({
-    client: client.serialize({strictOidc:true}),
-    title: 'Forgot Password',
-    linkUrl: `/op/auth?${querystring.stringify(request.query)}`,
-    formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
-    returnTo: `${request.query.redirect_uri}`,
-    error: !!error,
-    validationErrorMessages: getValidationMessages(error),
-  }),
+  forgotPassword : (user, client, request, error) => {
+    const query = request.query;
+    const shouldLink = query.response_type && query.scope;
+
+    return {
+      client: client.serialize({strictOidc:true}),
+      title: 'Forgot Password',
+      linkUrl: shouldLink ? `/op/auth?${querystring.stringify(request.query)}` : false,
+      formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
+      returnTo: `${request.query.redirect_uri}`,
+      error: !!error,
+      validationErrorMessages: getValidationMessages(error),
+    }
+  },
 
   forgotPasswordSuccess : (client, request) => ({
     client: client.serialize({strictOidc:true}),
@@ -249,14 +257,21 @@ module.exports = {
         successMessage = '';
     }
 
+    const query = {
+      client_id: request.query.client_id,
+      redirect_uri: request.query.redirect_uri,
+    };
+    if (request.query.access_token) {
+      query.access_token = request.query.access_token;
+    }
+
     return {
       user: user.serialize(),
       client: client.serialize({strictOidc:true}),
       title: 'Email Settings',
-      returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
-        client_id: request.query.client_id,
-        redirect_uri: request.query.redirect_uri,
-      })}` : `${request.query.redirect_uri}`,
+      returnTo: request.query.profile
+        ? `/user/profile?${querystring.stringify(query)}`
+        : `${request.query.redirect_uri}`,
       success: request.method === 'post' && !error,
       successMessage,
       error: !!error,
@@ -268,14 +283,23 @@ module.exports = {
   },
 
   changePassword : (user, client, request, error) => {
+
+    const query = {
+      client_id: request.query.client_id,
+      redirect_uri: request.query.redirect_uri,
+    };
+    if (request.query.access_token) {
+      query.access_token = request.query.access_token;
+    }
+
+
     return {
       user: user.serialize(),
       client: client.serialize({strictOidc:true}),
       title: 'Change Password',
-      returnTo: request.query.profile ? `/user/profile?${querystring.stringify({
-        client_id: request.query.client_id,
-        redirect_uri: request.query.redirect_uri,
-      })}` : `${request.query.redirect_uri}`,
+      returnTo: request.query.profile
+        ? `/user/profile?${querystring.stringify(query)}`
+        : `${request.query.redirect_uri}`,
       success: request.method === 'post' && !error,
       error: !!error,
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,

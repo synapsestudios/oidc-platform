@@ -10,10 +10,16 @@ const keys = require('../../api/keystore');
 
 
 const inviteHandler = require('./inviteHandler');
+const tokenHandler = require('./tokenHandler');
 const webhookHandler = require('./webhookHandler');
 
 const server = new Hapi.Server();
-server.connection({ port: 8080 });
+server.connection({
+  port: 8080,
+  routes: {
+    cors: { origin: ['*'] }
+  }
+});
 
 const validate = async (decoded, request, callback) => {
   try {
@@ -55,6 +61,12 @@ server.route({
       }
     }
   }
+});
+
+server.route({
+  method: 'POST',
+  path: '/token',
+  handler: tokenHandler,
 });
 
 server.start((err) => {

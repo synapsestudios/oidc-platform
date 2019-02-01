@@ -35,7 +35,7 @@ Body:
 0. In `test-client/src` create a copy of `config.template.js` and call it `config.js`. Fill in the
 client_id and client_secret of the client you created in the previous step.
 0. Add `sso-client.test`for `127.0.0.1` to your hosts file
-0. `npm i` and `npm start` in `test-client` and `test-server`
+0. `npm i` and `npm start` in `test-client` and `test-client/test-server`
 
 ## Session Management
 

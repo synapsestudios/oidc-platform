@@ -18,7 +18,7 @@ if (env === 'development') {
   connections[0].tls = {
     key: fs.readFileSync('dev.key'),
     cert: fs.readFileSync('dev.crt'),
-  }
+  };
 
   connections.push({ port: 9001 });
 }
@@ -43,6 +43,9 @@ module.exports = Promise.all([
     server: {
       connections: {
         routes: {
+          cors: {
+            origin: ['*'],
+          },
           validate: {
             options: { abortEarly: false },
             failAction: (request, reply, source, error) => {

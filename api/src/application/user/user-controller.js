@@ -12,6 +12,7 @@ const comparePasswords = require('../../lib/comparePasswords');
 const bookshelf = require('../../lib/bookshelf');
 const webhookService = require('../webhook/webhook-service');
 const logger = require('../../lib/logger');
+const allowedImageMimes = require('../image/allowed-image-mimes');
 
 // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
 const expandDotPaths = function(object) {
@@ -101,10 +102,11 @@ module.exports = (
       const { shouldClearPicture, ...originalPayload } = request.payload;
       const payload = expandDotPaths(originalPayload);
 
+      const uploadingNewPicture = !!originalPayload.picture._data.byteLength;
       const oldPicture = profile.picture;
       const pictureMIME = originalPayload.picture.hapi.headers['content-type'];
 
-      if (pictureMIME === 'image/jpeg' || pictureMIME === 'image/png') {
+      if (uploadingNewPicture && allowedImageMimes.indexOf(pictureMIME) >= 0) {
         const uuid = Uuid();
         const bucket = uuid.substring(0, 2);
         const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);
@@ -122,7 +124,7 @@ module.exports = (
       user = await userService.update(user.get('id'), { profile });
       webhookService.trigger('user.update', user);
 
-      if (oldPicture) {
+      if ((uploadingNewPicture && oldPicture) || shouldClearPicture) {
         await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
       }
 

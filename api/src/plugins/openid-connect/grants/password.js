@@ -8,9 +8,10 @@ module.exports = (options) => ({
       if (account) {
         const { AccessToken, IdToken } = providerInstance;
         const at = new AccessToken({
-          accountId: 'foo',
+          accountId: account.accountId,
           clientId: ctx.oidc.client.clientId,
           grantId: ctx.oidc.uuid,
+          scope: ctx.oidc.params.scope || '',
         });
 
         const accessToken = await at.save();
@@ -21,6 +22,7 @@ module.exports = (options) => ({
           ctx.oidc.client.sectorIdentifier
         );
         token.set('at_hash', accessToken);
+        token.set('sub', account.accountId);
 
         const idToken = await token.sign(ctx.oidc.client);
 
@@ -35,6 +37,7 @@ module.exports = (options) => ({
           error: 'invalid_grant',
           error_description: 'invalid credentials provided',
         };
+        ctx.status = 400;
       }
 
       await next();
