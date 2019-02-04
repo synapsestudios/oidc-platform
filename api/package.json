@@ -24,9 +24,9 @@
   },
   "homepage": "https://github.com/synapsestudios/oidc-platform",
   "dependencies": {
-    "aws-sdk": "^2.9.0",
+    "aws-sdk": "^2.395.0",
     "bcrypt": "^1.0.3",
-    "bookshelf": "^0.10.2",
+    "bookshelf": "0.14.2",
     "boom": "^4.2.0",
     "btoa": "^1.1.2",
     "confidence": "^3.0.0",
@@ -40,15 +40,16 @@
     "handlebars": "^4.0.5",
     "hapi": "^16.7.0",
     "hapi-auth-jwt2": "^7.2.4",
+    "hoek": "4.2.1",
     "ioredis": "^2.5.0",
     "knex": "^0.15.2",
     "koa2-cors": "^2.0.3",
     "lodash": "^4.17.4",
-    "mailgun-js": "^0.8.1",
-    "mysql": "^2.13.0",
-    "node-jose": "^0.10.0",
+    "mailgun-js": "0.22.0",
+    "mysql": "2.16.0",
+    "node-jose": "1.1.1",
     "oidc-provider": "^2.18.2",
-    "pg": "^6.1.2",
+    "pg": "7.8.0",
     "querystring": "^0.2.0",
     "queue": "^4.4.2",
     "raven": "^2.4.2",
@@ -60,6 +61,6 @@
     "winston-rollbar-transport": "^1.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.4.1"
+    "nodemon": "1.18.9"
   }
 }
