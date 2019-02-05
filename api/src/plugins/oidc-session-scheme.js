@@ -35,7 +35,7 @@ exports.register = function (server, pluginOptions, next) {
         if (!request.state._session) {
           if (request.query.id_token_hint) {
             // only do this when cookies aren't present and some token hint is provided or whatever
-            const parts = String(request.query.id_token_hint).split('.');
+            const parts = String(request.query.id_token_hint || request.payload.id_token_hint).split('.');
             const token = {
               header: JSON.parse(base64url.decode(parts[0])),
               payload: JSON.parse(base64url.decode(parts[1])),
