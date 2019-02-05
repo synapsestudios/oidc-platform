@@ -21,7 +21,7 @@ class App extends Component {
   }
 
   login = () => {
-    fetch('/token', {
+    fetch(`${config.testServer}token`, {
       method: 'POST',
       body: JSON.stringify({ grant_type: 'password', username: this.state.email, password: this.state.password }),
     })

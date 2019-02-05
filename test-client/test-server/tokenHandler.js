@@ -16,7 +16,7 @@ module.exports = (res, reply) => {
   const payload = JSON.parse(res.payload);
   const options = {
     headers: {
-      Authorization: 'Basic ' + btoa(`${clientId}:${clientSecret}`),
+      Authorization: 'Basic ' + btoa(`${encodeURIComponent(clientId)}:${encodeURIComponent(clientSecret)}`),
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     payload : querystring.stringify(payload),

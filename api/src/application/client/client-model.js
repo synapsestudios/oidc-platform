@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 /**
  * Client field names are specified by the openid connect spec:
  * http://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata
@@ -41,6 +43,12 @@ module.exports = bookshelf => ({
   },
 
   theme() {
-    return this.belongsTo('theme', 'theme_id')
+    return this.belongsTo('theme', 'theme_id');
+  },
+
+  serialize(options) {
+    options = options || {};
+    let json = bookshelf.Model.prototype.serialize.call(this, options);
+    return _.omitBy(json, _.isNull);
   }
 });
