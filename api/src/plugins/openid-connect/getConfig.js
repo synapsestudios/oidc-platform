@@ -70,7 +70,7 @@ module.exports = options => {
       }
     },
     subjectTypes: ['public', 'pairwise'],
-    pairwiseSaltIdentifier: async () => options.pariwiseSalt,
+    pairwiseSaltIdentifier: async () => options.pairwiseSalt,
     interactionUrl: async (ctx, interaction) => `/interaction/${ctx.oidc.uuid}`,
     scopes: ['admin', 'superadmin'],
   }
