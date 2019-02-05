@@ -1,5 +1,6 @@
 # UPGRADE GUIDE
 ## v2.x -> v3.0.0
+- OIDC implements the OAuth 2.0 Form Post Response Mode spec now. That means that if you're not using the strict Authorization or Implicit workflows then the oidc server will redirect back to your app with a POST request rather than a GET request. If you're using response_type values other than `code` or `id_token token` you will need to update to handle the POST with your server, or to use `code` or `id_token token` instead.
 - client_id and client_secret must be uri encoded individually when used as part of the Authorization header (like when using the client_credentials grant).
 ```
 ...
