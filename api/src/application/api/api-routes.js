@@ -282,15 +282,19 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
     method: 'PUT',
     path: '/api/user/profile',
     handler: async (request, reply) => {
+      const userId = request.auth.strategy === 'oidc_session'
+        ? request.auth.credentials.accountId()
+        : request.auth.credentials.accountId;
+
       const user = await bookshelf.model('user')
-        .where({id: request.auth.credentials.accountId})
+        .where({id: userId})
         .fetch();
       reply(apiService.updateUserProfile(user, request.payload));
     },
     config: {
       payload: filePayloadConfig,
       auth: {
-        strategy: 'access_token',
+        strategies: ['access_token', 'oidc_session'],
       },
       validate: {
         options: {
