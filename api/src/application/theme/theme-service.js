@@ -1,6 +1,3 @@
-const handlebars = require('handlebars');
-const fs = require('fs');
-const { promisify } = require('util');
 const Hoek = require('hoek');
 const bookshelf = require('../../lib/bookshelf');
 
@@ -10,13 +7,17 @@ module.exports = () => ({
 
     const client = await bookshelf.model('client')
       .where({client_id: clientId})
-      .fetch({ withRelated: ['theme.templates.layout'] });
+      .fetch();
 
     // scenario 1, client has null theme
     if (!client.get('theme_id')) return false;
 
     // scenario 2, client has theme but null template
-    const template = client.related('theme').related('templates').find(template => template.get('name') === page);
+    const template = await bookshelf.model('template').where({
+      theme_id: client.get('theme_id'),
+      name: page,
+    }).fetch({withRelated: ['layout']});
+
     return template || false;
   },
 
@@ -26,15 +27,11 @@ module.exports = () => ({
     if (!template) return false;
 
     const renderedTemplate = await template.render(page, context);
-    // const serializedTemplate = template.serialize();
-
-    // serializedTemplate.rendered_code = renderedTemplate;
-    // return serializedTemplate;
 
     return {
       template,
       renderedTemplate,
-    }
+    };
   },
 
   async renderThemedTemplate(clientId, page, context) {
