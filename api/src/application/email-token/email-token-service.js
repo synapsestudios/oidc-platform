@@ -21,11 +21,11 @@ module.exports = () => {
       return bookshelf.model('email_token')
         .forge({ token })
         .where('expires_at', '>', bookshelf.knex.fn.now())
-        .fetch()
+        .fetch();
     },
 
     destroyUserTokens: function(userId) {
-      return bookshelf.model('email_token').where('user_id', userId).destroy();
+      return bookshelf.model('email_token').where('user_id', userId).destroy({ require: false });
     }
   };
 };
