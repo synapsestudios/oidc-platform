@@ -22,7 +22,6 @@ module.exports = bookshelf => ({
     }
 
     if (attributes.app_metadata && typeof attributes.app_metadata !== 'string') {
-      console.log({ app_metadata: attributes.app_metadata });
       attributes.app_metadata = JSON.stringify(attributes.app_metadata);
     }
     return attributes;
