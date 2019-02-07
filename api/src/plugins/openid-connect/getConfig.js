@@ -3,7 +3,7 @@ const handlebars = require('handlebars');
 
 module.exports = options => {
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
-  return {
+  const config = {
     findById: options.findUserById,
     routes: {
       authorization: `${prefix}/auth`,
@@ -71,7 +71,11 @@ module.exports = options => {
     },
     subjectTypes: ['public', 'pairwise'],
     pairwiseSaltIdentifier: async () => options.pairwiseSalt,
-    interactionUrl: async (ctx, interaction) => `/interaction/${ctx.oidc.uuid}`,
+    interactionUrl: async (ctx, interaction) => `/interaction/${ctx.oidc.uuid}`, // eslint-disable-line no-unused-vars
     scopes: ['admin', 'superadmin'],
-  }
-}
+  };
+
+  if (options.formats) config.formats = options.formats;
+
+  return config;
+};
