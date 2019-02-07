@@ -17,10 +17,11 @@ module.exports = bookshelf => ({
 
   format(attributes) {
     // profile will be a text field if using mysql
-    if (typeof attributes.profile !== 'string') {
+    if (attributes.profile && typeof attributes.profile !== 'string') {
       attributes.profile = JSON.stringify(attributes.profile);
     }
-    if (typeof attributes.app_metadata !== 'string') {
+
+    if (attributes.app_metadata && typeof attributes.app_metadata !== 'string') {
       attributes.app_metadata = JSON.stringify(attributes.app_metadata);
     }
     return attributes;
