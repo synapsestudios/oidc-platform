@@ -6,7 +6,7 @@ module.exports = (options) => ({
       const account = await options.authenticateUser(username, password);
 
       if (account) {
-        const { AccessToken, IdToken } = providerInstance;
+        const { AccessToken, IdToken, RefreshToken } = providerInstance;
         const at = new AccessToken({
           accountId: account.accountId,
           clientId: ctx.oidc.client.clientId,
@@ -26,11 +26,21 @@ module.exports = (options) => ({
 
         const idToken = await token.sign(ctx.oidc.client);
 
+        const refreshToken = new RefreshToken({
+          client: ctx.oidc.client,
+          scope: ctx.oidc.params.scope || '',
+          accountId: account.accountId,
+          grantId: ctx.oidc.uuid,
+        });
+
+        const refreshTokenValue = await refreshToken.save();
+
         ctx.body = {
           access_token: accessToken,
           expires_in: expiresIn,
           token_type: 'Bearer',
           id_token: idToken,
+          refresh_token: refreshTokenValue,
         };
       } else {
         ctx.body = {
