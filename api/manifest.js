@@ -117,6 +117,7 @@ module.exports = Promise.all([
               return (name === 'Client') ? new lib.sqlOidcAdapter(name): new lib.redisOidcAdapter(name);
             },
             keystore: lib.keystore,
+            formats: { default: config('/oidc/defaultFormat') || 'opaque' }
           }
         }
       }
