@@ -4,6 +4,12 @@ The theming system in the Synapse OIDC Provider is a robust way to provide a com
 
 Currently themes are only configurable by inserting records into the database directly.
 
+- [Create a theme](#create-a-theme)
+  - [Templates](#templates)
+    - [Available screens](#available-screens)
+      - [Options](#options)
+      - [Variables](#variables)
+
 ## Create a theme
 
 Create a theme by inserting a new record into the `SIP_theme` table. In order to make use of your new theme on a client update the `theme_id` field in the `SIP_client` table with the id of the new theme.
