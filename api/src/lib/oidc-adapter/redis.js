@@ -77,6 +77,9 @@ module.exports = (userService) => {
       }
       const { dump, ...rest } = data;
 
+      // ease the transition from 2.x to 3.0.0
+      if (!dump) return { ...rest };
+
       if (dump.accountId) {
         const user = await userService.findByIdForOidc(dump.accountId);
         if (!user) {
