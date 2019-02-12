@@ -62,7 +62,9 @@ module.exports = (userService) => {
     }
 
     async find(id) {
-      const data = grantable.has(this.name)
+      // ease transition from 2.8 to 3.0.0
+      const type = await client.type(this.key(id));
+      const data = (type === 'hash' || grantable.has(this.name))
         ? await client.hgetall(this.key(id))
         : await client.get(this.key(id));
 
