@@ -225,7 +225,7 @@ module.exports = {
     return {
       client: client.serialize({strictOidc:true}),
       title: 'Forgot Password',
-      linkUrl: shouldLink ? `/op/auth?${querystring.stringify(request.query)}` : false,
+      loginUrl: shouldLink ? `/op/auth?${querystring.stringify(request.query)}` : false,
       formAction: `/user/forgot-password?${querystring.stringify(request.query)}`,
       returnTo: `${request.query.redirect_uri}`,
       error: !!error,
@@ -236,7 +236,7 @@ module.exports = {
   forgotPasswordSuccess : (client, request) => ({
     client: client.serialize({strictOidc:true}),
     title: 'Forgot Password',
-    linkUrl: `/op/auth?${querystring.stringify(request.query)}`,
+    loginUrl: `/op/auth?${querystring.stringify(request.query)}`,
   }),
 
   emailSettings : (user, client, request, error) => {
@@ -344,7 +344,7 @@ module.exports = {
     const { token, ...query } = request.query;
     return {
       title: 'Password Set',
-      linkUrl: `/op/auth?${querystring.stringify(query)}`
+      loginUrl: `/op/auth?${querystring.stringify(query)}`
     };
   },
 

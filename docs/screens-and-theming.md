@@ -57,7 +57,7 @@ From this screen we can also link back to the login screen, or back to your app.
 #### Variables
 ```
 {
-  linkUrl, // url for the login page
+  loginUrl, // url for the login page
   formAction, // action value for the form
   returnTo, // url to return the user to if they cancel
   error, // bool, true if there are errors
@@ -74,7 +74,7 @@ From this screen we can include a link to send the user back to the login screen
 #### Variables
 ```
 {
-  linkUrl, // url for the login page
+  loginUrl, // url for the login page
 }
 ```
 
@@ -86,7 +86,7 @@ The email should alert the user that they should follow the link to reset their 
 #### Variables
 ```
 {
-  linkUrl, // url for the login page
+  loginUrl, // url for the login page
 }
 ```
 
@@ -111,7 +111,7 @@ This is the screen we show a user after they have successfully reset their passw
 ```
 {
   title, // A suggested title for the page
-  linkUrl, // url for the login page
+  loginUrl, // url for the login page
 }
 ```
 
