@@ -21,8 +21,7 @@ module.exports = function() {
         }
       });
     } else {
-      const msg =
-        'DEPRECATION WARNING:\nThe Synapse OpenID Connect platform provides a default set of keys so that\nit will work if you do not provide your own, but \n\nDO NOT USE THE DEFAULTS IN PRODUCTION.\n\nUse of these keys in a non-development environment will be removed\nin the next version and OIDC will not start.';
+      const msg = 'You are using development keys! Make sure to generate secure keys for production : https://github.com/synapsestudios/oidc-platform/blob/master/docs/installation.md#keystores';
       logger.log('info', msg);
       resolve(defaultKeystore);
     }
