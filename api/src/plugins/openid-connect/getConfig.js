@@ -72,6 +72,14 @@ module.exports = options => {
     subjectTypes: ['public', 'pairwise'],
     pairwiseSalt: options.pairwiseSalt,
     interactionUrl: async (ctx, interaction) => `/interaction/${ctx.oidc.uuid}`,
-    scopes: ['admin', 'superadmin'],
-  }
-}
+    scopes: ['admin', 'superadmin', 'offline_access'],
+    ttl: {
+      AccessToken: parseInt(process.env.ACCESS_TOKEN_EXP, 10) || 3600,
+      AuthorizationCode: parseInt(process.env.AUTH_CODE_EXP, 10) || 600,
+      ClientCredentials: parseInt(process.env.CLIENT_CRED_EXP, 10) || 600,
+      DeviceCode: parseInt(process.env.DEVICE_CODE_EXP, 10) || 600,
+      IdToken: parseInt(process.env.ID_TOKEN_EXP, 10) || 3600,
+      RefreshToken: parseInt(process.env.REFRESH_TOKEN_EXP, 10) || 1209600 // default two weeks
+    }
+  };
+};
