@@ -72,6 +72,14 @@ module.exports = options => {
     subjectTypes: ['public', 'pairwise'],
     pairwiseSalt: options.pairwiseSalt,
     interactionUrl: async (ctx, interaction) => `/interaction/${ctx.oidc.uuid}`,
-    scopes: ['admin', 'superadmin'],
-  }
-}
+    scopes: ['admin', 'superadmin', 'offline_access'],
+    ttl: {
+      AccessToken: options.ttl.AccessToken || 3600,
+      AuthorizationCode: options.ttl.AuthorizationCode || 600,
+      ClientCredentials: options.ttl.ClientCredentials || 600,
+      DeviceCode: options.ttl.DeviceCode || 600,
+      IdToken: options.ttl.IdToken || 3600,
+      RefreshToken: options.ttl.RefreshToken || 1209600 // default two weeks
+    }
+  };
+};
