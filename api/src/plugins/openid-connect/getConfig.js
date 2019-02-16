@@ -58,16 +58,7 @@ module.exports = options => {
     logoutSource: async function renderLogoutSource(ctx, form) {
       const clientId = ctx.oidc.session.logout.clientId;
       const template = await options.getTemplate(clientId, 'end-session', { form });
-      if (template) {
-        ctx.body = template;
-      } else {
-        const layout = fs.readFileSync('./templates/layout/default.hbs', 'utf8');
-        const logout = fs.readFileSync('./templates/end_session.hbs', 'utf8');
-
-        ctx.body = handlebars.compile(layout)({
-          content: handlebars.compile(logout)({ form })
-        });
-      }
+      ctx.body = template;
     },
     subjectTypes: ['public', 'pairwise'],
     pairwiseSalt: options.pairwiseSalt,
