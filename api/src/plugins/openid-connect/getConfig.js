@@ -80,6 +80,7 @@ module.exports = options => {
       DeviceCode: options.ttl.DeviceCode || 600,
       IdToken: options.ttl.IdToken || 3600,
       RefreshToken: options.ttl.RefreshToken || 1209600 // default two weeks
-    }
+    },
+    renderError: options.renderError,
   };
 };

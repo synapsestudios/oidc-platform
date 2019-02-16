@@ -28,11 +28,7 @@ module.exports = (
       const render = async e => {
         const viewContext = getView(user, client, request, e);
         const template = await themeService.renderThemedTemplate(request.query.client_id, templateName, viewContext);
-        if (template) {
-          return reply(template);
-        } else {
-          return reply.view(templateName, viewContext);
-        }
+        return reply(template);
       };
 
       if (!error && request.method === 'post') {

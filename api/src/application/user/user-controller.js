@@ -140,11 +140,7 @@ module.exports = (
 
       const viewContext = views.forgotPasswordSuccess(client, request);
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
-      if (template) {
-        reply(template);
-      } else {
-        reply.view('forgot-password-success', viewContext);
-      }
+      reply(template);
     }),
 
     completeEmailUpdateHandler: async (request, reply, source, error) => {
@@ -175,11 +171,7 @@ module.exports = (
       const viewContext = views.completeChangePassword(user, client, request, error);
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
-      if (template) {
-        return reply(template);
-      } else {
-        return reply.view('email-verify-success', viewContext);
-      }
+      return reply(template);
     },
 
     emailVerifySuccessHandler: async (request, reply, source, error) => {
@@ -199,11 +191,7 @@ module.exports = (
       const viewContext = views.emailVerifySuccess(user, client, request, error);
 
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
-      if (template) {
-        reply(template);
-      } else {
-        reply.view('email-verify-success', viewContext);
-      }
+      reply(template);
     },
 
     resetPassword: async function(request, reply, user, client, render) {
@@ -216,11 +204,7 @@ module.exports = (
 
       const viewContext = views.resetPasswordSuccess(request);
       const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
-      if (template) {
-        reply(template);
-      } else {
-        reply.view('reset-password-success', viewContext);
-      }
+      reply(template);
     },
 
     logout: function(request, reply) {

@@ -1,4 +1,3 @@
-const handlebars = require('handlebars');
 const ioc = require('electrolyte');
 const GoodWinston = require('good-winston');
 const fs = require('fs');
@@ -63,11 +62,6 @@ module.exports = Promise.all([
         }
       },
       {
-        plugin : {
-          register: 'vision',
-        }
-      },
-      {
         plugin: {
           register: './plugins/access-token-scheme',
         }
@@ -97,14 +91,6 @@ module.exports = Promise.all([
           register: './plugins/openid-connect/openid-connect',
           options: {
             logger,
-            vision: {
-              engines: {
-                hbs: handlebars
-              },
-              path: './templates',
-              layoutPath: './templates/layout',
-              layout: 'default',
-            },
             prefix: 'op',
             getTemplate: lib.themeService.renderThemedTemplate.bind(lib.themeService),
             authenticateUser: lib.userService.authenticate,
@@ -117,6 +103,18 @@ module.exports = Promise.all([
               return (name === 'Client') ? new lib.sqlOidcAdapter(name): new lib.redisOidcAdapter(name);
             },
             keystore: lib.keystore,
+            renderError: async (ctx, error) => {
+              ctx.type = 'html';
+              ctx.body = `<!DOCTYPE html>
+<head>
+<title>oops! something went wrong</title>
+</head>
+<body>
+<h1>spaghetti</h1>
+<pre>${JSON.stringify(error, null, 4)}</pre>
+</body>
+</html>`;
+            }
           }
         }
       }
