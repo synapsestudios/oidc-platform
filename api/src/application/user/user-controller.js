@@ -139,7 +139,7 @@ module.exports = (
       }
 
       const viewContext = views.forgotPasswordSuccess(client, request);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
+      const template = await themeService.renderThemedTemplate('forgot-password-success', viewContext, request.query.client_id);
       reply(template);
     }),
 
@@ -170,7 +170,7 @@ module.exports = (
 
       const viewContext = views.completeChangePassword(user, client, request, error);
 
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
+      const template = await themeService.renderThemedTemplate('email-verify-success', viewContext, request.query.client_id);
       return reply(template);
     },
 
@@ -190,7 +190,7 @@ module.exports = (
       const client = await clientService.findById(request.query.client_id);
       const viewContext = views.emailVerifySuccess(user, client, request, error);
 
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
+      const template = await themeService.renderThemedTemplate('email-verify-success', viewContext, request.query.client_id);
       reply(template);
     },
 
@@ -203,7 +203,7 @@ module.exports = (
       await emailTokenService.destroyUserTokens(user.get('id'));
 
       const viewContext = views.resetPasswordSuccess(request);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
+      const template = await themeService.renderThemedTemplate('reset-password-success', viewContext, request.query.client_id);
       reply(template);
     },
 

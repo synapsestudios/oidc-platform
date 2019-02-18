@@ -7,7 +7,7 @@ const handlebars = require('handlebars');
 
 module.exports = (emailService, themeService, emailTokenService) => {
   const renderAndSend = async (to, clientId, page, context) => {
-    const {template, renderedTemplate} = await themeService.getThemedTemplate(clientId, page, context);
+    const {template, renderedTemplate} = await themeService.getThemedTemplate(page, context, clientId);
 
     let from, html, subject = context.subject;
     html = renderedTemplate;

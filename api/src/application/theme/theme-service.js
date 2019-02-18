@@ -6,15 +6,19 @@ const { promisify } = require('util');
 const defaultLayouts = require('./defaultLayouts');
 
 module.exports = () => ({
-  async fetchTemplate(clientId, page) {
+  async fetchTemplate(page, clientId) {
     Hoek.assert(clientId, new Error('clientId is required in ThemeService::fetchTemplate'));
 
-    const client = await bookshelf.model('client')
-      .where({client_id: clientId})
-      .fetch();
+    let themeId = null;
+
+    if (clientId) {
+      const client = await bookshelf.model('client')
+        .where({client_id: clientId})
+        .fetch();
+      themeId = client.get('theme_id');
+    }
 
     // determine theme
-    let themeId = client.get('theme_id');
     if (!themeId) {
       // is there a system theme configured?
       const systemTheme = await bookshelf.model('theme').where({
@@ -38,9 +42,8 @@ module.exports = () => ({
     return template || false;
   },
 
-  async getThemedTemplate(clientId, page, context) {
-    Hoek.assert(clientId, new Error('clientId is required in ThemeService::getThemedTemplate'));
-    const template = await this.fetchTemplate(clientId, page);
+  async getThemedTemplate(page, context, clientId) {
+    const template = await this.fetchTemplate(page, clientId);
 
     let renderedTemplate;
     if (!template) {
@@ -61,8 +64,8 @@ module.exports = () => ({
     };
   },
 
-  async renderThemedTemplate(clientId, page, context) {
-    const { renderedTemplate } = await this.getThemedTemplate(clientId, page, context);
+  async renderThemedTemplate(page, context, clientId) {
+    const { renderedTemplate } = await this.getThemedTemplate(page, context, clientId);
     return renderedTemplate;
   }
 });
