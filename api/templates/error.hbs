@@ -1,1 +1,9 @@
-<div>hi there dude</div>
+<div>
+  <div>Something went wrong</div>
+  {{#unless production}}
+    <div>
+      error: {{error}}<br />
+      error description: {{error_description}}
+    </div>
+  {{/unless}}
+</div>

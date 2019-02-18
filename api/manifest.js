@@ -105,7 +105,7 @@ module.exports = Promise.all([
             keystore: lib.keystore,
             renderError: async (ctx, error) => {
               ctx.type = 'html';
-              ctx.body = await lib.themeService.renderThemedTemplate('error');
+              ctx.body = await lib.themeService.renderThemedTemplate('error', {...error, production: env === 'production'});
 //               ctx.type = 'html';
 //               ctx.body = `<!DOCTYPE html>
 // <head>
