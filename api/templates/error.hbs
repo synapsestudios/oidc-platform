@@ -1,9 +1,17 @@
 <div>
   <div>Something went wrong</div>
-  {{#unless production}}
+  {{#if systemError}}
+    {{#unless production}}
+      <div>
+        error: {{error}}<br />
+        error description: {{error_description}}
+      </div>
+    {{/unless}}
+  {{else}}
     <div>
+      User Land Error<br />
       error: {{error}}<br />
       error description: {{error_description}}
     </div>
-  {{/unless}}
+  {{/if}}
 </div>
