@@ -13,12 +13,25 @@ module.exports = () => ({
       .where({client_id: clientId})
       .fetch();
 
-    // scenario 1, client has null theme
-    if (!client.get('theme_id')) return false;
+    // determine theme
+    let themeId = client.get('theme_id');
+    if (!themeId) {
+      // is there a system theme configured?
+      const systemTheme = await bookshelf.model('theme').where({
+        system: true,
+      }).fetch();
+
+      if (systemTheme) {
+        themeId = systemTheme.get('id');
+      }
+    }
+
+    // scenario 1, there is no configured theme
+    if (!themeId) return false;
 
     // scenario 2, client has theme but null template
     const template = await bookshelf.model('template').where({
-      theme_id: client.get('theme_id'),
+      theme_id: themeId,
       name: page,
     }).fetch({withRelated: ['layout']});
 
