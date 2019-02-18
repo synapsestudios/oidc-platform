@@ -13,18 +13,26 @@ module.exports = () => ({
 
   async render(page, context) {
     let layoutTemplate;
+    const pageTemplate = handlebars.compile(this.get('code'));
+
     if (!this.get('layout_id')) {
-      // scenario 3, client has theme and template but null layout
-      const readFileAsync = promisify(fs.readFile);
-      const code = await readFileAsync(`./templates/layout/${defaultLayouts[page]}`);
-      layoutTemplate = handlebars.compile(code.toString());
+      if (defaultLayouts[page]) {
+        // scenario 3, client has theme and template but null layout
+        const readFileAsync = promisify(fs.readFile);
+        const code = await readFileAsync(`./templates/layout/${defaultLayouts[page]}`);
+        layoutTemplate = handlebars.compile(code.toString());
+      }
+
     } else {
       // scenario 4, client has theme and template and layout
       layoutTemplate = handlebars.compile(this.related('layout').get('code'));
     }
 
-    const pageTemplate = handlebars.compile(this.get('code'));
-    const layoutContext = Object.assign({}, context, { content: pageTemplate(context) });
-    return layoutTemplate(layoutContext);
+    if (layoutTemplate) {
+      const layoutContext = Object.assign({}, context, { content: pageTemplate(context) });
+      return layoutTemplate(layoutContext);
+    } else {
+      return pageTemplate(context);
+    }
   },
 });

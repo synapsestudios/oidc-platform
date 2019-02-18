@@ -1,4 +1,3 @@
-const Hoek = require('hoek');
 const bookshelf = require('../../lib/bookshelf');
 const fs = require('fs');
 const handlebars = require('handlebars');
@@ -7,8 +6,6 @@ const defaultLayouts = require('./defaultLayouts');
 
 module.exports = () => ({
   async fetchTemplate(page, clientId) {
-    Hoek.assert(clientId, new Error('clientId is required in ThemeService::fetchTemplate'));
-
     let themeId = null;
 
     if (clientId) {
@@ -48,12 +45,19 @@ module.exports = () => ({
     let renderedTemplate;
     if (!template) {
       const readFileAsync = promisify(fs.readFile);
-      const layoutCode = await readFileAsync(`./templates/layout/${defaultLayouts[page]}`);
-      const layoutTemplate = handlebars.compile(layoutCode.toString());
       const templateCode = await readFileAsync(`./templates/${page}.hbs`);
       const pageTemplate = handlebars.compile(templateCode.toString());
-      const layoutContext = Object.assign({}, context, { content: pageTemplate(context) });
-      renderedTemplate = layoutTemplate(layoutContext);
+
+      if (defaultLayouts[page]) {
+        const layoutCode = await readFileAsync(`./templates/layout/${defaultLayouts[page]}`);
+        const layoutTemplate = handlebars.compile(layoutCode.toString());
+        const layoutContext = Object.assign({}, context, { content: pageTemplate(context) });
+        renderedTemplate = layoutTemplate(layoutContext);
+      } else {
+        // no layout, just render the page
+        renderedTemplate = pageTemplate(context);
+      }
+
     } else {
       renderedTemplate = await template.render(page, context);
     }

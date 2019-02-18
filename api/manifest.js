@@ -105,15 +105,17 @@ module.exports = Promise.all([
             keystore: lib.keystore,
             renderError: async (ctx, error) => {
               ctx.type = 'html';
-              ctx.body = `<!DOCTYPE html>
-<head>
-<title>oops! something went wrong</title>
-</head>
-<body>
-<h1>spaghetti</h1>
-<pre>${JSON.stringify(error, null, 4)}</pre>
-</body>
-</html>`;
+              ctx.body = await lib.themeService.renderThemedTemplate('error');
+//               ctx.type = 'html';
+//               ctx.body = `<!DOCTYPE html>
+// <head>
+// <title>oops! something went wrong</title>
+// </head>
+// <body>
+// <h1>spaghetti</h1>
+// <pre>${JSON.stringify(error, null, 4)}</pre>
+// </body>
+// </html>`;
             }
           }
         }
