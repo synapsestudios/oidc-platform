@@ -1,5 +1,9 @@
 const Hoek = require('hoek');
 const bookshelf = require('../../lib/bookshelf');
+const fs = require('fs');
+const handlebars = require('handlebars');
+const { promisify } = require('util');
+const defaultLayouts = require('./defaultLayouts');
 
 module.exports = () => ({
   async fetchTemplate(clientId, page) {
@@ -24,9 +28,19 @@ module.exports = () => ({
   async getThemedTemplate(clientId, page, context) {
     Hoek.assert(clientId, new Error('clientId is required in ThemeService::getThemedTemplate'));
     const template = await this.fetchTemplate(clientId, page);
-    if (!template) return false;
 
-    const renderedTemplate = await template.render(page, context);
+    let renderedTemplate;
+    if (!template) {
+      const readFileAsync = promisify(fs.readFile);
+      const layoutCode = await readFileAsync(`./templates/layout/${defaultLayouts[page]}`);
+      const layoutTemplate = handlebars.compile(layoutCode.toString());
+      const templateCode = await readFileAsync(`./templates/${page}.hbs`);
+      const pageTemplate = handlebars.compile(templateCode.toString());
+      const layoutContext = Object.assign({}, context, { content: pageTemplate(context) });
+      renderedTemplate = layoutTemplate(layoutContext);
+    } else {
+      renderedTemplate = await template.render(page, context);
+    }
 
     return {
       template,
@@ -35,12 +49,7 @@ module.exports = () => ({
   },
 
   async renderThemedTemplate(clientId, page, context) {
-    Hoek.assert(clientId, new Error('clientId is required in ThemeService::renderThemedTemplate'));
-
-    const template = await this.fetchTemplate(clientId, page);
-    if (!template) return false;
-
-    const renderedTemplate = await template.render(page, context);
+    const { renderedTemplate } = await this.getThemedTemplate(clientId, page, context);
     return renderedTemplate;
   }
 });

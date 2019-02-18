@@ -14,19 +14,11 @@ module.exports = (server, issuer, options) => {
       if (cookie.interaction.error === 'login_required') {
         const viewContext = views.login(cookie, client, options);
         const template = await options.getTemplate(client.clientId, 'login', viewContext);
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('login', viewContext);
-        }
+        reply(template);
       } else {
         const viewContext = views.interaction(cookie, client);
         const template = await options.getTemplate(client.clientId, 'interaction', viewContext);
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('interaction', views.interaction(cookie, client));
-        }
+        reply(template);
       }
     },
     config: {
@@ -90,11 +82,7 @@ module.exports = (server, issuer, options) => {
         const viewContext = views.login(cookie, client, options, 'Invalid email password combination', request.payload.login);
         const template = await options.getTemplate(client.clientId, 'login', viewContext);
 
-        if (template) {
-          reply(template);
-        } else {
-          reply.view('login', viewContext);
-        }
+        reply(template);
       }
     },
     config: {

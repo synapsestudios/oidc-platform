@@ -46,7 +46,6 @@ exports.register = function (server, options, next) {
         }
       });
 
-      server.views(options.vision);
       addRoutes(server, issuer, options);
 
       server.expose('provider', provider);
