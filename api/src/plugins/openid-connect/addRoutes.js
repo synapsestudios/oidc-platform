@@ -13,11 +13,11 @@ module.exports = (server, issuer, options) => {
 
       if (cookie.interaction.error === 'login_required') {
         const viewContext = views.login(cookie, client, options);
-        const template = await options.getTemplate(client.clientId, 'login', viewContext);
+        const template = await options.getTemplate('login', viewContext, client.clientId);
         reply(template);
       } else {
         const viewContext = views.interaction(cookie, client);
-        const template = await options.getTemplate(client.clientId, 'interaction', viewContext);
+        const template = await options.getTemplate('interaction', viewContext, client.clientId);
         reply(template);
       }
     },
@@ -80,7 +80,7 @@ module.exports = (server, issuer, options) => {
         const cookie = await provider.interactionDetails(request.raw.req);
         const client = await provider.Client.find(cookie.params.client_id);
         const viewContext = views.login(cookie, client, options, 'Invalid email password combination', request.payload.login);
-        const template = await options.getTemplate(client.clientId, 'login', viewContext);
+        const template = await options.getTemplate('login', viewContext, client.clientId);
 
         reply(template);
       }

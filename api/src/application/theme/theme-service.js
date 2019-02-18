@@ -6,28 +6,44 @@ const { promisify } = require('util');
 const defaultLayouts = require('./defaultLayouts');
 
 module.exports = () => ({
-  async fetchTemplate(clientId, page) {
+  async fetchTemplate(page, clientId) {
     Hoek.assert(clientId, new Error('clientId is required in ThemeService::fetchTemplate'));
 
-    const client = await bookshelf.model('client')
-      .where({client_id: clientId})
-      .fetch();
+    let themeId = null;
 
-    // scenario 1, client has null theme
-    if (!client.get('theme_id')) return false;
+    if (clientId) {
+      const client = await bookshelf.model('client')
+        .where({client_id: clientId})
+        .fetch();
+      themeId = client.get('theme_id');
+    }
+
+    // determine theme
+    if (!themeId) {
+      // is there a system theme configured?
+      const systemTheme = await bookshelf.model('theme').where({
+        system: true,
+      }).fetch();
+
+      if (systemTheme) {
+        themeId = systemTheme.get('id');
+      }
+    }
+
+    // scenario 1, there is no configured theme
+    if (!themeId) return false;
 
     // scenario 2, client has theme but null template
     const template = await bookshelf.model('template').where({
-      theme_id: client.get('theme_id'),
+      theme_id: themeId,
       name: page,
     }).fetch({withRelated: ['layout']});
 
     return template || false;
   },
 
-  async getThemedTemplate(clientId, page, context) {
-    Hoek.assert(clientId, new Error('clientId is required in ThemeService::getThemedTemplate'));
-    const template = await this.fetchTemplate(clientId, page);
+  async getThemedTemplate(page, context, clientId) {
+    const template = await this.fetchTemplate(page, clientId);
 
     let renderedTemplate;
     if (!template) {
@@ -48,8 +64,8 @@ module.exports = () => ({
     };
   },
 
-  async renderThemedTemplate(clientId, page, context) {
-    const { renderedTemplate } = await this.getThemedTemplate(clientId, page, context);
+  async renderThemedTemplate(page, context, clientId) {
+    const { renderedTemplate } = await this.getThemedTemplate(page, context, clientId);
     return renderedTemplate;
   }
 });
