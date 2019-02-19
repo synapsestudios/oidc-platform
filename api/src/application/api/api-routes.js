@@ -5,6 +5,7 @@ const Readable = require('stream').Readable;
 const bookshelf = require('../../lib/bookshelf');
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 const allowedImageMimes = require('../image/allowed-image-mimes');
+const uuid = require('uuid');
 
 const ONE_MEGABYTE = 1048576;
 const filePayloadConfig = {
@@ -45,6 +46,36 @@ const userProfilePayloadValidation = Joi.object().keys({
 module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator, userEmails, apiService) => [
   {
     method: 'POST',
+    path: '/api/user',
+    handler: (request, reply) => {
+      const { email, app_metadata, profile } = request.payload;
+      reply(userService.create(email, uuid.v4(), {
+        app_metadata: app_metadata || {},
+        profile : profile || {}
+      }));
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin'
+      },
+      validate: {
+        payload: mixedValidation(
+          {
+            email: Joi.string().email().regex(/[\*%]+/g, { invert: true }).required(),
+            app_metadata: Joi.object(),
+            profile: Joi.object(),
+          },
+          {
+            email: rowNotExists('user', 'email', 'Email already in use'),
+            client_id: clientValidator,
+          }
+        )
+      }
+    }
+  },
+  {
+    method: 'POST',
     path: '/api/invite',
     handler: (request, reply) => {
       reply(userService.inviteUser(request.payload));
@@ -70,7 +101,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
             hours_till_expiration: hoursTillExpirationSchema,
           },
           {
-            email: rowNotExists('user', 'email', 'Email already in use'),
             client_id: clientValidator,
           }
         )
