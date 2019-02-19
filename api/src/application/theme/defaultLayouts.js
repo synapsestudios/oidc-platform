@@ -1,4 +1,6 @@
 const defaultLayouts = {
+  'error': false,
+
   'end_session': 'default.hbs',
   'forgot-password-success': 'default.hbs',
   'forgot-password': 'default.hbs',
@@ -11,6 +13,7 @@ const defaultLayouts = {
   'change-password': 'default.hbs',
   'email-settings': 'default.hbs',
   'email-verify-success': 'default.hbs',
+
 
   'forgot-password-email': 'email.hbs',
   'invite-email': 'email.hbs',
