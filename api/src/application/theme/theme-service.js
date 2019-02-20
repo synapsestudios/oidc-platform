@@ -12,7 +12,7 @@ module.exports = () => ({
       const client = await bookshelf.model('client')
         .where({client_id: clientId})
         .fetch();
-      themeId = client.get('theme_id');
+      themeId = client && client.get('theme_id');
     }
 
     // determine theme

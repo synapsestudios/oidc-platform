@@ -50,8 +50,42 @@ module.exports = Promise.all([
             failAction: (request, reply, source, error) => {
               reply(formatError(error));
             }
-          }
-        }
+          },
+          ext: {
+            onPreResponse: [{ method: async (request, reply) => {
+              const res = request.response;
+              const accept = request.headers.accept;
+
+              // if we have an error and they have an accept header with
+              // text/html then render them an error page
+              if (res.isBoom && accept && accept.match(/text\/html/)) {
+                const debug = {
+                  method: request.method, // e.g GET/POST
+                  url: request.url.path, // the path the person requested
+                  headers: request.headers, // all HTTP Headers
+                  info: request.info, // all additional request info (useful for debug)
+                  auth: request.auth, // any authentication details e.g. the decoded JWT
+                  payload: request.payload, // the complete request payload received
+                  response: res.output.payload, // response before error intercepted
+                };
+
+
+                const template = await lib.themeService.renderThemedTemplate('error', {
+                  error: res.output.payload.error,
+                  error_description: res.output.payload.message,
+                  stack: res.stack,
+                  systemError: true,
+                  debug_info: JSON.stringify(debug, null, 4),
+                }, request.query.client_id);
+
+
+                return reply(template).code(res.output.statusCode);
+              }
+
+              return reply.continue();
+            }}],
+          },
+        },
       }
     },
     connections,

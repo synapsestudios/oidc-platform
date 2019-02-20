@@ -7,6 +7,7 @@ module.exports = (
     if (error && error.output.statusCode === 404) {
       return reply(error);
     }
+
     try {
       const client = await clientService.findById(request.query.client_id);
       let user = null;
