@@ -42,7 +42,6 @@ module.exports = Promise.all([
     server: {
       connections: {
         routes: {
-          // ext:
           cors: {
             origin: ['*'],
           },
