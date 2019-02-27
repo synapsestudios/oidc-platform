@@ -1,9 +1,79 @@
 const Joi = require('joi');
 const webhookService = require('../webhook/webhook-service');
-
+const userFormData = require('../user/user-form-data');
+const Readable = require('stream').Readable;
+const bookshelf = require('../../lib/bookshelf');
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
+const allowedImageMimes = require('../image/allowed-image-mimes');
+const uuid = require('uuid');
 
-module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator, userEmails) => [
+const ONE_MEGABYTE = 1048576;
+const filePayloadConfig = {
+  failAction: 'ignore', // set payload to null if picture is too large
+  output: 'stream',
+  maxBytes: ONE_MEGABYTE,
+  parse: true,
+  allow: 'multipart/form-data'
+};
+
+const userProfilePayloadValidation = Joi.object().keys({
+  name: Joi.string().allow(''),
+  given_name: Joi.string().allow(''),
+  family_name: Joi.string().allow(''),
+  middle_name: Joi.string().allow(''),
+  nickname: Joi.string().allow(''),
+  preferred_username: Joi.string().allow(''),
+  profile: Joi.string().uri().allow(''),
+  shouldClearPicture: Joi.boolean(),
+  picture: Joi.object().type(Readable).assert(
+    'hapi.headers.content-type',
+    Joi.any().valid([...allowedImageMimes, 'application/octet-stream'])
+  ),
+  website: Joi.string().uri().allow(''),
+  email: Joi.string().email().allow(''),
+  gender: Joi.string().allow(''),
+  birthdate: Joi.string().isoDate().allow(''),
+  zoneinfo: Joi.string().valid(userFormData.timezones),
+  locale: Joi.string().valid(Object.keys(userFormData.locales)),
+  phone_number: Joi.string().allow(''),
+  'address.street_address': Joi.string().allow(''),
+  'address.locality': Joi.string().allow(''),
+  'address.region': Joi.string().allow(''),
+  'address.postal_code': Joi.string().allow(''),
+  'address.country': Joi.string().allow(''),
+}).invalid(null).label('picture') // null payload means picture size validation failed
+
+module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator, userEmails, apiService) => [
+  {
+    method: 'POST',
+    path: '/api/user',
+    handler: (request, reply) => {
+      const { email, app_metadata, profile } = request.payload;
+      reply(userService.create(email, uuid.v4(), {
+        app_metadata: app_metadata || {},
+        profile : profile || {}
+      }));
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin'
+      },
+      validate: {
+        payload: mixedValidation(
+          {
+            email: Joi.string().email().regex(/[\*%]+/g, { invert: true }).required(),
+            app_metadata: Joi.object(),
+            profile: Joi.object(),
+          },
+          {
+            email: rowNotExists('user', 'email', 'Email already in use'),
+            client_id: clientValidator,
+          }
+        )
+      }
+    }
+  },
   {
     method: 'POST',
     path: '/api/invite',
@@ -31,7 +101,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
             hours_till_expiration: hoursTillExpirationSchema,
           },
           {
-            email: rowNotExists('user', 'email', 'Email already in use'),
             client_id: clientValidator,
           }
         )
@@ -239,6 +308,32 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       }
     }
   },
+  {
+    method: 'PUT',
+    path: '/api/user/profile',
+    handler: async (request, reply) => {
+      const userId = request.auth.strategy === 'oidc_session'
+        ? request.auth.credentials.accountId()
+        : request.auth.credentials.accountId;
+
+      const user = await bookshelf.model('user')
+        .where({id: userId})
+        .fetch();
+      reply(apiService.updateUserProfile(user, request.payload));
+    },
+    config: {
+      payload: filePayloadConfig,
+      auth: {
+        strategies: ['access_token', 'oidc_session'],
+      },
+      validate: {
+        options: {
+          allowUnknown: true,
+        },
+        payload: userProfilePayloadValidation,
+      }
+    }
+  },
 ];
 
 module.exports['@singleton'] = true;
@@ -250,4 +345,5 @@ module.exports['@require'] = [
   'validator/constraints/row-exists',
   'validator/constraints/client-validator',
   'user/user-emails',
+  'api/api-service',
 ];

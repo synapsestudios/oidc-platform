@@ -1,5 +1,3 @@
-const logger = require('./logger');
-
 module.exports = (
   userService,
   themeService,
@@ -9,24 +7,30 @@ module.exports = (
     if (error && error.output.statusCode === 404) {
       return reply(error);
     }
+
     try {
       const client = await clientService.findById(request.query.client_id);
       let user = null;
       if (request.auth.isAuthenticated) {
-        user = request.auth.strategy === 'email_token'
-          ? request.auth.credentials.user
-          : await userService.findById(request.auth.credentials.accountId());
+        switch(request.auth.strategy) {
+          case 'email_token':
+            user = request.auth.credentials.user;
+            break;
+          case 'oidc_session':
+            user = await userService.findById(request.auth.credentials.accountId());
+            break;
+          case 'access_token':
+            user =  await userService.findById(request.auth.credentials.accountId);
+            break;
+          default:
+        }
       }
 
       const render = async e => {
         const viewContext = getView(user, client, request, e);
-        const template = await themeService.renderThemedTemplate(request.query.client_id, templateName, viewContext);
-        if (template) {
-          return reply(template);
-        } else {
-          return reply.view(templateName, viewContext);
-        }
-      }
+        const template = await themeService.renderThemedTemplate(templateName, viewContext, request.query.client_id);
+        return reply(template);
+      };
 
       if (!error && request.method === 'post') {
         error = await postHandler(request, reply, user, client, render);

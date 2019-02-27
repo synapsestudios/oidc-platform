@@ -33,11 +33,11 @@ exports.register = function (server, pluginOptions, next) {
           if (client.redirectUris.indexOf(request.query.redirect_uri) < 0) {
             return reply(Boom.forbidden('redirect_uri not in whitelist'));
           } else {
-            return reply.redirect(`${redirectUri}?error=unauthorized&error_description=invalid access token`);
+            return reply.redirect(`${redirectUri}#error=unauthorized&error_description=invalid access token`);
           }
         });
       } else {
-        return reply(Boom.forbidden('invalid access token'));
+        return reply(Boom.unauthorized(null, 'access_token'));
       }
     };
 

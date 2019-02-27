@@ -7,7 +7,7 @@ const querystring = require('querystring');
 const userViews = require('./user-views');
 const bookshelf = require('../../lib/bookshelf');
 
-module.exports = (emailService, clientService, renderTemplate, RedisAdapter, themeService, userEmails, emailTokenService) => {
+module.exports = (emailService, clientService, RedisAdapter, themeService, userEmails, emailTokenService) => {
   var self = {
     redisAdapter: new RedisAdapter('Session'),
 
@@ -63,10 +63,14 @@ module.exports = (emailService, clientService, renderTemplate, RedisAdapter, the
     async inviteUser({email, hours_till_expiration, template, app_metadata, profile, ...payload}) {
       const client = await clientService.findById(payload.client_id);
       return bookshelf.transaction(async trx => {
-        const user = await self.create(email, uuid.v4(), {
-          app_metadata: app_metadata || {},
-          profile : profile || {}
-        }, { transacting: trx });
+        let user = await bookshelf.model('user').where({ email }).fetch();
+
+        if (!user) {
+          user = await self.create(email, uuid.v4(), {
+            app_metadata: app_metadata || {},
+            profile : profile || {}
+          }, { transacting: trx });
+        }
 
         await userEmails.sendInviteEmail(
           user,
@@ -160,7 +164,6 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'email/email-service',
   'client/client-service',
-  'render-template',
   'oidc-adapter/redis',
   'theme/theme-service',
   'user/user-emails',

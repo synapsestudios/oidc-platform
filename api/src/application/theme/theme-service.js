@@ -1,49 +1,75 @@
-const handlebars = require('handlebars');
-const fs = require('fs');
-const { promisify } = require('util');
-const Hoek = require('hoek');
 const bookshelf = require('../../lib/bookshelf');
+const fs = require('fs');
+const handlebars = require('handlebars');
+const { promisify } = require('util');
+const defaultLayouts = require('./defaultLayouts');
 
 module.exports = () => ({
-  async fetchTemplate(clientId, page) {
-    Hoek.assert(clientId, new Error('clientId is required in ThemeService::fetchTemplate'));
+  async fetchTemplate(page, clientId) {
+    let themeId = null;
 
-    const client = await bookshelf.model('client')
-      .where({client_id: clientId})
-      .fetch({ withRelated: ['theme.templates.layout'] });
+    if (clientId) {
+      const client = await bookshelf.model('client')
+        .where({client_id: clientId})
+        .fetch();
+      themeId = client && client.get('theme_id');
+    }
 
-    // scenario 1, client has null theme
-    if (!client.get('theme_id')) return false;
+    // determine theme
+    if (!themeId) {
+      // is there a system theme configured?
+      const systemTheme = await bookshelf.model('theme').where({
+        system: true,
+      }).fetch();
+
+      if (systemTheme) {
+        themeId = systemTheme.get('id');
+      }
+    }
+
+    // scenario 1, there is no configured theme
+    if (!themeId) return false;
 
     // scenario 2, client has theme but null template
-    const template = client.related('theme').related('templates').find(template => template.get('name') === page);
+    const template = await bookshelf.model('template').where({
+      theme_id: themeId,
+      name: page,
+    }).fetch({withRelated: ['layout']});
+
     return template || false;
   },
 
-  async getThemedTemplate(clientId, page, context) {
-    Hoek.assert(clientId, new Error('clientId is required in ThemeService::getThemedTemplate'));
-    const template = await this.fetchTemplate(clientId, page);
-    if (!template) return false;
+  async getThemedTemplate(page, context, clientId) {
+    const template = await this.fetchTemplate(page, clientId);
 
-    const renderedTemplate = await template.render(page, context);
-    // const serializedTemplate = template.serialize();
+    let renderedTemplate;
+    if (!template) {
+      const readFileAsync = promisify(fs.readFile);
+      const templateCode = await readFileAsync(`./templates/${page}.hbs`);
+      const pageTemplate = handlebars.compile(templateCode.toString());
 
-    // serializedTemplate.rendered_code = renderedTemplate;
-    // return serializedTemplate;
+      if (defaultLayouts[page]) {
+        const layoutCode = await readFileAsync(`./templates/layout/${defaultLayouts[page]}`);
+        const layoutTemplate = handlebars.compile(layoutCode.toString());
+        const layoutContext = Object.assign({}, context, { content: pageTemplate(context) });
+        renderedTemplate = layoutTemplate(layoutContext);
+      } else {
+        // no layout, just render the page
+        renderedTemplate = pageTemplate(context);
+      }
+
+    } else {
+      renderedTemplate = await template.render(page, context);
+    }
 
     return {
       template,
       renderedTemplate,
-    }
+    };
   },
 
-  async renderThemedTemplate(clientId, page, context) {
-    Hoek.assert(clientId, new Error('clientId is required in ThemeService::renderThemedTemplate'));
-
-    const template = await this.fetchTemplate(clientId, page);
-    if (!template) return false;
-
-    const renderedTemplate = await template.render(page, context);
+  async renderThemedTemplate(page, context, clientId) {
+    const { renderedTemplate } = await this.getThemedTemplate(page, context, clientId);
     return renderedTemplate;
   }
 });

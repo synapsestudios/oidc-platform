@@ -1,6 +1,7 @@
 const Boom = require('boom');
 const base64url = require('base64url');
 const uuid = require('uuid/v4');
+const get = require('lodash/get');
 
 const epochTime = (date = Date.now()) => Math.floor(date / 1000);
 
@@ -32,11 +33,12 @@ exports.register = function (server, pluginOptions, next) {
   server.auth.scheme('oidc_session', () => {
     return {
       async authenticate(request, reply) {
-
         if (!request.state._session) {
-          if (request.query.id_token_hint) {
+          const authorization = get(request, 'headers.authorization', '');
+          const tokenString = authorization ? authorization.split(' ')[1] : null;
+          if (request.query.id_token_hint || tokenString) {
             // only do this when cookies aren't present and some token hint is provided or whatever
-            const parts = String(request.query.id_token_hint).split('.');
+            const parts = String(request.query.id_token_hint || tokenString).split('.');
             const token = {
               header: JSON.parse(base64url.decode(parts[0])),
               payload: JSON.parse(base64url.decode(parts[1])),
@@ -54,13 +56,13 @@ exports.register = function (server, pluginOptions, next) {
               reply(e);
             }
           } else {
-            reply(Boom.forbidden());
+            reply(Boom.unauthorized(null, 'oidc_session'));
           }
         } else {
           try {
             var session = await request.server.plugins['open-id-connect'].provider.Session.find(request.state._session);
             if (!session.accountId()) {
-              reply(Boom.forbidden());
+              reply(Boom.unauthorized(null, 'oidc_session'));
             } else {
               reply.continue({
                 credentials: session,

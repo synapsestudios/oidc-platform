@@ -1,6 +1,5 @@
 const Glue = require('glue');
 const ioc = require('electrolyte');
-const handlebars = require('handlebars');
 const manifestPromise = require('./manifest');
 const bookshelf = require('./src/lib/bookshelf');
 const logger = require('./src/lib/logger');
@@ -36,17 +35,6 @@ manifestPromise.then(manifest => {
         server['@literal'] = true;
         return server;
       }
-    });
-
-    // Configure templating engine for emails
-    server.views({
-      engines: {
-        hbs: handlebars
-      },
-      relativeTo: __dirname,
-      path: './templates',
-      layoutPath: './templates/layout',
-      layout: 'default',
     });
 
     // Register routes
