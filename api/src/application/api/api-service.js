@@ -22,13 +22,12 @@ module.exports = (userService, imageService) => {
       const { shouldClearPicture, ...originalPayload } = requestPayload;
       const payload = expandDotPaths(originalPayload);
 
-      const oldPicture = profile.picture;
       const pictureMIME = originalPayload.picture
         ? originalPayload.picture.hapi.headers['content-type']
         : null;
 
       if (allowedImageMimes.indexOf(pictureMIME) >= 0) {
-        const uuid = Uuid();
+        const uuid = user.get('id')
         const bucket = uuid.substring(0, 2);
         const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);
 
@@ -36,6 +35,9 @@ module.exports = (userService, imageService) => {
       } else {
         delete originalPayload.picture;
         if (shouldClearPicture) {
+          if (payload.picture) {
+            await imageService.deleteImage(payload.picture.replace(/^.*\/\/[^\/]+\//, ''));
+          }
           profile = Object.assign(profile, payload, {picture: null});
         } else {
           profile = Object.assign(profile, payload);
@@ -44,10 +46,6 @@ module.exports = (userService, imageService) => {
 
       user = await userService.update(user.get('id'), { profile });
       webhookService.trigger('user.update', user);
-
-      if (oldPicture) {
-        await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
-      }
 
       return user;
     },
