@@ -3,7 +3,7 @@ const aws = require('aws-sdk');
 const s3Bucket = require('../config')('/aws/s3Bucket');
 
 const s3 = new aws.S3();
-const BATCH_SIZE = 1;
+const BATCH_SIZE = 10000;
 
 
 exports.up = async knex => {
