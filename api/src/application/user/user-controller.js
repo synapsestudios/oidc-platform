@@ -107,7 +107,7 @@ module.exports = (
       const pictureMIME = originalPayload.picture.hapi.headers['content-type'];
 
       if (uploadingNewPicture && allowedImageMimes.indexOf(pictureMIME) >= 0) {
-        const uuid = Uuid();
+        const uuid = user.get('id');
         const bucket = uuid.substring(0, 2);
         const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);
 
@@ -124,7 +124,7 @@ module.exports = (
       user = await userService.update(user.get('id'), { profile });
       webhookService.trigger('user.update', user);
 
-      if ((uploadingNewPicture && oldPicture) || shouldClearPicture) {
+      if (shouldClearPicture) {
         await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
       }
 
