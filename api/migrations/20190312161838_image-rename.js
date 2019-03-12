@@ -21,22 +21,24 @@ exports.up = async knex => {
   let users = await fetchUsers(lastId);
   while (users.length) {
     for (let i = 0; i < users.length; i++) {
-      users[i].profile.depricatedPicture = users[i].profile.picture;
-      const parsedPictureLocation = url.parse(users[i].profile.picture);
-      const newPath = `pictures/${users[i].id.substring(0, 2)}/${users[i].id}`;
+      if (users[i].profile.picture) {
+        users[i].profile.depricatedPicture = users[i].profile.picture;
+        const parsedPictureLocation = url.parse(users[i].profile.picture);
+        const newPath = `pictures/${users[i].id.substring(0, 2)}/${users[i].id}`;
 
-      const copyParams = {
-        Bucket: s3Bucket,
-        CopySource: `/${s3Bucket}${parsedPictureLocation.pathname}`,
-        Key: newPath,
-      };
-      await s3.copyObject(copyParams).promise();
+        const copyParams = {
+          Bucket: s3Bucket,
+          CopySource: `/${s3Bucket}${parsedPictureLocation.pathname}`,
+          Key: newPath,
+        };
+        await s3.copyObject(copyParams).promise();
 
-      users[i].profile.picture = `https://${s3Bucket}.s3.amazonaws.com/${newPath}`;
+        users[i].profile.picture = `https://${s3Bucket}.s3.amazonaws.com/${newPath}`;
 
-      await knex('SIP_user')
-        .where('id', users[i].id)
-        .update({ profile: users[i].profile });
+        await knex('SIP_user')
+          .where('id', users[i].id)
+          .update({ profile: users[i].profile });
+      }
     }
 
 
