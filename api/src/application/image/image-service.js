@@ -11,7 +11,7 @@ module.exports = () => ({
     const bucket = new s3({ params: { Bucket: s3Bucket } });
     return bucket.upload({ Body: stream, Key: filename, ContentType: contentType })
       .promise()
-      .then(data => data.location)
+      .then(data => data.Location)
       .catch(error => {
         const trace = new Error(error);
         logger.error(trace);
