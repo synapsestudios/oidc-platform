@@ -9,7 +9,7 @@ module.exports = () => ({
     const filename = key;
 
     const bucket = new s3({ params: { Bucket: s3Bucket } });
-    return bucket.upload({ Body: stream, Key: filename, ContentType: contentType, CacheControl: 'max-age=0' })
+    return bucket.upload({ Body: stream, Key: filename, ContentType: contentType, CacheControl: 'public, must-revalidate, proxy-revalidate, max-age=0' })
       .promise()
       .then(data => data.Location)
       .catch(error => {
