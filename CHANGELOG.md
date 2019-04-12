@@ -1,3 +1,7 @@
+## [v2.9.0](https://github.com/synapsestudios/oidc-platform/compare/v2.8.0...v2.9.0)
+### Added
+- [421] (https://github.com/synapsestudios/oidc-platform/issues/421) Don't create new urls for updated profile pictures, use `path/to/image/${userId}`.
+
 ## [v2.8.0](https://github.com/synapsestudios/oidc-platform/compare/v2.7.1...v2.8.0)
 ### Added
 - [#196](https://github.com/synapsestudios/oidc-platform/issues/196) Added system templates and a new error page template
