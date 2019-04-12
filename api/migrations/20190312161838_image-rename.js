@@ -31,13 +31,18 @@ exports.up = async knex => {
           CopySource: `/${s3Bucket}${parsedPictureLocation.pathname}`,
           Key: newPath,
         };
-        await s3.copyObject(copyParams).promise();
 
-        users[i].profile.picture = `https://${s3Bucket}.s3.amazonaws.com/${newPath}`;
+        try {
+          await s3.copyObject(copyParams).promise();
 
-        await knex('SIP_user')
-          .where('id', users[i].id)
-          .update({ profile: users[i].profile });
+          users[i].profile.picture = `https://${s3Bucket}.s3.amazonaws.com/${newPath}`;
+
+          await knex('SIP_user')
+            .where('id', users[i].id)
+            .update({ profile: users[i].profile });
+        } catch(e) {
+          // swallow and move on
+        }
       }
     }
 
