@@ -69,7 +69,6 @@ module.exports = Promise.all([
                   response: res.output.payload, // response before error intercepted
                 };
 
-
                 const template = await lib.themeService.renderThemedTemplate('error', {
                   error: res.output.payload.error,
                   error_description: res.output.payload.message,
@@ -77,6 +76,7 @@ module.exports = Promise.all([
                   systemError: true,
                   production: env === 'production',
                   debug_info: JSON.stringify(debug, null, 4),
+                  debug,
                 }, request.query.client_id);
 
 
