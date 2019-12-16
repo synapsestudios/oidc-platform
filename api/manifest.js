@@ -75,6 +75,7 @@ module.exports = Promise.all([
                   error_description: res.output.payload.message,
                   stack: res.stack,
                   systemError: true,
+                  production: env === 'production',
                   debug_info: JSON.stringify(debug, null, 4),
                 }, request.query.client_id);
 
