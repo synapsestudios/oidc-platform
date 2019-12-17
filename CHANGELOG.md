@@ -1,3 +1,11 @@
+## [v2.9.1](https://github.com/synapsestudios/oidc-platform/compare/v2.9.0...v2.9.1)
+### Added
+- [439] (https://github.com/synapsestudios/oidc-platform/issues/439) Add `ifEq` and `ifStartsWith` to Handlebars renderer
+- [437] (https://github.com/synapsestudios/oidc-platform/issues/437) Add full `debug` to error template context
+
+### Bugs Fixed
+- [432] (https://github.com/synapsestudios/oidc-platform/issues/432) Error template assumes `production` is false
+
 ## [v2.9.0](https://github.com/synapsestudios/oidc-platform/compare/v2.8.0...v2.9.0)
 ### Added
 - [421] (https://github.com/synapsestudios/oidc-platform/issues/421) Don't create new urls for updated profile pictures, use `path/to/image/${userId}`.
