@@ -1,6 +1,6 @@
 const bookshelf = require('../../lib/bookshelf');
 const fs = require('fs');
-const handlebars = require('handlebars');
+const handlebars = require('../../lib/handlebars');
 const { promisify } = require('util');
 const defaultLayouts = require('./defaultLayouts');
 
