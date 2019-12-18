@@ -1,6 +1,3 @@
-const fs = require('fs');
-const handlebars = require('handlebars');
-
 module.exports = options => {
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   return {

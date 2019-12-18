@@ -1,10 +1,6 @@
 const bcrypt = require('bcrypt');
 const Boom = require('boom');
-const config = require('../../../config');
 const uuid = require('uuid');
-const handlebars = require('handlebars');
-const querystring = require('querystring');
-const userViews = require('./user-views');
 const bookshelf = require('../../lib/bookshelf');
 
 module.exports = (emailService, clientService, RedisAdapter, themeService, userEmails, emailTokenService) => {
