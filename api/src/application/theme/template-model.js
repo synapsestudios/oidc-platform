@@ -1,4 +1,4 @@
-const handlebars = require('handlebars');
+const handlebars = require('../../lib/handlebars');
 const fs = require('fs');
 const { promisify } = require('util');
 const defaultLayouts = require('./defaultLayouts');

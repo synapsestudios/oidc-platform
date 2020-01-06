@@ -3,7 +3,7 @@ const base = config('/baseUrl');
 const querystring = require('querystring');
 const Hoek = require('hoek');
 const userViews = require('./user-views');
-const handlebars = require('handlebars');
+const handlebars = require('../../lib/handlebars');
 
 module.exports = (emailService, themeService, emailTokenService) => {
   const renderAndSend = async (to, clientId, page, context) => {
