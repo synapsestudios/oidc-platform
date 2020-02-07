@@ -194,13 +194,17 @@ module.exports = (
       reply(template);
     },
 
-    resetPassword: async function(request, reply, user, client, render) {
+    resetPassword: async function(request, reply, user, client, render, isInitialInviteAcceptance) {
       const token = request.auth.credentials.token;
       const password = await userService.encryptPassword(request.payload.password)
       const profile = user.get('profile');
       profile.email_verified = true;
       await userService.update(user.get('id'), { password, profile });
       await emailTokenService.destroyUserTokens(user.get('id'));
+
+      if (isInitialInviteAcceptance) {
+        // hit webhook
+      }
 
       const viewContext = views.resetPasswordSuccess(request);
       const template = await themeService.renderThemedTemplate('reset-password-success', viewContext, request.query.client_id);
