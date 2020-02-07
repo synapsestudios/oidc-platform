@@ -203,7 +203,8 @@ module.exports = (
       await emailTokenService.destroyUserTokens(user.get('id'));
 
       if (isInitialInviteAcceptance) {
-        // hit webhook
+        await user.refresh();
+        webhookService.trigger('user.accept-invite', user);
       }
 
       const viewContext = views.resetPasswordSuccess(request);
