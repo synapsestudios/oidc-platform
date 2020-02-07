@@ -194,7 +194,7 @@ module.exports = (
       reply(template);
     },
 
-    resetPassword: async function(request, reply, user, client, render, isInitialInviteAcceptance) {
+    resetPassword: async function(request, reply, user, client, render, isInviteAcceptance) {
       const token = request.auth.credentials.token;
       const password = await userService.encryptPassword(request.payload.password)
       const profile = user.get('profile');
@@ -202,7 +202,7 @@ module.exports = (
       await userService.update(user.get('id'), { password, profile });
       await emailTokenService.destroyUserTokens(user.get('id'));
 
-      if (isInitialInviteAcceptance) {
+      if (isInviteAcceptance) {
         await user.refresh();
         webhookService.trigger('user.accept-invite', user);
       }
