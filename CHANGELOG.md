@@ -1,3 +1,7 @@
+## [v2.10.0](https://github.com/synapsestudios/oidc-platform/compare/v2.9.1...v2.10.0)
+### Added
+- [449] (https://github.com/synapsestudios/oidc-platform/issues/449) Add user.accept-invite webhook
+
 ## [v2.9.1](https://github.com/synapsestudios/oidc-platform/compare/v2.9.0...v2.9.1)
 ### Added
 - [439] (https://github.com/synapsestudios/oidc-platform/issues/439) Add `ifEq` and `ifStartsWith` to Handlebars renderer
