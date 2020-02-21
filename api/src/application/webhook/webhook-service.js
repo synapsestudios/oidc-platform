@@ -8,6 +8,7 @@ const webhookConfig = require('../../../config')('/webhooks');
 module.exports = {
   events: [
     'user.update',
+    'user.accept-invite',
   ],
 
   async create(clientId, url, events) {

@@ -3,7 +3,7 @@ module.exports = (
   themeService,
   clientService
 ) => {
-  return (templateName, getView, postHandler) => async (request, reply, source, error) => {
+  return (templateName, getView, postHandler, ...rest) => async (request, reply, source, error) => {
     if (error && error.output.statusCode === 404) {
       return reply(error);
     }
@@ -33,7 +33,7 @@ module.exports = (
       };
 
       if (!error && request.method === 'post') {
-        error = await postHandler(request, reply, user, client, render);
+        error = await postHandler(request, reply, user, client, render, ...rest);
       } else {
         await render(error);
       }
