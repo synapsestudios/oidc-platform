@@ -1,6 +1,6 @@
 const webhookService = require('../webhook/webhook-service');
-const Uuid = require('uuid');
 const set = require('lodash/set');
+const bookshelf = require('../../lib/bookshelf');
 const allowedImageMimes = require('../image/allowed-image-mimes');
 
 // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
@@ -17,7 +17,11 @@ const expandDotPaths = function(object) {
 
 module.exports = (userService, imageService) => {
   return {
-    async updateUserProfile(user, requestPayload) {
+    async updateUserProfile(userId, requestPayload) {
+      let user = await bookshelf.model('user')
+        .where({ id: userId })
+        .fetch();
+
       let profile = user.get('profile');
       const { shouldClearPicture, ...originalPayload } = requestPayload;
       const payload = expandDotPaths(originalPayload);
