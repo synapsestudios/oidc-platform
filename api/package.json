@@ -11,7 +11,8 @@
     "rebuild-db": "npm run drop-tables && knex migrate:latest && knex seed:run",
     "migrate-seed": "knex migrate:latest && knex seed:run",
     "generate-keys": "node src/bin/generate-keys.js",
-    "migrate": "knex migrate:latest"
+    "migrate": "knex migrate:latest",
+    "test:lab": "lab -lv"
   },
   "repository": {
     "type": "git",
@@ -60,6 +61,9 @@
     "winston-rollbar-transport": "^1.0.0"
   },
   "devDependencies": {
+    "@hapi/code": "^7.0.0",
+    "@hapi/lab": "^21.0.0",
+    "factory-girl": "^5.0.4",
     "nodemon": "1.18.9"
   }
 }

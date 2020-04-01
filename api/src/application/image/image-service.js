@@ -1,4 +1,4 @@
-const s3 = require('aws-sdk').S3;
+const s3 = require('../../lib/s3');
 const s3Bucket = require('../../../config')('/aws/s3Bucket');
 const logger = require('../../lib/logger');
 
@@ -6,10 +6,8 @@ module.exports = () => ({
   uploadImageStream(stream, key) {
     const contentType = (stream.hapi && stream.hapi.headers['content-type']) ?
       stream.hapi.headers['content-type'] : 'application/octet-stream';
-    const filename = key;
 
-    const bucket = new s3({ params: { Bucket: s3Bucket } });
-    return bucket.upload({ Body: stream, Key: filename, ContentType: contentType, CacheControl: 'public, must-revalidate, proxy-revalidate, max-age=0' })
+    return s3.upload({ Bucket: s3Bucket, Body: stream, Key: key, ContentType: contentType, CacheControl: 'public, must-revalidate, proxy-revalidate, max-age=0' })
       .promise()
       .then(data => data.Location)
       .catch(error => {

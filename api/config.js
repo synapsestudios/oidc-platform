@@ -41,6 +41,7 @@ var config = {
   'qa': {},
   'staging': {},
   'production': {},
+  'test': {},
 };
 
 module.exports = function(path, criteria) {
