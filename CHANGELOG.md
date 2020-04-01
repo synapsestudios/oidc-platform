@@ -1,18 +1,22 @@
+## [v2.11.0](https://github.com/synapsestudios/oidc-platform/compare/v2.10.0...v2.11.0)
+### Added
+- [#445](https://github.com/synapsestudios/oidc-platform/issues/439) Edit User Profile route for Admins. Added Lab tests.
+
 ## [v2.10.0](https://github.com/synapsestudios/oidc-platform/compare/v2.9.1...v2.10.0)
 ### Added
-- [449] (https://github.com/synapsestudios/oidc-platform/issues/449) Add user.accept-invite webhook
+- [#449](https://github.com/synapsestudios/oidc-platform/issues/449) Add user.accept-invite webhook
 
 ## [v2.9.1](https://github.com/synapsestudios/oidc-platform/compare/v2.9.0...v2.9.1)
 ### Added
-- [439] (https://github.com/synapsestudios/oidc-platform/issues/439) Add `ifEq` and `ifStartsWith` to Handlebars renderer
-- [437] (https://github.com/synapsestudios/oidc-platform/issues/437) Add full `debug` to error template context
+- [#439](https://github.com/synapsestudios/oidc-platform/issues/439) Add `ifEq` and `ifStartsWith` to Handlebars renderer
+- [#437](https://github.com/synapsestudios/oidc-platform/issues/437) Add full `debug` to error template context
 
 ### Bugs Fixed
-- [432] (https://github.com/synapsestudios/oidc-platform/issues/432) Error template assumes `production` is false
+- [#432](https://github.com/synapsestudios/oidc-platform/issues/432) Error template assumes `production` is false
 
 ## [v2.9.0](https://github.com/synapsestudios/oidc-platform/compare/v2.8.0...v2.9.0)
 ### Added
-- [421] (https://github.com/synapsestudios/oidc-platform/issues/421) Don't create new urls for updated profile pictures, use `path/to/image/${userId}`.
+- [#421](https://github.com/synapsestudios/oidc-platform/issues/421) Don't create new urls for updated profile pictures, use `path/to/image/${userId}`.
 
 ## [v2.8.0](https://github.com/synapsestudios/oidc-platform/compare/v2.7.1...v2.8.0)
 ### Added
