@@ -28,8 +28,8 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
     return value;
   };
 
-  const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
-  const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
+  const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword, false);
+  const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword, true);
 
   let routes = [
     {
