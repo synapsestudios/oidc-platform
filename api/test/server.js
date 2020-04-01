@@ -41,6 +41,7 @@ module.exports = async function() {
   try {
     const server = await Glue.compose(manifest, options);
 
+    // Register the same auth strategies and routes as the main server.js
     server.auth.strategy('access_token', 'access_token', { token_type: 'access_token' });
     server.auth.strategy('client_credentials', 'access_token', { token_type: 'client_credentials' });
     server.auth.strategy('oidc_session', 'oidc_session');

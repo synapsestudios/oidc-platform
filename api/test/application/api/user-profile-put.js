@@ -62,6 +62,5 @@ describe('PUT /api/users/{userId}/profile', () => {
 
     expect(res.statusCode).to.equal(200);
     expect(updatedUser.profile).to.equal(expectedUserProfile);
-
   });
 });
