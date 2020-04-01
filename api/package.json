@@ -12,7 +12,7 @@
     "migrate-seed": "knex migrate:latest && knex seed:run",
     "generate-keys": "node src/bin/generate-keys.js",
     "migrate": "knex migrate:latest",
-    "test": "lab -lv"
+    "test:lab": "lab -lv"
   },
   "repository": {
     "type": "git",
