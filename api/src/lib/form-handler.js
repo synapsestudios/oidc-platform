@@ -10,6 +10,11 @@ module.exports = (
 
     try {
       const client = await clientService.findById(request.query.client_id);
+
+      if (!client) {
+        reply('404: Client not found').code(404);
+      }
+
       let user = null;
       if (request.auth.isAuthenticated) {
         switch(request.auth.strategy) {
