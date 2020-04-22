@@ -8,7 +8,7 @@ const bookshelf = require('../src/lib/bookshelf');
 // Prevent s3 calls that happen on initialize
 storageAdapter.get = function(container, key) {
   if (key === process.env.KEYSTORE) {
-    return Promise.resolve(Buffer.from(JSON.stringify(keystore)));
+    return Promise.resolve(JSON.stringify(keystore));
   } else {
     throw new Error('Not expecting getObject call');
   }

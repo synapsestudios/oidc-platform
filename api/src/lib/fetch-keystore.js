@@ -1,3 +1,4 @@
+const storageAdapter = require('../lib/storage-adapter');
 const defaultKeystore = require('../../keystore');
 const logger = require('./logger');
 

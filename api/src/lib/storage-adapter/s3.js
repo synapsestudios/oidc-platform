@@ -1,5 +1,6 @@
-const s3 = require('./s3');
+const s3 = require('../s3');
 const s3Bucket = require('../../../config')('/aws/s3Bucket');
+const logger = require('../logger');
 
 module.exports = {
   upload(stream, key, contentType) {
