@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import queryString from 'query-string';
 import localstorage from 'store2';
-import createHistory from 'history/createBrowserHistory';
+import { createBrowserHistory as createHistory } from 'history';
 import config from './config';
 import './App.css';
 
@@ -21,7 +21,7 @@ class App extends Component {
   }
 
   login = () => {
-    fetch('/token', {
+    fetch('http://localhost:8080/token', {
       method: 'POST',
       body: JSON.stringify({ grant_type: 'password', username: this.state.email, password: this.state.password }),
     })
