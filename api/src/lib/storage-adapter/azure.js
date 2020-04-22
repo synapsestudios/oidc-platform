@@ -35,12 +35,18 @@ module.exports = {
       }
     };
 
-    return blockBlobClient.uploadStream(
+    await blockBlobClient.uploadStream(
       stream,
       undefined, // Keep default bufferSize
       undefined, // Keep default maxConcurrency
       options
     );
+
+    const filename = (
+      `https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/` +
+      `${process.env.OIDC_AZURE_STORAGE_CONTAINER}/${blobName}`
+    );
+    return filename;
   },
 
   async get(container, blob) {
