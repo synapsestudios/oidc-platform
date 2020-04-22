@@ -27,9 +27,6 @@ var config = {
     aws: {
       s3Bucket: process.env.OIDC_S3_BUCKET,
     },
-    azure: {
-      storageContainer: process.env.OIDC_AZURE_STORAGE_CONTAINER,
-    },
     clientInitiatedLogout: process.env.CLIENT_INITIATED_LOGOUT === 'true' ? true : false,
     userRegistration: process.env.ENABLE_USER_REGISTRATION === 'true' ? true : false,
     webhooks: process.env.ENABLE_WEBHOOKS === 'true' ? {

@@ -15,8 +15,15 @@ async function streamToString(readableStream) {
 }
 
 module.exports = {
-  upload() {
-
+  async upload(stream, blobName, contentType) {
+    const containerClient = blobServiceClient.getContainerClient(process.env.OIDC_AZURE_STORAGE_CONTAINER);
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    return blockBlobClient.uploadStream(stream, {
+      blobHTTPHeaders: {
+        blobContentType: contentType,
+        blobCacheControl: 'public, must-revalidate, proxy-revalidate, max-age=0'
+      }
+    });
   },
 
   async get(container, blob) {
