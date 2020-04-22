@@ -15,7 +15,7 @@ const initialize = factory => {
         'clientRedirectUri',
         {
           client_id: model.get('client_id'),
-          uri: model.get('client_uri') + '/redirect'
+          uri: model.get('client_uri') + '/'
         }
       )
       return model;

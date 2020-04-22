@@ -1,4 +1,3 @@
-const logger = require('../../lib/logger');
 const storageAdapter = require('../../lib/storage-adapter');
 
 module.exports = () => ({
