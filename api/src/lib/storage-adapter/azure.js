@@ -35,13 +35,10 @@ module.exports = {
       }
     };
 
-    // Have to include these or the upload has zero bytes and no content type.
-    const defaults = { bufferSize: 8 * 1024 * 1024, maxBuffers: 5 };
-
     return blockBlobClient.uploadStream(
       stream,
-      defaults.bufferSize,
-      defaults.maxBuffers,
+      undefined, // Keep default bufferSize
+      undefined, // Keep default maxConcurrency
       options
     );
   },
