@@ -49,6 +49,16 @@ Now you have a `keystores.json` file. Put that in an AWS S3 bucket and configure
 
 When `KEYSTORE` and `KEYSTORE_BUCKET` are provided the Synapse OpenID Provider will attempt to pull the keystores from S3 when the node service starts. If you provide the `KEYSTORE` and `KEYSTORE_BUCKET` variables but NOT the AWS credential variables then the provider api will fail to start.
 
+Alternatively, the keystore can be placed in an Azure Blob Storage container. In that case, the following environment variables must be set:
+
+| Environment Variables    | Description |
+| ------------------------ | ----------- |
+| OIDC_STORAGE_DRIVER      | This must be set to azure_blob_storage, otherwise s3 will be used |
+| KEYSTORE                 | The name of your keystore file |
+| KEYSTORE_CONTAINER       | The name of the container your keystore can be found in |
+| AZURE_STORAGE_ACCOUNT    | The name of the storage account |
+| AZURE_STORAGE_ACCESS_KEY | Secret access key |
+
 ## Database
 
 The OIDC Platform supports Postgres or MySQL. The database server is not packaged with the OIDC platform. You must create a blank database and provide connection details to the OIDC Platform through environment variables.
@@ -97,6 +107,14 @@ Users can upload profile pictures when editing their profile. The platform makes
 | AWS_ACCESS_KEY        | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 | AWS_SECRET_ACCESS_KEY | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 
+If you are storing your keystore using Azure Blob Storage, then your uploads will also use Azure. In that case, make sure the following variables are defined:
+
+| Environment Variables        | Description |
+| ---------------------------- | ----------- |
+| OIDC_STORAGE_DRIVER          | This must be set to azure_blob_storage, otherwise s3 will be used |
+| AZURE_STORAGE_ACCOUNT        | The name of the storage account |
+| AZURE_STORAGE_ACCESS_KEY     | Secret access key |
+| OIDC_AZURE_STORAGE_CONTAINER | The name of the container where uploads will be stored |
 ## Webhooks
 
 | Environment Variables | Description |
