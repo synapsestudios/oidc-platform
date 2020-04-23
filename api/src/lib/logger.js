@@ -1,19 +1,19 @@
 const RollbarTransport = require('winston-rollbar-transport').default;
-const Sentry = require('winston-raven-sentry');
 const winston = require('winston');
+const SentryTransport = require('@synapsestudios/winston-sentry');
+
 const transports = [new winston.transports.Console()];
-const config = require('../../config');
 
 if (process.env.SENTRY_DSN) {
-  transports.push(new Sentry({
-    dsn: process.env.SENTRY_DSN,
-    level: 'error',
-    config: {
-      environment: config('/env'),
-    },
-  }));
+  const Sentry = require('./sentry');
+  transports.push(
+    new SentryTransport({
+      Sentry,
+      // Filter out timestamp so errors are grouped together better
+      formatter: (options) => options.message.replace(/\d{6}\/\d{6}\.\d{3},\s\[.*\]\smessage:\s(.*),\s.*/, '$1')
+    })
+  )
 }
-
 
 if (process.env.ROLLBAR_ACCESS_TOKEN) {
   transports.push(new RollbarTransport({
