@@ -58,7 +58,10 @@ module.exports = {
     return downloaded;
   },
 
-  delete() {
-
+  delete(pathToBlob) {
+    const blobName = pathToBlob.replace(`${process.env.OIDC_AZURE_STORAGE_CONTAINER}/`, '');
+    const containerClient = blobServiceClient.getContainerClient(process.env.OIDC_AZURE_STORAGE_CONTAINER);
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    return blockBlobClient.delete();
   },
 };
