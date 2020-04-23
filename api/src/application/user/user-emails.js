@@ -13,7 +13,6 @@ module.exports = (emailService, themeService, emailTokenService) => {
     html = renderedTemplate;
     subject = template && template.get('options') && template.get('options').subject || subject;
     from = template && template.get('options') && template.get('options').from || from;
-
     await emailService.send({to, subject, html, from});
   };
 

@@ -84,15 +84,16 @@ npm run migrate
 
 ## Email
 
-The OIDC platform provides some features that will send emails. In order to send emails the OIDC Provider needs to be configured to use an email service. Currently the platform only supports [mailgun](https://www.mailgun.com/) and [AWS SES](https://aws.amazon.com/ses/). Configuring your email provider occurs in environment variables.
+The OIDC platform provides some features that will send emails. In order to send emails the OIDC Provider needs to be configured to use an email service. Currently the platform supports [mailgun](https://www.mailgun.com/), [AWS SES](https://aws.amazon.com/ses/), and [SendGrid](https://sendgrid.com/). Configuring your email provider occurs in environment variables.
 
 | Environment Variables | Provider | Description |
 | --------------------- | -------- | ----------- |
-| OIDC_EMAIL_DRIVER     | both     | Tell the platform which email provider to user. Value can be either 'ses' or 'mailgun' |
-| OIDC_EMAIL_DOMAIN     | both     | The domain to send emails from |
-| OIDC_EMAIL_WHITELIST  | both     | A whitelist of domains (comma separated) that emails can be sent to. If OIDC_EMAIL_WHITELIST is not set then the whitelist feature will not be used |
-| OIDC_EMAIL_TRAP       | both     | If whitelist check fails then the email will be sent to the email specified by OIDC_EMAIL_TRAP |
+| OIDC_EMAIL_DRIVER     | all      | Tell the platform which email provider to user. Value can be either 'ses', 'sendgrid' or 'mailgun' |
+| OIDC_EMAIL_DOMAIN     | all      | The domain to send emails from |
+| OIDC_EMAIL_WHITELIST  | all      | A whitelist of domains (comma separated) that emails can be sent to. If OIDC_EMAIL_WHITELIST is not set then the whitelist feature will not be used |
+| OIDC_EMAIL_TRAP       | all      | If whitelist check fails then the email will be sent to the email specified by OIDC_EMAIL_TRAP |
 | MAILGUN_API_KEY       | mailgun  | If you're using mailgun you must provide an api key |
+| SENDGRID_API_KEY      | sendgrid | If you're using SendGrid you must provide an api key |
 | AWS_ACCESS_KEY        | ses      | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 | AWS_SECRET_ACCESS_KEY | ses      | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 
