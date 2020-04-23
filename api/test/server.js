@@ -2,27 +2,17 @@ const Glue = require('glue');
 const ioc = require('electrolyte');
 const manifestPromise = require('../manifest');
 const keystore = require('../keystore');
-const s3 = require('../src/lib/s3');
+const storageAdapter = require('../src/lib/storage-adapter');
 const bookshelf = require('../src/lib/bookshelf');
 
 // Prevent s3 calls that happen on initialize
-s3.getObject = function(params) {
-  // If retrieving the keystore used to sign JWTs, return from local file
-  if (
-    params.Bucket === process.env.KEYSTORE_BUCKET &&
-    params.Key === process.env.KEYSTORE
-  ) {
-    return {
-      promise: () => new Promise(
-        resolve => resolve({
-          Body: Buffer.from(JSON.stringify(keystore))
-        })
-      )
-    };
+storageAdapter.get = function(container, key) {
+  if (key === process.env.KEYSTORE) {
+    return Promise.resolve(JSON.stringify(keystore));
   } else {
     throw new Error('Not expecting getObject call');
   }
-};
+}
 
 const options = {
   relativeTo: __dirname + '/../src',
