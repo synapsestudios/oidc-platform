@@ -84,7 +84,7 @@ npm run migrate
 
 ## Email
 
-The OIDC platform provides some features that will send emails. In order to send emails the OIDC Provider needs to be configured to use an email service. Currently the platform only supports [mailgun](https://www.mailgun.com/) and [AWS SES](https://aws.amazon.com/ses/). Configuring your email provider occurs in environment variables.
+The OIDC platform provides some features that will send emails. In order to send emails the OIDC Provider needs to be configured to use an email service. Currently the platform supports [mailgun](https://www.mailgun.com/), [AWS SES](https://aws.amazon.com/ses/), and [SendGrid](https://sendgrid.com/). Configuring your email provider occurs in environment variables.
 
 | Environment Variables | Provider | Description |
 | --------------------- | -------- | ----------- |
