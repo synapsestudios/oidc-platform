@@ -31,10 +31,12 @@ describe(`POST /api/invite`, () => {
   it(`invites user`, async () => {
     const sendEmailMock = await mockSendEmail();
 
+    await client.load('redirect_uris');
+
     const payload = {
       client_id: client.get('client_id'),
       email: 'test@syn0.com',
-      redirect_uri: `${client.get('client_uri')}/redirect`,
+      redirect_uri: client.related('redirect_uris').at(0).get('uri'),
       response_type: 'something',
       scope: 'scope',
     };
