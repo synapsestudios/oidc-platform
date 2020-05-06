@@ -8,8 +8,6 @@ var options = {
   relativeTo: __dirname + '/src'
 };
 
-
-
 manifestPromise.then(manifest => {
   Glue.compose(manifest, options, async function(err, server) {
     if (err) {
