@@ -8,6 +8,8 @@ var options = {
   relativeTo: __dirname + '/src'
 };
 
+
+
 manifestPromise.then(manifest => {
   Glue.compose(manifest, options, async function(err, server) {
     if (err) {
@@ -63,8 +65,17 @@ manifestPromise.then(manifest => {
         for (let i = 0; i < server.connections.length; i++) {
           const message = `${server.connections[i].info.protocol === 'https' ? 'SSL ' : ''}Server running at: ${server.connections[i].info.uri}`
           server.log(['info'], message);
+
+          const keepAliveTimeout = process.env.KEEP_ALIVE_TIMEOUT || 60;
+
+          // keep tcp connections open a bit longer than the load balancer's timeout to prevent hangups that cause 502s
+          server.connections[i].listener.keepAliveTimeout = (keepAliveTimeout * 1000) + 5000;
+          // headersTimeout timer starts _after_ keep-alive timer has started so give it a 1 second buffer to prevent hangups
+          server.connections[i].listener.headersTimeout = (keepAliveTimeout * 1000) + 6000;
         }
       });
+
+
     } catch (e) {
       server.log(['error'], e);
     }
