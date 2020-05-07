@@ -17,6 +17,7 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | REDIS_HOST                | Set if different from default 'localhost' |
 | REDIS_PORT                | Set if different from default '6379' |
 | ENABLE_USER_SESSION_TRACKING | Set to true if you want to enable session tracking by user id in order to bulk delete sessions by user id at the `/user/invalidate-user-sessions` endpoint. |
+| KEEP_ALIVE_TIMEOUT | Duration for which OIDC will keep connections open with the client. This setting should be at least as long as the client's expecting connections to remain open e.g. ELB's `Idle timeout` setting. |
 
 ## Keystores
 **DEPRECATION WARNING:** The Synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but **DO NOT USE THE DEFAULTS IN PRODUCTION**. Use of these keys in a non-development environment will be removed in the next version and OIDC will not start.
