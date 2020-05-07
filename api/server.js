@@ -72,8 +72,6 @@ manifestPromise.then(manifest => {
           server.connections[i].listener.headersTimeout = (keepAliveTimeout * 1000) + 1000;
         }
       });
-
-
     } catch (e) {
       server.log(['error'], e);
     }
