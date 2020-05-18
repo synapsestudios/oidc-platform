@@ -39,19 +39,16 @@ module.exports = function () {
           throw 'attachments must be an array';
         }
 
-        mail.attachments = emailObject.attachments.map(attachment => {
-          if (typeof attachment.data === 'string') {
-            attachment.data = new Buffer(attachment.data);
-          }
-
-          return {
-            type: attachment.contentType,
-            filename: attachment.filename,
-            content: attachment.data,
-            disposition: 'attachment',
-            contentId: '',
-          };
-        });
+        mail.attachments = emailObject.attachments.map(attachment => ({
+          type: attachment.contentType,
+          filename: attachment.filename,
+          content:
+            typeof attachment.data === 'string'
+              ? new Buffer(attachment.data)
+              : attachment.data,
+          disposition: 'attachment',
+          contentId: '',
+        }));
       }
 
       try {
