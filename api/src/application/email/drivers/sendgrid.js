@@ -1,10 +1,10 @@
 const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const checkWhitelist = require('../check-whitelist');
 const logger = require('../../../lib/logger');
 
 module.exports = function () {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
   return {
     send: async (emailObject) => {
@@ -39,32 +39,25 @@ module.exports = function () {
           throw 'attachments must be an array';
         }
 
-        const attachments = [];
-        emailObject.attachments.forEach((attachment) => {
-
-          if (typeof attachment.data === 'string') {
-            attachment.content = new Buffer(attachment.data);
-          }
-
-          attachments.push(new mailgunClient.Attachment({
-            type: attachment.contentType,
-            filename: attachment.filename,
-            content: attachment.data,
-            disposition: 'attachment',
-            contentId: '',
-          }));
-        });
-        mail.attachments = attachments;
+        mail.attachments = emailObject.attachments.map(attachment => ({
+          type: attachment.contentType,
+          filename: attachment.filename,
+          content:
+            typeof attachment.data === 'string'
+              ? new Buffer(attachment.data)
+              : attachment.data,
+          disposition: 'attachment',
+          contentId: '',
+        }));
       }
 
       try {
-        const response = await sgMail.send(mail);
-        return response;
+        return await sgMail.send(mail);
       } catch (error) {
         logger.error(error);
 
         if (error.response) {
-          logger.error(error.response.body)
+          logger.error(error.response.body);
         }
 
         throw error;
