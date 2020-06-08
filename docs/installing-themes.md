@@ -28,7 +28,7 @@ Templates are the individual screens that can be created. To create a new templa
 | email-verify-success | The success screen users see after clicking the verify link from their email |
 | email-verify-email | The email address verification email |
 | change-email-verify-email | The email sent to the new address with a verify link after the user changes their email |
-| change-email-alert-email | The eamil sent to the old address with an alert that the user's email has changed |
+| change-email-alert-email | The email sent to the old address with an alert that the user's email has changed |
 
 ##### Options
 
