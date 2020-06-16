@@ -17,7 +17,7 @@ var config = {
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD,
       userSessionTrackingEnabled: process.env.ENABLE_USER_SESSION_TRACKING || false,
-      tls: process.env.REDIS_TLS ? { port: process.env.TLS_PORT || 6380 } : undefined,
+      tls: process.env.REDIS_TLS ? { port: process.env.REDIS_TLS_PORT || 6380 } : undefined,
     },
     email: process.env.OIDC_EMAIL_DRIVER,
     oidc: {
