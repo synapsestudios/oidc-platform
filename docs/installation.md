@@ -16,6 +16,9 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | ENABLE_USER_REGISTRATION  | Set to true if you want to enable user registration at the `/user/register` endpoint. If this is disabled client initiated invites is the only way to make new users |
 | REDIS_HOST                | Set if different from default 'localhost' |
 | REDIS_PORT                | Set if different from default '6379' |
+| REDIS_PASSWORD            | Set if using password authentication for redis |
+| REDIS_TLS                 | Set to true if connecting to redis over SSL |
+| REDIS_TLS_PORT            | Set if different from default '6380' |
 | ENABLE_USER_SESSION_TRACKING | Set to true if you want to enable session tracking by user id in order to bulk delete sessions by user id at the `/user/invalidate-user-sessions` endpoint. |
 | KEEP_ALIVE_TIMEOUT | Duration for which OIDC will keep connections open with the client. This setting should be at least as long as the client's expecting connections to remain open e.g. ELB's `Idle timeout` setting. |
 
