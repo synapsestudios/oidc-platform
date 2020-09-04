@@ -1,6 +1,8 @@
 version: '2'
 services:
     api:
+       volumes:
+            - .:/src:delegated
        ports:
             - "9000:9000"
             - "9001:9001"
