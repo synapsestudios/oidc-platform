@@ -1,14 +1,7 @@
 const querystring = require('querystring');
-const formatError = require('../../lib/format-error');
-const get = require('lodash/get');
 const set = require('lodash/set');
 const omit = require('lodash/omit');
-const Uuid = require('uuid');
-const config = require('../../../config');
-const Boom = require('boom');
 const views = require('./user-views');
-const errorMessages = require('./user-error-messages');
-const userFormData = require('./user-form-data');
 const comparePasswords = require('../../lib/comparePasswords');
 const bookshelf = require('../../lib/bookshelf');
 const webhookService = require('../webhook/webhook-service');
@@ -29,10 +22,8 @@ const expandDotPaths = function(object) {
 
 module.exports = (
   userService,
-  emailService,
   imageService,
   themeService,
-  validationError,
   clientService,
   formHandler,
   userEmails,
@@ -239,10 +230,8 @@ module.exports = (
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
-  'email/email-service',
   'image/image-service',
   'theme/theme-service',
-  'validator/validation-error',
   'client/client-service',
   'form-handler',
   'user/user-emails',
