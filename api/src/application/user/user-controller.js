@@ -33,6 +33,7 @@ module.exports = (
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
       const profile = omit(request.payload, ['email', 'password', 'pass2']);
       user = await userService.create(request.payload.email, request.payload.password, { profile });
+      webhookService.trigger('user.registered', user);
       await userEmails.sendVerificationEmail(user, client, request.payload.email, request.query);
       reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
     }),
