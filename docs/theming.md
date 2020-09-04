@@ -38,6 +38,11 @@ Templates are the individual screens that can be created. To create a new templa
 
 For each template record in the `SIP_template` table there is an `options` json field. The only thing this is currently used for is that if you set this to `{"subject":"hello"}` on an email template then the subject from your options object will be used when sending the email.
 
+##### Additional Registration Fields
+
+The registration form is able to receive additional form values. Simply add extra input
+fields to your registration template. Any values other than email, password, and pass2 will be saved to the user's profile property.
+
 ##### Variables
 
 Each template will receive the same variables as the [layout](#layout). In addition each template will be provided with unique values that can be used.
