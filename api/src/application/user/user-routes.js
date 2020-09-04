@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const Boom = require('boom');
 const Readable = require('stream').Readable;
 const userFormData = require('./user-form-data');
 const views = require('./user-views');
@@ -439,21 +440,38 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
         validate : {
           failAction : controller.registerHandler,
           query : queryValidation,
-        }
+      }
       },
     }, {
       method : 'POST',
       path : '/user/register',
       handler : controller.registerHandler,
       config : {
+        pre: [
+          { method: async (request, reply) => {
+            try {
+              await emailValidator(request.payload.email);
+            } catch (error) {
+              const boomError = Boom.badRequest(null, { details: [
+                {
+                  path: 'email',
+                  message: error.message,
+                }
+              ]});
+              return reply(boomError);
+            }
+            reply.continue();
+          },
+          failAction: 'ignore', // makes it assign the error instead of returning it
+          assign: 'error',
+        }
+        ],
         validate : {
-          payload : mixedValidation({
+          payload : Joi.object().keys({
             email: Joi.string().email().regex(/[\*%]+/g, { invert: true }).required(),
             password : Joi.string().min(8).required(),
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
-          }, {
-            email: emailValidator,
-          }),
+          }).unknown(true),
           query : queryValidation,
           failAction : controller.registerHandler,
         }

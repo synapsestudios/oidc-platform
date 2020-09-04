@@ -2,6 +2,7 @@ const querystring = require('querystring');
 const formatError = require('../../lib/format-error');
 const get = require('lodash/get');
 const set = require('lodash/set');
+const omit = require('lodash/omit');
 const Uuid = require('uuid');
 const config = require('../../../config');
 const Boom = require('boom');
@@ -39,7 +40,8 @@ module.exports = (
 ) => {
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
-      user = await userService.create(request.payload.email, request.payload.password)
+      const profile = omit(request.payload, ['email', 'password', 'pass2']);
+      user = await userService.create(request.payload.email, request.payload.password, { profile });
       await userEmails.sendVerificationEmail(user, client, request.payload.email, request.query);
       reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
     }),

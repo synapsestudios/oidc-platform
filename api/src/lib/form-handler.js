@@ -3,7 +3,9 @@ module.exports = (
   themeService,
   clientService
 ) => {
-  return (templateName, getView, postHandler, ...rest) => async (request, reply, source, error) => {
+  return (templateName, getView, postHandler, ...rest) => async (request, reply, source, err) => {
+    const error = err || request.pre.error;
+    console.log('handling the form', JSON.stringify(error));
     if (error && error.output.statusCode === 404) {
       return reply(error);
     }
