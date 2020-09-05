@@ -8,7 +8,6 @@ const userSessionTracking = require('../../../config')('/redis/userSessionTracki
 const userRegistration = require('../../../config')('/userRegistration');
 const bookshelf = require('../../lib/bookshelf');
 
-
 module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, emailChangeTokenValidator, clientValidator) => {
   const queryValidation = mixedValidation({
     client_id: Joi.string().required(),
@@ -447,31 +446,29 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
       path : '/user/register',
       handler : controller.registerHandler,
       config : {
-        pre: [
-          { method: async (request, reply) => {
-            try {
-              await emailValidator(request.payload.email);
-            } catch (error) {
-              const boomError = Boom.badRequest(null, { details: [
-                {
-                  path: 'email',
-                  message: error.message,
-                }
-              ]});
-              return reply(boomError);
-            }
-            reply.continue();
-          },
-          failAction: 'ignore', // makes it assign the error instead of returning it
-          assign: 'error',
-        }
-        ],
         validate : {
-          payload : Joi.object().keys({
+          payload : mixedValidation({
             email: Joi.string().email().regex(/[\*%]+/g, { invert: true }).required(),
             password : Joi.string().min(8).required(),
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
-          }).unknown(true),
+            // optional profile values
+            name: Joi.string().allow('').optional(),
+            given_name: Joi.string().allow('').optional(),
+            family_name: Joi.string().allow('').optional(),
+            middle_name: Joi.string().allow('').optional(),
+            nickname: Joi.string().allow('').optional(),
+            preferred_username: Joi.string().allow('').optional(),
+            profile: Joi.string().uri().allow('').optional(),
+            website: Joi.string().uri().allow('').optional(),
+            email: Joi.string().email().allow('').optional(),
+            gender: Joi.string().allow('').optional(),
+            birthdate: Joi.string().isoDate().allow('').optional(),
+            zoneinfo: Joi.string().valid(userFormData.timezones).optional(),
+            locale: Joi.string().valid(Object.keys(userFormData.locales)).optional(),
+            phone_number: Joi.string().allow('').optional(),
+          }, {
+            email: emailValidator
+          }),
           query : queryValidation,
           failAction : controller.registerHandler,
         }

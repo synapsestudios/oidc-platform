@@ -42,6 +42,21 @@ For each template record in the `SIP_template` table there is an `options` json 
 
 The registration form is able to receive additional form values. Simply add extra input
 fields to your registration template. Any values other than email, password, and pass2 will be saved to the user's profile property.
+Valid fields include:
+
+  'name',
+  'given_name',
+  'family_name',
+  'middle_name',
+  'nickname',
+  'preferred_username',
+  'profile',
+  'website',
+  'gender',
+  'birthdate',
+  'zoneinfo',
+  'locale',
+  'phone_number',
 
 ##### Variables
 

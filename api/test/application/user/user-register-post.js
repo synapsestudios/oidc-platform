@@ -49,7 +49,6 @@ describe(`POST /api/invite`, () => {
       password: 'synapse1',
       pass2: 'synapse1',
       name: uuid.v4(),
-      occupation: uuid.v4(),
     };
 
     const res = await server.inject({
@@ -64,7 +63,6 @@ describe(`POST /api/invite`, () => {
 
     expect(res.statusCode).to.equal(302);
     expect(user.get('profile').name).to.equal(payload.name);
-    expect(user.get('profile').occupation).to.equal(payload.occupation);
   });
 
   it(`triggers user.registered webhook`, async () => {
