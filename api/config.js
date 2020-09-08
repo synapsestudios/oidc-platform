@@ -43,7 +43,11 @@ var config = {
   'qa': {},
   'staging': {},
   'production': {},
-  'test': {},
+  'test': {
+    dbConnection: {
+      database: `${process.env.OIDC_DB_NAME}_test`,
+    },
+  },
 };
 
 module.exports = function(path, criteria) {

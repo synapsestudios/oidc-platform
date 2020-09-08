@@ -12,7 +12,9 @@
     "migrate-seed": "knex migrate:latest && knex seed:run",
     "generate-keys": "node src/bin/generate-keys.js",
     "migrate": "knex migrate:latest",
-    "test": "lab -lv"
+    "test": "NODE_ENV=test knex migrate:latest && lab -lv",
+    "create-test-db": "node ./src/bin/create-test-db.js",
+    "rebuild-db-for-tests": "NODE_ENV=test npm run create-test-db && NODE_ENV=test npm run drop-tables && NODE_ENV=test knex migrate:latest"
   },
   "repository": {
     "type": "git",
