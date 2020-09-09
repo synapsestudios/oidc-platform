@@ -9,7 +9,7 @@ const getValidationMessages = function(error) {
 
   if (error) {
     error = formatError(error);
-    error.output.payload.validationErrors.forEach(errorObj => {
+    get(error, 'output.payload.validationErrors', []).forEach(errorObj => {
       validationErrorMessages[errorObj.key] = validationErrorMessages[errorObj.key] || [];
 
       if (errorMessages[errorObj.key] && errorMessages[errorObj.key][errorObj.type]) {

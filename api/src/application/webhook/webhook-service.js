@@ -9,6 +9,7 @@ const uuid = require('uuid');
 module.exports = {
   events: [
     'user.update',
+    'user.registered',
     'user.accept-invite',
   ],
 

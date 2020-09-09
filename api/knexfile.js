@@ -16,6 +16,21 @@ module.exports = {
     }
   },
 
+  test : {
+    client   : config('/dbAdapter'),
+    seeds    : {
+      directory : './seeds/dev'
+    },
+    connection : config('/dbConnection'),
+    pool : {
+      min : 2,
+      max : 10
+    },
+    migrations : {
+      tableName : 'oidc_migrations'
+    }
+  },
+
   qa : {
     client   : config('/dbAdapter'),
     seeds    : {

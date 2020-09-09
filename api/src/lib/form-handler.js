@@ -3,7 +3,8 @@ module.exports = (
   themeService,
   clientService
 ) => {
-  return (templateName, getView, postHandler, ...rest) => async (request, reply, source, error) => {
+  return (templateName, getView, postHandler, ...rest) => async (request, reply, source, err) => {
+    const error = err || request.pre.error;
     if (error && error.output.statusCode === 404) {
       return reply(error);
     }
@@ -12,7 +13,7 @@ module.exports = (
       const client = await clientService.findById(request.query.client_id);
 
       if (!client) {
-        reply('404: Client not found').code(404);
+        return reply('404: Client not found').code(404);
       }
 
       let user = null;
@@ -38,7 +39,7 @@ module.exports = (
       };
 
       if (!error && request.method === 'post') {
-        error = await postHandler(request, reply, user, client, render, ...rest);
+        await postHandler(request, reply, user, client, render, ...rest);
       } else {
         await render(error);
       }
