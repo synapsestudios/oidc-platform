@@ -6,4 +6,5 @@ module.exports = {
   clientSecret: '',
   identityServer: 'https://sso-client.test:9000/',
   testServer: 'https://localhost:8080/',
+  responseType: 'code_id id_token token',
 };
