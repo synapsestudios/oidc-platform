@@ -271,6 +271,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             nonce: Joi.string().optional(),
             login: Joi.string().optional(),
+            code_challenge: Joi.string().optional(),
           },{
             client_id: clientValidator,
           })
@@ -293,6 +294,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             nonce: Joi.string().optional(),
             login: Joi.string().optional(),
+            code_challenge: Joi.string().optional(),
           },{
             client_id: clientValidator,
           }),
@@ -317,6 +319,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             nonce: Joi.string().optional(),
             login: Joi.string().optional(),
+            code_challenge: Joi.string().optional(),
           }, {
             client_id: clientValidator,
           }),
@@ -344,6 +347,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             nonce: Joi.string().optional(),
             login: Joi.string().optional(),
+            code_challenge: Joi.string().optional(),
           }, {
             client_id: clientValidator,
           }),
@@ -439,7 +443,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
         validate : {
           failAction : controller.registerHandler,
           query : queryValidation,
-      }
+        }
       },
     }, {
       method : 'POST',
