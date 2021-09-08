@@ -1,0 +1,17 @@
+{
+  "testFiles": ["**/*.{feature,features}", "**/*.spec.{ts,js}"],
+  "viewportWidth": 1536,
+  "viewportHeight": 960,
+  "hosts": {
+    "*.localhost": "127.0.0.1",
+    "sso-client.test": "127.0.0.1"
+  },
+  "video": false,
+  "env": {
+    "frontend_base_url": "https://sso-client.test:3000",
+    "oids_base_url": "https://sso-client.test:9000",
+    "api_base_url": "http://localhost:9001"
+  },
+  "scrollBehavior": "center",
+  "chromeWebSecurity": false
+}
