@@ -1,13 +1,13 @@
 /* eslint @typescript-eslint/no-var-requires: 0 */
 const main = async () => {
-  const client = require('knex')({
-    client: 'pg',
+  const client = require("knex")({
+    client: "pg",
     connection: {
-      host : process.env.DB_HOST || 'localhost',
-      user : 'postgres',
-      password : 'synapse1',
-      database : 'database_vm'
-    }
+      host: process.env.DB_HOST || "localhost",
+      user: "postgres",
+      password: "synapse1",
+      database: "database_vm",
+    },
   });
 
   await client.raw(`

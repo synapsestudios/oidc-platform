@@ -1,5 +1,5 @@
 export class db {
   static reinit() {
-    cy.exec('node scripts/reset-db');
+    cy.exec("node scripts/reset-db");
   }
 }
