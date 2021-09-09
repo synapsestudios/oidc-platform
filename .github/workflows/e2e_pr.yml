@@ -103,8 +103,8 @@ jobs:
       REDIS_PORT: 6379
       COOKIE_KEY: cookie
       OLD_COOKIE_KEY: oldcookie
-      AWS_ACCESS_KEY_ID: AKIA3ZMVPP4BADSDAXVE
-      AWS_SECRET_ACCESS_KEY: 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
+      AWS_ACCESS_KEY_ID: AAAAAAAAAAAAAAAAAAAA
+      AWS_SECRET_ACCESS_KEY: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       AWS_REGION: us-west-2
     steps:
       - uses: actions/checkout@v2
