@@ -1,0 +1,11 @@
+name: "Create OIDC Client"
+description: "Create an OIDC client for use in workflows"
+outputs:
+  client_id:
+    description: "The ID of the newly created OIDC client"
+  client_secret:
+    description: "The secret key of the newly created OIDC client"
+runs:
+  using: "node14"
+  main: "index.js"
+  post: "cleanup.js"
