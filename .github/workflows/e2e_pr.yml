@@ -12,24 +12,24 @@ jobs:
           concurrent_skipping: 'never'
           paths: '["api/**/*", "test-client/**/*", "e2e/**/*", ".github/workflows/e2e_pr.yml"]'
 
-  initialize_notification:
-    # needs: e2e_diff
-    # if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
-    name: Initialize Slack Message
-    runs-on: ubuntu-latest
-    outputs:
-      messageTs: ${{ steps.notification.outputs.messageTs }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Send acceptance Test Triggered Notification
-        id: notification
-        uses: synapsestudios/build-status@main
-        with:
-          type: 'trigger'
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
-          channel: 'CUVU8NYAY'
+  # initialize_notification:
+  #   needs: e2e_diff
+  #   if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
+  #   name: Initialize Slack Message
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     messageTs: ${{ steps.notification.outputs.messageTs }}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+  #     - name: Send e2e Test Triggered Notification
+  #       id: notification
+  #       uses: synapsestudios/build-status@main
+  #       with:
+  #         type: 'trigger'
+  #         githubToken: ${{ secrets.GITHUB_TOKEN }}
+  #         token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+  #         channel: 'CUVU8NYAY'
 
   e2e_commit_stage:
     # needs: e2e_diff
@@ -65,8 +65,8 @@ jobs:
         run: npm run prettier:ci
 
   e2e_tests:
-  #   needs: e2e_diff
-  #   if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
+    needs: [e2e_diff, initialize_notification]
+    if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -109,14 +109,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up notifications
-        uses: synapsestudios/build-status@main
-        with:
-          messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
-          jobStatus: ${{ job.status }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
-          channel: 'CUVU8NYAY'
+      # - name: Set up notifications
+      #   uses: synapsestudios/build-status@main
+      #   with:
+      #     messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
+      #     jobStatus: ${{ job.status }}
+      #     githubToken: ${{ secrets.GITHUB_TOKEN }}
+      #     token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+      #     channel: 'CUVU8NYAY'
 
       - name: Setup node
         uses: actions/setup-node@v1
