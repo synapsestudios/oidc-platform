@@ -65,8 +65,8 @@ jobs:
         run: npm run prettier:ci
 
   e2e_tests:
-    needs: [e2e_diff, initialize_notification]
-    if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
+    # needs: [e2e_diff, initialize_notification]
+    # if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
