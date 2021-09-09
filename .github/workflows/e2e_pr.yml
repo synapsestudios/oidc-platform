@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Send acceptance Test Triggered Notification
         id: notification
-        uses: synapsestudios/build-status
+        uses: synapsestudios/build-status@main
         with:
           type: 'trigger'
           githubToken: ${{ secrets.GITHUB_TOKEN }}
@@ -110,7 +110,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Set up notifications
-        uses: synapsestudios/build-status
+        uses: synapsestudios/build-status@main
         with:
           messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
           jobStatus: ${{ job.status }}
