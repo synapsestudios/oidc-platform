@@ -167,8 +167,7 @@ jobs:
         if: steps.api-npm-cache.outputs.cache-hit != 'true'
 
       - name: Add sso-client.test host
-        run: |
-          sudo echo "sso-client.test 0.0.0.0" | sudo tee -a /etc/hosts
+        run: sudo echo "sso-client.test 0.0.0.0" | sudo tee -a /etc/hosts
 
       - name: Perform database migrations
         working-directory: api
@@ -189,12 +188,12 @@ jobs:
       - name: Create test-client config
         run: |
           cp src/config.template.js src/config.js
-          sed -E -i "" -e "s/clientId: ''/clientId: '$INPUT_CLIENT_ID'/g" src/config.js
-          sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$INPUT_CLIENT_SECRET'/g" src/config.js
+          sed -E -i "" -e "s/clientId: ''/clientId: '$CLIENT_ID'/g" src/config.js
+          sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
         working-directory: test-client
-        with:
-          client_id: ${{ steps.create_oidc_client.outputs.client_id }}
-          client_secret: ${{ steps.create_oidc_client.outputs.client_secret }}
+        env:
+          CLIENT_ID: ${{ steps.create_oidc_client.outputs.client_id }}
+          CLIENT_SECRET: ${{ steps.create_oidc_client.outputs.client_secret }}
 
       - name: Start frontend
         working-directory: frontend
