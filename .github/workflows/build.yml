@@ -62,7 +62,6 @@ jobs:
           push: false
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-          target: service
           tags: ${{ steps.artifact.outputs.artifact_name }}, ${{ steps.artifact.outputs.artifact_name_latest }}
 
       # Temp fix
