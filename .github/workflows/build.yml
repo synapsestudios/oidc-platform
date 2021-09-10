@@ -145,6 +145,14 @@ jobs:
       - name: Add sso-client.test host
         run: sudo echo "sso-client.test 0.0.0.0" | sudo tee -a /etc/hosts
 
+      - name: Start api
+        run: |
+          sh ./scripts/run-api-command.sh ${{ steps.artifact.outputs.artifact_name }} "npm run migrate:seed"
+          sh ./scripts/run-api.sh ${{ steps.artifact.outputs.artifact_name }} "npm start"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - id: create_oidc_client
         name: Create OIDC client
         uses: ./.github/actions/create-oidc-client
@@ -166,14 +174,6 @@ jobs:
         run: |
           npm start > frontend_logs 2>&1 &
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://sso-client.test:3000
-
-      - name: Start api
-        run: |
-          sh ./scripts/run-api-command.sh ${{ steps.artifact.outputs.artifact_name }} "npm run migrate:seed"
-          sh ./scripts/run-api.sh ${{ steps.artifact.outputs.artifact_name }} "npm start"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Run e2e tests
         working-directory: e2e
