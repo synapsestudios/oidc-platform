@@ -1,20 +1,12 @@
-name: e2e PR
+name: Build
 on: [pull_request]
+# on:
+#   push:
+#     branches:
+#       - main
+concurrency: build
 jobs:
-  e2e_diff:
-    runs-on: ubuntu-latest
-    outputs:
-      should_skip: true
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@master
-        with:
-          concurrent_skipping: 'never'
-          paths: '["api/**/*", "test-client/**/*", "e2e/**/*", ".github/workflows/e2e_pr.yml"]'
-
   # initialize_notification:
-  #   needs: e2e_diff
-  #   if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
   #   name: Initialize Slack Message
   #   runs-on: ubuntu-latest
   #   outputs:
@@ -22,51 +14,68 @@ jobs:
   #   steps:
   #     - name: Checkout
   #       uses: actions/checkout@v2
-  #     - name: Send e2e Test Triggered Notification
+  #     - name: Send Build Triggered Notification
   #       id: notification
   #       uses: synapsestudios/build-status@main
   #       with:
   #         type: 'trigger'
   #         githubToken: ${{ secrets.GITHUB_TOKEN }}
   #         token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
-  #         channel: 'CUVU8NYAY'
+  #         channel: 'C01T3HH1JP5'
 
-  e2e_commit_stage:
-    # needs: e2e_diff
-    # if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
+  build_api:
+    name: Build Api
+    # needs: initialize_notification
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: e2e
+    outputs:
+      artifact: ${{ steps.artifact.outputs.artifact_name }}
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - name: Setup node
-        uses: actions/setup-node@v1
+      # - name: Set up notifications
+      #   uses: synapsestudios/build-status@main
+      #   with:
+      #     messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
+      #     jobStatus: ${{ job.status }}
+      #     githubToken: ${{ secrets.GITHUB_TOKEN }}
+      #     token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+      #     channel: 'C01T3HH1JP5'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set commit output
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+      - name: Set artifact name output
+        id: artifact
+        run: |
+          echo "::set-output name=artifact_name::oidc-platform:${{steps.vars.outputs.sha_short}}"
+          echo "::set-output name=artifact_name_latest::oidc-platform:latest"
+
+      - name: Build
+        uses: docker/build-push-action@v2
         with:
-          node-version: '14'
+          context: ./api
+          push: false
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          target: service
+          tags: ${{ steps.artifact.outputs.artifact_name }}, ${{ steps.artifact.outputs.artifact_name_latest }}
 
-      - name: Cache e2e node_modules
-        uses: actions/cache@v2
-        id: e2e_commit_stage-e2e-npm-cache
-        with:
-          path: e2e/node_modules
-          key: e2e_commit_stage-e2e-npm-cache-${{ runner.os }}-modules-${{ hashFiles('e2e/package-lock.json') }}
+      # Temp fix
+      # https://github.com/docker/build-push-action/issues/252
+      # https://github.com/moby/buildkit/issues/1896
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-      - name: Install dependencies for e2e
-        run: npm i
-        if: steps.e2e_commit_stage-e2e-npm-cache.outputs.cache-hit != 'true'
-
-      - name: Run lint on e2e
-        run: npm run lint:ci
-
-      - name: Run prettier on e2e
-        run: npm run prettier:ci
-
-  e2e_tests:
-    # needs: [e2e_diff, initialize_notification]
-    # if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
+  acceptance_tests:
+    # needs: [acceptance_diff, initialize_notification]
+    # if: ${{ needs.acceptance_diff.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -86,26 +95,6 @@ jobs:
           - 5432:5432
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-    env:
-      OIDC_BASE_URL: https://0.0.0.0:9000
-      OIDC_DB_HOST: 0.0.0.0
-      OIDC_INITIAL_ACCESS_TOKEN: token1
-      OIDC_PAIRWISE_SALT: 0731adf16f1dcdf0422238808a407436
-      OIDC_EMAIL_DRIVER: ses
-      OIDC_EMAIL_DOMAIN: syn0.com
-      OIDC_EMAIL_WHITELIST: syn0.com
-      OIDC_EMAIL_TRAP: andrew@syn0.com
-      OIDC_S3_BUCKET: oidc-test-keystore
-      CLIENT_INITIATED_LOGOUT: true
-      ENABLE_USER_REGISTRATION: true
-      ENABLE_USER_SESSION_TRACKING: true
-      REDIS_HOST: 0.0.0.0
-      REDIS_PORT: 6379
-      COOKIE_KEY: cookie
-      OLD_COOKIE_KEY: oldcookie
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: us-west-2
     steps:
       - uses: actions/checkout@v2
 
@@ -125,61 +114,37 @@ jobs:
 
       - name: Cache e2e node_modules
         uses: actions/cache@v2
-        id: e2e_tests-e2e-npm-cache
+        id: acceptance_tests-e2e-npm-cache
         with:
           path: e2e/node_modules
-          key: e2e_tests-e2e-npm-cache-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+          key: acceptance_tests-e2e-npm-cache-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
       - name: Cache e2e Cypress binaries
         uses: actions/cache@v2
-        id: e2e_tests-e2e-cypress-binaries
+        id: acceptance_tests-e2e-cypress-binaries
         with:
           path: ~/.cache/Cypress
-          key: e2e_tests-e2e-cypress-binaries-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+          key: acceptance_tests-e2e-cypress-binaries-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
       - name: Cache frontend node_modules
         uses: actions/cache@v2
-        id: e2e_tests-frontend-npm-cache
+        id: acceptance_tests-frontend-npm-cache
         with:
           path: frontend/node_modules
-          key: e2e_tests-frontend-npm-cache-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
-
-      - name: Cache api node_modules
-        uses: actions/cache@v2
-        id: e2e_tests-api-npm-cache
-        with:
-          path: api/node_modules
-          key: e2e_tests-api-npm-cache-${{ runner.os }}-${{ hashFiles('api/package-lock.json') }}
+          key: acceptance_tests-frontend-npm-cache-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
 
       - name: Install dependencies for e2e
         run: npm i
         working-directory: e2e
-        if: steps.e2e_tests-api-npm-cache.outputs.cache-hit != 'true' || steps.e2e_tests-e2e-cypress-binaries.outputs.cache-hit != 'true'
+        if: steps.acceptance_tests-api-npm-cache.outputs.cache-hit != 'true' || steps.acceptance_tests-e2e-cypress-binaries.outputs.cache-hit != 'true'
 
       - name: Install dependencies for frontend
         run: npm i
         working-directory: test-client
-        if: steps.e2e_tests-frontend-npm-cache.outputs.cache-hit != 'true'
-
-      - name: Install dependencies for API
-        run: npm i
-        working-directory: api
-        if: steps.api-npm-cache.outputs.cache-hit != 'true'
+        if: steps.acceptance_tests-frontend-npm-cache.outputs.cache-hit != 'true'
 
       - name: Add sso-client.test host
         run: sudo echo "sso-client.test 0.0.0.0" | sudo tee -a /etc/hosts
-
-      - name: Perform database migrations
-        working-directory: api
-        run: npm run migrate-seed
-
-      - name: Start API
-        working-directory: api
-        env:
-          DUPLICATE_IMAGE_SIMILARITY_THRESHOLD: 0.85
-        run: |
-          npm run start > api_logs 2>&1 &
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://sso-client.test:9000/health-check
 
       - id: create_oidc_client
         name: Create OIDC client
@@ -202,6 +167,14 @@ jobs:
         run: |
           npm start > frontend_logs 2>&1 &
           wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://sso-client.test:3000
+
+      - name: Start api
+        run: |
+          sh ./scripts/run-api-command.sh ${{ steps.artifact.outputs.artifact_name }} "npm run migrate:seed"
+          sh ./scripts/run-api.sh ${{ steps.artifact.outputs.artifact_name }} "npm start"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Run e2e tests
         working-directory: e2e
