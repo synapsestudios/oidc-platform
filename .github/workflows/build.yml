@@ -73,7 +73,8 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   acceptance_tests:
-    # needs: [acceptance_diff, initialize_notification]
+    # needs: [acceptance_diff, initialize_notification
+    needs: build_api
     # if: ${{ needs.acceptance_diff.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     defaults:
