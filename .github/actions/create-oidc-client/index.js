@@ -1,4 +1,5 @@
 const core = require('@actions/core');
+const got = require('got');
 
 const execute = async () => {
   // @TODO Make these input variables
