@@ -6,6 +6,6 @@ outputs:
   client_secret:
     description: "The secret key of the newly created OIDC client"
 runs:
-  using: "node14"
+  using: "node12"
   main: "index.js"
   post: "cleanup.js"
