@@ -148,8 +148,8 @@ jobs:
 
       - name: Start api
         run: |
-          sh ./scripts/run-api-command.sh ${{ steps.artifact.outputs.artifact_name }} "npm run migrate:seed"
-          sh ./scripts/run-api.sh ${{ steps.artifact.outputs.artifact_name }} "npm start"
+          sh ./scripts/run-api-command.sh ${{ needs.build_api.outputs.artifact_name }} "npm run migrate:seed"
+          sh ./scripts/run-api.sh ${{ needs.build_api.outputs.artifact_name }} "npm start"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
