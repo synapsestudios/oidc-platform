@@ -156,9 +156,6 @@ jobs:
       - name: Add sso-client.test host
         run: sudo echo "0.0.0.0 sso-client.test" | sudo tee -a /etc/hosts
 
-      - name: cat hosts
-        run: cat /etc/hosts
-
       - name: Start api
         run: |
           sh ./scripts/run-api-command.sh oidc-platform:latest "npm run migrate-seed"
@@ -167,63 +164,68 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - id: create_oidc_client
+      - id: create_idc_client
         name: Create OIDC client
-        uses: ./.github/actions/create-oidc-client
-
-      - name: Create test-client config
         run: |
-          cp src/config.template.js src/config.js
-          sed -E -i "" -e "s/clientId: ''/clientId: '$CLIENT_ID'/g" src/config.js
-          sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
-        working-directory: test-client
-        env:
-          CLIENT_ID: ${{ steps.create_oidc_client.outputs.client_id }}
-          CLIENT_SECRET: ${{ steps.create_oidc_client.outputs.client_secret }}
+          curl curl -X POST http://0.0.0.0:9001/op/reg -H "Content-Type: "application/json" -H "Authorization: Bearer token1" -d {"response_types": ["code id_token token"],"grant_types": ["authorization_code","implicit","client_credentials"],"redirect_uris": ["https://sso-client.test:3000/"],"post_logout_redirect_uris": ["https://sso-client.test:3000/logout"]}
 
-      - name: Start frontend
-        working-directory: frontend
-        env:
-          CHOKIDAR_USEPOLLING: 1
-        run: |
-          npm start > frontend_logs 2>&1 &
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://sso-client.test:3000
+      # - id: create_oidc_client
+      #   name: Create OIDC client
+      #   uses: ./.github/actions/create-oidc-client
 
-      - name: Run e2e tests
-        working-directory: e2e
-        env:
-          CYPRESS_frontend_base_url: https://sso-client.test:3000
-          CYPRESS_oidc_base_url: https://sso-client.test:9000
-          CYPRESS_api_base_url: http://0.0.0.0:9001
-          # TODO: Determine if/how we can run this without CHOKIDAR_USEPOLLING
-          # https://github.com/synapsestudios/puppies.com/runs/3130846603
-          # Fixes error: "Error: ENOSPC: System limit for number of file watchers reached"
-          # This probably has something to do with the fact we are running the frontend in development mode
-          CHOKIDAR_USEPOLLING: 1
-        run: npm run test:ci
+      # - name: Create test-client config
+      #   run: |
+      #     cp src/config.template.js src/config.js
+      #     sed -E -i "" -e "s/clientId: ''/clientId: '$CLIENT_ID'/g" src/config.js
+      #     sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
+      #   working-directory: test-client
+      #   env:
+      #     CLIENT_ID: ${{ steps.create_oidc_client.outputs.client_id }}
+      #     CLIENT_SECRET: ${{ steps.create_oidc_client.outputs.client_secret }}
 
-      - name: 'Upload Cypress Screenshots'
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: cypress-screenshots
-          path: e2e/cypress/screenshots/
-          retention-days: 1
+      # - name: Start frontend
+      #   working-directory: frontend
+      #   env:
+      #     CHOKIDAR_USEPOLLING: 1
+      #   run: |
+      #     npm start > frontend_logs 2>&1 &
+      #     wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://sso-client.test:3000
 
-      - name: 'Upload Cypress Videos'
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: cypress-videos
-          path: e2e/cypress/videos/
-          retention-days: 1
+      # - name: Run e2e tests
+      #   working-directory: e2e
+      #   env:
+      #     CYPRESS_frontend_base_url: https://sso-client.test:3000
+      #     CYPRESS_oidc_base_url: https://sso-client.test:9000
+      #     CYPRESS_api_base_url: http://0.0.0.0:9001
+      #     # TODO: Determine if/how we can run this without CHOKIDAR_USEPOLLING
+      #     # https://github.com/synapsestudios/puppies.com/runs/3130846603
+      #     # Fixes error: "Error: ENOSPC: System limit for number of file watchers reached"
+      #     # This probably has something to do with the fact we are running the frontend in development mode
+      #     CHOKIDAR_USEPOLLING: 1
+      #   run: npm run test:ci
 
-      - name: Print frontend logs
-        if: always()
-        working-directory: frontend
-        run: cat frontend_logs
+      # - name: 'Upload Cypress Screenshots'
+      #   if: always()
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: cypress-screenshots
+      #     path: e2e/cypress/screenshots/
+      #     retention-days: 1
 
-      - name: Print API logs
-        if: always()
-        working-directory: api
-        run: cat api_logs
+      # - name: 'Upload Cypress Videos'
+      #   if: always()
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: cypress-videos
+      #     path: e2e/cypress/videos/
+      #     retention-days: 1
+
+      # - name: Print frontend logs
+      #   if: always()
+      #   working-directory: frontend
+      #   run: cat frontend_logs
+
+      # - name: Print API logs
+      #   if: always()
+      #   working-directory: api
+      #   run: cat api_logs
