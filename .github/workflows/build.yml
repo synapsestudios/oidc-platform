@@ -170,11 +170,11 @@ jobs:
 
       - id: client_id
         name: Extract client ID
-        run: echo "::set-output name=CLIENT_ID::$(echo ${{ steps.create_oidc_client.outputs.CLIENT_JSON }} | jq '.client_id')"
+        run: echo "::set-output name=CLIENT_ID::$(echo '${{ steps.create_oidc_client.outputs.CLIENT_JSON }}' | jq '.client_id')"
 
       - id: client_secret
         name: Extract client secret
-        run: echo "::set-output name=CLIENT_ID::$(echo ${{ steps.create_oidc_client.outputs.CLIENT_JSON }} | jq '.client_secret')"
+        run: echo "::set-output name=CLIENT_ID::$(echo '${{ steps.create_oidc_client.outputs.CLIENT_JSON }}' | jq '.client_secret')"
 
       # - id: create_oidc_client
       #   name: Create OIDC client
