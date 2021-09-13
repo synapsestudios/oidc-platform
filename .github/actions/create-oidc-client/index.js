@@ -16,8 +16,8 @@ const execute = async () => {
         'implicit',
         'client_credentials',
       ],
-      redirect_uris: ['https://0.0.0.0:3000/'],
-      post_logout_redirect_uris: ['https://0.0.0.0:3000/logout'],
+      redirect_uris: ['https://sso-client.test:3000/'],
+      post_logout_redirect_uris: ['https://sso-client.test:3000/logout'],
     },
   });
 
