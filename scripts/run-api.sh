@@ -10,4 +10,4 @@ docker run \
 # If you curl into nest too soon after starting it will close the connection without sending any packets
 # so we have to wait a bit to get past that nest bug
 sleep 5
-curl --connect-timeout 600 --retry 10 --retry-delay 3 --retry-connrefused https://sso-client.test:9000/health-check
+curl --connect-timeout 600 --retry 10 --retry-delay 3 --retry-connrefused --insecure https://sso-client.test:9000/health-check
