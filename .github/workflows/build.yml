@@ -195,7 +195,7 @@ jobs:
           CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
 
       - name: Start frontend
-        working-directory: frontend
+        working-directory: test-client
         env:
           CHOKIDAR_USEPOLLING: 1
         run: |
@@ -236,7 +236,7 @@ jobs:
         working-directory: frontend
         run: cat frontend_logs
 
-      - name: Print API logs
-        if: always()
-        working-directory: api
-        run: cat api_logs
+      # - name: Print API logs
+      #   if: always()
+      #   working-directory: api
+      #   run: cat api_logs
