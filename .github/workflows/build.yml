@@ -176,15 +176,8 @@ jobs:
         name: Extract client secret
         run: echo "::set-output name=CLIENT_ID::$(echo '${{ steps.create_oidc_client.outputs.CLIENT_JSON }}' | jq '.client_secret')"
 
-      - run: ls src
-        working-directory: test-client
-
       - name: Create test-client config
         run: cp src/config.template.js src/config.js
-        working-directory: test-client
-
-      - id: ls_src_2
-        run: ls src
         working-directory: test-client
 
       - name: Insert client id
@@ -194,9 +187,6 @@ jobs:
         env:
           CLIENT_ID: ${{ steps.client_id.outputs.client_id }}
 
-      - run: cat src/config.js
-        working-directory: test-client
-
       - name: Insert client secret
         run: |
           sed -i "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
@@ -204,49 +194,49 @@ jobs:
         env:
           CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
 
-      # - name: Start frontend
-      #   working-directory: frontend
-      #   env:
-      #     CHOKIDAR_USEPOLLING: 1
-      #   run: |
-      #     npm start > frontend_logs 2>&1 &
-      #     wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://sso-client.test:3000
+      - name: Start frontend
+        working-directory: frontend
+        env:
+          CHOKIDAR_USEPOLLING: 1
+        run: |
+          npm start > frontend_logs 2>&1 &
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://sso-client.test:3000
 
-      # - name: Run e2e tests
-      #   working-directory: e2e
-      #   env:
-      #     CYPRESS_frontend_base_url: https://sso-client.test:3000
-      #     CYPRESS_oidc_base_url: https://sso-client.test:9000
-      #     CYPRESS_api_base_url: http://0.0.0.0:9001
-      #     # TODO: Determine if/how we can run this without CHOKIDAR_USEPOLLING
-      #     # https://github.com/synapsestudios/puppies.com/runs/3130846603
-      #     # Fixes error: "Error: ENOSPC: System limit for number of file watchers reached"
-      #     # This probably has something to do with the fact we are running the frontend in development mode
-      #     CHOKIDAR_USEPOLLING: 1
-      #   run: npm run test:ci
+      - name: Run e2e tests
+        working-directory: e2e
+        env:
+          CYPRESS_frontend_base_url: https://sso-client.test:3000
+          CYPRESS_oidc_base_url: https://sso-client.test:9000
+          CYPRESS_api_base_url: http://0.0.0.0:9001
+          # TODO: Determine if/how we can run this without CHOKIDAR_USEPOLLING
+          # https://github.com/synapsestudios/puppies.com/runs/3130846603
+          # Fixes error: "Error: ENOSPC: System limit for number of file watchers reached"
+          # This probably has something to do with the fact we are running the frontend in development mode
+          CHOKIDAR_USEPOLLING: 1
+        run: npm run test:ci
 
-      # - name: 'Upload Cypress Screenshots'
-      #   if: always()
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: cypress-screenshots
-      #     path: e2e/cypress/screenshots/
-      #     retention-days: 1
+      - name: 'Upload Cypress Screenshots'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress-screenshots
+          path: e2e/cypress/screenshots/
+          retention-days: 1
 
-      # - name: 'Upload Cypress Videos'
-      #   if: always()
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: cypress-videos
-      #     path: e2e/cypress/videos/
-      #     retention-days: 1
+      - name: 'Upload Cypress Videos'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress-videos
+          path: e2e/cypress/videos/
+          retention-days: 1
 
-      # - name: Print frontend logs
-      #   if: always()
-      #   working-directory: frontend
-      #   run: cat frontend_logs
+      - name: Print frontend logs
+        if: always()
+        working-directory: frontend
+        run: cat frontend_logs
 
-      # - name: Print API logs
-      #   if: always()
-      #   working-directory: api
-      #   run: cat api_logs
+      - name: Print API logs
+        if: always()
+        working-directory: api
+        run: cat api_logs
