@@ -200,7 +200,7 @@ jobs:
           CHOKIDAR_USEPOLLING: 1
         run: |
           npm start > frontend_logs 2>&1 &
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 --no-check-certificate https://sso-client.test:3000
+          curl --connect-timeout 600 --retry 20 --retry-delay 10 --retry-connrefused --insecure https://sso-client.test:3000
 
       - name: Run e2e tests
         working-directory: e2e
