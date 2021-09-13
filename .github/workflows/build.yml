@@ -153,8 +153,8 @@ jobs:
         working-directory: test-client
         if: steps.acceptance_tests-frontend-npm-cache.outputs.cache-hit != 'true'
 
-      - name: Add sso-client.test host
-        run: sudo echo "sso-client.test 0.0.0.0" | sudo tee -a /etc/hosts
+      # - name: Add sso-client.test host
+      #   run: sudo echo "sso-client.test 0.0.0.0" | sudo tee -a /etc/hosts
 
       - name: Start api
         run: |
@@ -184,13 +184,13 @@ jobs:
           CHOKIDAR_USEPOLLING: 1
         run: |
           npm start > frontend_logs 2>&1 &
-          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://sso-client.test:3000
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://0.0.0.0:3000
 
       - name: Run e2e tests
         working-directory: e2e
         env:
-          CYPRESS_frontend_base_url: https://sso-client.test:3000
-          CYPRESS_oidc_base_url: https://sso-client.test:9000
+          CYPRESS_frontend_base_url: https://0.0.0.0:3000
+          CYPRESS_oidc_base_url: https://0.0.0.0:9000
           CYPRESS_api_base_url: http://0.0.0.0:9001
           # TODO: Determine if/how we can run this without CHOKIDAR_USEPOLLING
           # https://github.com/synapsestudios/puppies.com/runs/3130846603
