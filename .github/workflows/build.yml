@@ -154,7 +154,7 @@ jobs:
         if: steps.acceptance_tests-frontend-npm-cache.outputs.cache-hit != 'true'
 
       - name: Add sso-client.test host
-        run: sudo echo "sso-client.test 0.0.0.0" | sudo tee -a /etc/hosts
+        run: sudo echo "0.0.0.0 sso-client.test" | sudo tee -a /etc/hosts
 
       - name: cat hosts
         run: cat /etc/hosts
