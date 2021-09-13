@@ -23,15 +23,15 @@ jobs:
   #         token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
   #         channel: 'C01T3HH1JP5'
 
-  # build_api:
-  #   name: Build Api
-  #   # needs: initialize_notification
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     artifact: ${{ steps.artifact.outputs.artifact_name }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
+  build_api:
+    name: Build Api
+    # needs: initialize_notification
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: ${{ steps.artifact.outputs.artifact_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
       # - name: Set up notifications
       #   uses: synapsestudios/build-status@main
@@ -42,39 +42,35 @@ jobs:
       #     token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
       #     channel: 'C01T3HH1JP5'
 
-      # - name: Set up Docker Buildx
-      #   uses: docker/setup-buildx-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      # - name: Set commit output
-      #   id: vars
-      #   run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Set commit output
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
-      # - name: Set artifact name output
-      #   id: artifact
-      #   run: |
-      #     echo "::set-output name=artifact_name::oidc-platform:${{steps.vars.outputs.sha_short}}"
-      #     echo "::set-output name=artifact_name_latest::oidc-platform:latest"
+      - name: Set artifact name output
+        id: artifact
+        run: |
+          echo "::set-output name=artifact_name::oidc-platform:${{steps.vars.outputs.sha_short}}"
+          echo "::set-output name=artifact_name_latest::oidc-platform:latest"
 
-      # - name: Build
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: ./api
-      #     push: false
-      #     cache-from: type=local,src=/tmp/.buildx-cache
-      #     cache-to: type=local,dest=/tmp/.buildx-cache-new
-      #     tags: ${{ steps.artifact.outputs.artifact_name }}, ${{ steps.artifact.outputs.artifact_name_latest }}
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./api
+          tags: ${{ steps.artifact.outputs.artifact_name }}, ${{ steps.artifact.outputs.artifact_name_latest }}
+          outputs: type=docker,dest=/tmp/build.tar
 
-      # # Temp fix
-      # # https://github.com/docker/build-push-action/issues/252
-      # # https://github.com/moby/buildkit/issues/1896
-      # - name: Move cache
-      #   run: |
-      #     rm -rf /tmp/.buildx-cache
-      #     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: /tmp/build.tar
 
   acceptance_tests:
     # needs: [acceptance_diff, initialize_notification
-    # needs: build_api
+    needs: build_api
     # if: ${{ needs.acceptance_diff.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     defaults:
@@ -98,9 +94,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
       # - name: Set up notifications
       #   uses: synapsestudios/build-status@main
       #   with:
@@ -113,37 +106,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Set commit output
-        id: vars
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: /tmp
 
-      - name: Set artifact name output
-        id: artifact
+      - name: Load image
         run: |
-          echo "::set-output name=artifact_name::oidc-platform:${{steps.vars.outputs.sha_short}}"
-          echo "::set-output name=artifact_name_latest::oidc-platform:latest"
-
-      - name: Build
-        uses: docker/build-push-action@v2
-        with:
-          context: ./api
-          push: false
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
-          tags: ${{ steps.artifact.outputs.artifact_name }}, ${{ steps.artifact.outputs.artifact_name_latest }}
-
-      # Temp fix
-      # https://github.com/docker/build-push-action/issues/252
-      # https://github.com/moby/buildkit/issues/1896
-      # - name: Move cache
-      #   run: |
-      #     rm -rf /tmp/.buildx-cache
-      #     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-      - name: Upload image
-        uses: ishworkh/docker-image-artifact-upload@v1
-        with:
-          image: ${{ steps.artifact.outputs.artifact_name }}
+          docker load --input /tmp/build.tar
+          docker image ls -a
 
       - name: Setup node
         uses: actions/setup-node@v1
@@ -186,8 +158,8 @@ jobs:
 
       - name: Start api
         run: |
-          sh ./scripts/run-api-command.sh ${{ steps.artifact.outputs.artifact_name }} "npm run migrate:seed"
-          sh ./scripts/run-api.sh ${{ steps.artifact.outputs.artifact_name }} "npm start"
+          sh ./scripts/run-api-command.sh oidc-platform:latest "npm run migrate:seed"
+          sh ./scripts/run-api.sh oidc-platform:latest "npm start"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
