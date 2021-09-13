@@ -176,6 +176,9 @@ jobs:
         name: Extract client secret
         run: echo "::set-output name=CLIENT_ID::$(echo '${{ steps.create_oidc_client.outputs.CLIENT_JSON }}' | jq '.client_secret')"
 
+      - run: ls src
+        working-directory: test-client
+
       - name: Create test-client config
         run: |
           cp src/config.template.js src/config.js
@@ -186,7 +189,7 @@ jobs:
           CLIENT_ID: ${{ steps.client_id.outputs.client_id }}
           CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
 
-      - run: cat src/config
+      - run: cat src/config.js
         working-directory: test-client
 
       # - name: Start frontend
