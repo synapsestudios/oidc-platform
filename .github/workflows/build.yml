@@ -167,7 +167,7 @@ jobs:
       - id: create_idc_client
         name: Create OIDC client
         run: |
-          curl curl -X POST http://0.0.0.0:9001/op/reg -H "Content-Type: "application/json" -H "Authorization: Bearer token1" -d {"response_types": ["code id_token token"],"grant_types": ["authorization_code","implicit","client_credentials"],"redirect_uris": ["https://sso-client.test:3000/"],"post_logout_redirect_uris": ["https://sso-client.test:3000/logout"]}
+          curl -X POST http://0.0.0.0:9001/op/reg -H "Content-Type: application/json" -H "Authorization: Bearer token1" -d '{"response_types": ["code id_token token"],"grant_types": ["authorization_code","implicit","client_credentials"],"redirect_uris": ["https://sso-client.test:3000/"],"post_logout_redirect_uris": ["https://sso-client.test:3000/logout"]}'
 
       # - id: create_oidc_client
       #   name: Create OIDC client
