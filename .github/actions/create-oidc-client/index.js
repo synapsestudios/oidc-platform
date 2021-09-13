@@ -21,7 +21,10 @@ const execute = async () => {
     },
   });
 
-  if (!response.body.ok) throw new Error(response.body.error);
+  if (!response.body.ok) {
+    core.error(response.body.error);
+    throw new Error(response.body.error);
+  }
 
   core.setOutput('client_id', response.body.client_id);
   core.setOutput('client_secret', response.body.client_secret);
