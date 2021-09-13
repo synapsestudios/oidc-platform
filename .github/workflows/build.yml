@@ -176,19 +176,18 @@ jobs:
         name: Extract client secret
         run: echo "::set-output name=CLIENT_ID::$(echo '${{ steps.create_oidc_client.outputs.CLIENT_JSON }}' | jq '.client_secret')"
 
-      # - id: create_oidc_client
-      #   name: Create OIDC client
-      #   uses: ./.github/actions/create-oidc-client
+      - name: Create test-client config
+        run: |
+          cp src/config.template.js src/config.js
+          sed -E -i "" -e "s/clientId: ''/clientId: '$CLIENT_ID'/g" src/config.js
+          sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
+        working-directory: test-client
+        env:
+          CLIENT_ID: ${{ steps.client_id.outputs.client_id }}
+          CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
 
-      # - name: Create test-client config
-      #   run: |
-      #     cp src/config.template.js src/config.js
-      #     sed -E -i "" -e "s/clientId: ''/clientId: '$CLIENT_ID'/g" src/config.js
-      #     sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
-      #   working-directory: test-client
-      #   env:
-      #     CLIENT_ID: ${{ steps.client_id.outputs.client_id }}
-      #     CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
+      - run: cat src/config
+        working-directory: test-client
 
       # - name: Start frontend
       #   working-directory: frontend
