@@ -164,10 +164,18 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - id: create_idc_client
+      - id: create_oidc_client
         name: Create OIDC client
         run: |
-          curl -X POST http://0.0.0.0:9001/op/reg -H "Content-Type: application/json" -H "Authorization: Bearer token1" -d '{"response_types": ["code id_token token"],"grant_types": ["authorization_code","implicit","client_credentials"],"redirect_uris": ["https://sso-client.test:3000/"],"post_logout_redirect_uris": ["https://sso-client.test:3000/logout"]}'
+          echo '::set-output name=CLIENT_JSON::$(curl -X POST http://0.0.0.0:9001/op/reg -H "Content-Type: application/json" -H "Authorization: Bearer token1" -d \'{"response_types":["code id_token token"],"grant_types":["authorization_code","implicit","client_credentials"],"redirect_uris":["https://sso-client.test:3000/"],"post_logout_redirect_uris":["https://sso-client.test:3000/logout"]}\')'
+
+      - id: client_id
+        name: Extract client ID
+        run: echo "::set-output name=CLIENT_ID::$(${{ steps.create_oidc_client.outputs.CLIENT_JSON }} | jq '.client_id')"
+
+      - id: client_secret
+        name: Extract client secret
+        run: echo "::set-output name=CLIENT_ID::$(${{ steps.create_oidc_client.outputs.CLIENT_JSON }} | jq '.client_secret')"
 
       # - id: create_oidc_client
       #   name: Create OIDC client
@@ -180,8 +188,8 @@ jobs:
       #     sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
       #   working-directory: test-client
       #   env:
-      #     CLIENT_ID: ${{ steps.create_oidc_client.outputs.client_id }}
-      #     CLIENT_SECRET: ${{ steps.create_oidc_client.outputs.client_secret }}
+      #     CLIENT_ID: ${{ steps.client_id.outputs.client_id }}
+      #     CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
 
       # - name: Start frontend
       #   working-directory: frontend
