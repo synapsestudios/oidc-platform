@@ -180,17 +180,29 @@ jobs:
         working-directory: test-client
 
       - name: Create test-client config
+        run: cp src/config.template.js src/config.js
+        working-directory: test-client
+
+      - id: ls_src_2
+        run: ls src
+        working-directory: test-client
+
+      - name: Insert client id
         run: |
-          cp src/config.template.js src/config.js
           sed -E -i "" -e "s/clientId: ''/clientId: '$CLIENT_ID'/g" src/config.js
-          sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
         working-directory: test-client
         env:
           CLIENT_ID: ${{ steps.client_id.outputs.client_id }}
-          CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
 
       - run: cat src/config.js
         working-directory: test-client
+
+      - name: Insert client secret
+        run: |
+          sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
+        working-directory: test-client
+        env:
+          CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
 
       # - name: Start frontend
       #   working-directory: frontend
