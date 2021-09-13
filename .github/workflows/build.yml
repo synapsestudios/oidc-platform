@@ -189,7 +189,7 @@ jobs:
 
       - name: Insert client id
         run: |
-          sed -E -i "" -e "s/clientId: ''/clientId: '$CLIENT_ID'/g" src/config.js
+          sed -i "s/clientId: ''/clientId: '$CLIENT_ID'/g" src/config.js
         working-directory: test-client
         env:
           CLIENT_ID: ${{ steps.client_id.outputs.client_id }}
@@ -199,7 +199,7 @@ jobs:
 
       - name: Insert client secret
         run: |
-          sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
+          sed -i "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
         working-directory: test-client
         env:
           CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
