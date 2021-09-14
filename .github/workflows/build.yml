@@ -194,6 +194,8 @@ jobs:
         env:
           CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
 
+      - run: ls test-client/node_modules
+
       - name: Start frontend
         working-directory: test-client
         env:
