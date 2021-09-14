@@ -7,7 +7,7 @@
     "lint": "eslint **/*.ts --fix",
     "lint:ci": "eslint **/*.ts",
     "test": "cypress open",
-    "test:ci": "cypress run --spec **/*.features -e TAGS='not @in-process and not @third-party'",
+    "test:ci": "cypress run --spec **/*.feature -e TAGS='not @in-process and not @third-party'",
     "test:tags": "sh -c 'cypress-tags run -e TAGS=\"${0}\"'"
   },
   "author": "Synapse Studios",
