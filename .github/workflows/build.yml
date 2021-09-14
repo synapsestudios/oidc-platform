@@ -199,8 +199,11 @@ jobs:
         env:
           CHOKIDAR_USEPOLLING: 1
         run: |
-          npm start > frontend_logs 2>&1 &
-          curl --connect-timeout 600 --retry 20 --retry-delay 10 --retry-connrefused --insecure https://sso-client.test:3000
+          npm start &
+          curl --connect-timeout 60
+        # run: |
+        #   npm start > frontend_logs 2>&1 &
+        #   curl --connect-timeout 600 --retry 20 --retry-delay 10 --retry-connrefused --insecure https://sso-client.test:3000
 
       - name: Run e2e tests
         working-directory: e2e
@@ -231,12 +234,12 @@ jobs:
           path: e2e/cypress/videos/
           retention-days: 1
 
-      - name: Print frontend logs
-        if: always()
-        working-directory: frontend
-        run: cat frontend_logs
-
-      # - name: Print API logs
+      # - name: Print frontend logs
       #   if: always()
-      #   working-directory: api
-      #   run: cat api_logs
+      #   working-directory: frontend
+      #   run: cat frontend_logs
+
+      - name: Print API logs
+        if: always()
+        working-directory: api
+        run: cat api_logs
