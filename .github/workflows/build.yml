@@ -198,9 +198,10 @@ jobs:
         working-directory: test-client
         env:
           CHOKIDAR_USEPOLLING: 1
-        run: |
-          npm start > frontend_logs 2>&1 &
-          curl --connect-timeout 600 --retry 20 --retry-delay 10 --retry-connrefused --insecure https://sso-client.test:3000
+        run: npm start
+        # run: |
+        #   npm start > frontend_logs 2>&1 &
+        #   curl --connect-timeout 600 --retry 20 --retry-delay 10 --retry-connrefused --insecure https://sso-client.test:3000
 
       - name: Run e2e tests
         working-directory: e2e
