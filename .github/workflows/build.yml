@@ -122,36 +122,36 @@ jobs:
         with:
           node-version: '14'
 
-      - name: Cache e2e node_modules
-        uses: actions/cache@v2
-        id: acceptance_tests-e2e-npm-cache
-        with:
-          path: e2e/node_modules
-          key: acceptance_tests-e2e-npm-cache-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+      # - name: Cache e2e node_modules
+      #   uses: actions/cache@v2
+      #   id: acceptance_tests-e2e-npm-cache
+      #   with:
+      #     path: e2e/node_modules
+      #     key: acceptance_tests-e2e-npm-cache-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
-      - name: Cache e2e Cypress binaries
-        uses: actions/cache@v2
-        id: acceptance_tests-e2e-cypress-binaries
-        with:
-          path: ~/.cache/Cypress
-          key: acceptance_tests-e2e-cypress-binaries-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+      # - name: Cache e2e Cypress binaries
+      #   uses: actions/cache@v2
+      #   id: acceptance_tests-e2e-cypress-binaries
+      #   with:
+      #     path: ~/.cache/Cypress
+      #     key: acceptance_tests-e2e-cypress-binaries-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
-      - name: Cache frontend node_modules
-        uses: actions/cache@v2
-        id: acceptance_tests-frontend-npm-cache
-        with:
-          path: frontend/node_modules
-          key: acceptance_tests-frontend-npm-cache-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+      # - name: Cache frontend node_modules
+      #   uses: actions/cache@v2
+      #   id: acceptance_tests-frontend-npm-cache
+      #   with:
+      #     path: frontend/node_modules
+      #     key: acceptance_tests-frontend-npm-cache-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
 
       - name: Install dependencies for e2e
         run: npm i
         working-directory: e2e
-        if: steps.acceptance_tests-api-npm-cache.outputs.cache-hit != 'true' || steps.acceptance_tests-e2e-cypress-binaries.outputs.cache-hit != 'true'
+        # if: steps.acceptance_tests-api-npm-cache.outputs.cache-hit != 'true' || steps.acceptance_tests-e2e-cypress-binaries.outputs.cache-hit != 'true'
 
       - name: Install dependencies for frontend
         run: npm i
         working-directory: test-client
-        if: steps.acceptance_tests-frontend-npm-cache.outputs.cache-hit != 'true'
+        # if: steps.acceptance_tests-frontend-npm-cache.outputs.cache-hit != 'true'
 
       - name: Add sso-client.test host
         run: sudo echo "0.0.0.0 sso-client.test" | sudo tee -a /etc/hosts
@@ -193,8 +193,6 @@ jobs:
         working-directory: test-client
         env:
           CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
-
-      - run: ls test-client/node_modules
 
       - name: Start frontend
         working-directory: test-client
