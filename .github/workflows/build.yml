@@ -146,12 +146,12 @@ jobs:
       - name: Install dependencies for e2e
         run: npm i
         working-directory: e2e
-        # if: steps.acceptance_tests-api-npm-cache.outputs.cache-hit != 'true' || steps.acceptance_tests-e2e-cypress-binaries.outputs.cache-hit != 'true'
+        if: steps.acceptance_tests-api-npm-cache.outputs.cache-hit != 'true' || steps.acceptance_tests-e2e-cypress-binaries.outputs.cache-hit != 'true'
 
       - name: Install dependencies for frontend
         run: npm i
         working-directory: test-client
-        # if: steps.acceptance_tests-frontend-npm-cache.outputs.cache-hit != 'true'
+        if: steps.acceptance_tests-frontend-npm-cache.outputs.cache-hit != 'true'
 
       - name: Add sso-client.test host
         run: sudo echo "0.0.0.0 sso-client.test" | sudo tee -a /etc/hosts
@@ -200,10 +200,9 @@ jobs:
         working-directory: test-client
         env:
           CHOKIDAR_USEPOLLING: 1
-        run: HTTPS=true npx react-scripts start
-        # run: |
-        #   HTTPS=true npx react-scripts start > frontend_logs 2>&1 &
-        #   curl --connect-timeout 600 --retry 20 --retry-delay 10 --retry-connrefused --insecure https://sso-client.test:3000
+        run: |
+          npm start > frontend_logs 2>&1 &
+          curl --connect-timeout 600 --retry 20 --retry-delay 10 --retry-connrefused --insecure https://sso-client.test:3000
 
       - name: Run e2e tests
         working-directory: e2e
