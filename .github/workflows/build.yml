@@ -146,12 +146,12 @@ jobs:
       - name: Install dependencies for e2e
         run: npm i
         working-directory: e2e
-        if: steps.acceptance_tests-api-npm-cache.outputs.cache-hit != 'true' || steps.acceptance_tests-e2e-cypress-binaries.outputs.cache-hit != 'true'
+        # if: steps.acceptance_tests-api-npm-cache.outputs.cache-hit != 'true' || steps.acceptance_tests-e2e-cypress-binaries.outputs.cache-hit != 'true'
 
       - name: Install dependencies for frontend
         run: npm i
         working-directory: test-client
-        if: steps.acceptance_tests-frontend-npm-cache.outputs.cache-hit != 'true'
+        # if: steps.acceptance_tests-frontend-npm-cache.outputs.cache-hit != 'true'
 
       - name: Add sso-client.test host
         run: sudo echo "0.0.0.0 sso-client.test" | sudo tee -a /etc/hosts
