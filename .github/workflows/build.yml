@@ -6,22 +6,22 @@ on: [pull_request]
 #       - main
 concurrency: build
 jobs:
-  # initialize_notification:
-  #   name: Initialize Slack Message
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     messageTs: ${{ steps.notification.outputs.messageTs }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v2
-  #     - name: Send Build Triggered Notification
-  #       id: notification
-  #       uses: synapsestudios/build-status@main
-  #       with:
-  #         type: 'trigger'
-  #         githubToken: ${{ secrets.GITHUB_TOKEN }}
-  #         token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
-  #         channel: 'C01T3HH1JP5'
+  initialize_notification:
+    name: Initialize Slack Message
+    runs-on: ubuntu-latest
+    outputs:
+      messageTs: ${{ steps.notification.outputs.messageTs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Send Build Triggered Notification
+        id: notification
+        uses: synapsestudios/build-status@main
+        with:
+          type: 'trigger'
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+          channel: 'CUVU8NYAY'
 
   build_api:
     name: Build Api
@@ -33,14 +33,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      # - name: Set up notifications
-      #   uses: synapsestudios/build-status@main
-      #   with:
-      #     messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
-      #     jobStatus: ${{ job.status }}
-      #     githubToken: ${{ secrets.GITHUB_TOKEN }}
-      #     token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
-      #     channel: 'C01T3HH1JP5'
+      - name: Set up notifications
+        uses: synapsestudios/build-status@main
+        with:
+          messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
+          jobStatus: ${{ job.status }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+          channel: 'CUVU8NYAY'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -94,14 +94,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # - name: Set up notifications
-      #   uses: synapsestudios/build-status@main
-      #   with:
-      #     messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
-      #     jobStatus: ${{ job.status }}
-      #     githubToken: ${{ secrets.GITHUB_TOKEN }}
-      #     token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
-      #     channel: 'CUVU8NYAY'
+      - name: Set up notifications
+        uses: synapsestudios/build-status@main
+        with:
+          messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
+          jobStatus: ${{ job.status }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+          channel: 'CUVU8NYAY'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
