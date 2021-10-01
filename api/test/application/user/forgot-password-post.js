@@ -45,7 +45,7 @@ describe('POST /user/forgot-password', () => {
     expect(res.statusCode).to.equal(400);
   });
 
-  it('includes code_challenge in the password recovery form action', async () => {
+  it('includes code_challenge in the login link URL', async () => {
     const query = {
       client_id: client.get('client_id'),
       redirect_uri: client.related('redirect_uris').at(0).get('uri'),
