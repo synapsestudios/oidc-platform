@@ -127,7 +127,7 @@ describe(`POST /api/invite`, () => {
 
     const queryString = querystring.stringify(getQueryParams());
     const payload = {
-      email: `${uuid.v4()}@syn0.com`,
+      email: `${uuid.v4()}@example.com`,
       password: "synapse1",
       pass2: "synapse1",
     };

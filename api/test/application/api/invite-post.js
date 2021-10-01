@@ -35,7 +35,7 @@ describe(`POST /api/invite`, () => {
 
     const payload = {
       client_id: client.get('client_id'),
-      email: 'test@syn0.com',
+      email: 'test@example.com',
       redirect_uri: client.related('redirect_uris').at(0).get('uri'),
       response_type: 'something',
       scope: 'scope',
