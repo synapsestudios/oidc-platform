@@ -1,10 +1,12 @@
 const Boom = require('boom');
-const bookshelf = require('../lib/bookshelf');
 
 exports.register = function (server, pluginOptions, next) {
   server.auth.scheme('email_token', (server, schemeOptions) => {
     return {
       async authenticate(request, reply) {
+        if (!request.query.token) {
+          return reply(Boom.forbidden());
+        }
         try {
           var token = await schemeOptions.findToken(request.query.token);
           var user = token ? await schemeOptions.findUser(token.get('user_id')) : null;
