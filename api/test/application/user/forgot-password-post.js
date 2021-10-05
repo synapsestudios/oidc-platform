@@ -1,5 +1,7 @@
 const Lab = require('@hapi/lab');
 const { expect } = require('@hapi/code');
+const { getByRole } = require('@testing-library/dom');
+const { JSDOM } = require('jsdom');
 const { stringify } = require('querystring');
 const sinon = require('sinon');
 const uuid = require('uuid');
@@ -60,8 +62,11 @@ describe('POST /user/forgot-password', () => {
     });
 
     expect(res.statusCode).to.equal(200);
-    expect(res.result).to.match(
-      new RegExp(`href="/op/auth?[^"]+${query.code_challenge}`)
-    );
+
+    const { window } = new JSDOM(res.result);
+    const link = getByRole(window.document.body, 'link', {
+      name: /return to login/i,
+    });
+    expect(link.href).to.include(query.code_challenge);
   });
 });
