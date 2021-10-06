@@ -47,6 +47,12 @@ var config = {
     dbConnection: {
       database: `${process.env.OIDC_DB_NAME}_test`,
     },
+    redis: {
+      password: 'synapse1',
+      tls: {
+        // port: 6380
+      }
+    }
   },
 };
 
