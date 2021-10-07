@@ -117,16 +117,6 @@ describe(`POST /api/invite`, () => {
     expect(user_profile.phone_number).to.equal(payload.phone_number);
   });
 
-  /*it(`returns 400 with missing payload`, async () => {
-    const queryString = querystring.stringify(getQueryParams());
-    const res = await server.inject({
-      method: "POST",
-      url: `/user/register?${queryString}`,
-    });
-    expect(res.statusCode).to.equal(400);
-
-  });*/
-
   it(`returns 400 with an invalid email`, async () => {
     const queryString = querystring.stringify(getQueryParams());
 
