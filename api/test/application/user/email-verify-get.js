@@ -8,11 +8,15 @@ const { describe, it, before, beforeEach, after, afterEach } = (exports.lab =
 const { mockSendEmail } = require("../../helpers/mocks");
 const sinon = require("sinon");
 const factory = require("../../helpers/factory");
-const knex = require("../../../src/lib/knex");
 const { expect } = Code;
 
+const { URL } = require("url");
+
 describe("GET /user/email-verify", () => {
-  let server, client;
+  let server, client, client_id, redirect_uri;
+
+  const response_type = "application/json";
+  const scope = "scope";
 
   before(async () => {
     server = await getServer();
@@ -20,6 +24,9 @@ describe("GET /user/email-verify", () => {
 
   beforeEach(async () => {
     client = await factory.create("client");
+    await client.load("redirect_uris");
+    client_id = client.get("client_id");
+    redirect_uri = client.related("redirect_uris").at(0).get("uri");
   });
 
   after(async () => {
@@ -31,23 +38,17 @@ describe("GET /user/email-verify", () => {
   });
 
   it(`responds with a 200 with valid accept invite url`, async () => {
-    await mockSendEmail();
-    await client.load("redirect_uris");
-
-    const client_id = client.get("client_id");
-    const redirect_uri = client.related("redirect_uris").at(0).get("uri");
-    const response_type = "something";
-    const scope = "scope";
+    const sendEmailMock = await mockSendEmail();
 
     const payload = {
-      client_id: client.get("client_id"),
-      email: "test@syn0.com",
-      redirect_uri: client.related("redirect_uris").at(0).get("uri"),
-      response_type: "something",
-      scope: "scope",
+      client_id,
+      email: "test@example.com",
+      redirect_uri,
+      response_type,
+      scope,
     };
 
-    const res = await server.inject({
+    await server.inject({
       method: "POST",
       url: "/api/invite",
       credentials: {
@@ -56,47 +57,34 @@ describe("GET /user/email-verify", () => {
       payload,
     });
 
-    const user = res.result;
-    const [{ token }] = await knex("SIP_email_token").where({
-      user_id: user.id,
-    });
+    expect(sendEmailMock.calledOnce).to.equal(true);
 
-    const query = {
-      client_id,
-      redirect_uri,
-      response_type,
-      scope,
-      token,
-    };
+    const emailHtml = sendEmailMock.args[0][0].html;
+
+    const emailRegex = new RegExp("https?://[^\\s]+");
+
+    const [urlFromEmail] = emailHtml.match(emailRegex);
 
     const verificationResponse = await server.inject({
       method: "GET",
-      url: `/user/accept-invite?${querystring.stringify(query)}`.replace(
-        " ",
-        "%20"
-      ),
+      url: urlFromEmail,
     });
 
     expect(verificationResponse.statusCode).to.equal(200);
   });
 
   it(`responds with a 404 with invalid accept invite url`, async () => {
-    await mockSendEmail();
-    await client.load("redirect_uris");
-    const client_id = client.get("client_id");
-    const redirect_uri = client.related("redirect_uris").at(0).get("uri");
-    const response_type = "something";
-    const scope = "scope";
+    const sendEmailMock = await mockSendEmail();
 
     const payload = {
       client_id,
-      email: "test@syn0.com",
+      email: "test@example.com",
       redirect_uri,
       response_type,
       scope,
     };
 
-    const res = await server.inject({
+    await server.inject({
       method: "POST",
       url: "/api/invite",
       credentials: {
@@ -105,26 +93,25 @@ describe("GET /user/email-verify", () => {
       payload,
     });
 
-    const user = res.result;
-    const [{ token }] = await knex("SIP_email_token").where({
-      user_id: user.id,
-    });
+    expect(sendEmailMock.calledOnce).to.equal(true);
 
-    const query = {
-      client_id: client_id + "junk",
-      redirect_uri,
-      response_type,
-      scope,
-      token,
-    };
+    const emailHtml = sendEmailMock.args[0][0].html;
+
+    const emailRegex = new RegExp("https?://[^\\s]+");
+
+    const [urlFromEmail] = emailHtml.match(emailRegex);
+
+    const urlObject = new URL(urlFromEmail);
+
+    const query = querystring.parse(urlObject.searchParams.toString());
+
+    urlObject.search = querystring.stringify({ ...query, client_id: "junk" });
 
     const verificationResponse = await server.inject({
       method: "GET",
-      url: `/user/accept-invite?${querystring.stringify(query)}`.replace(
-        " ",
-        "%20"
-      ),
+      url: urlObject.toString(),
     });
+
     expect(verificationResponse.statusCode).to.equal(404);
   });
 });
