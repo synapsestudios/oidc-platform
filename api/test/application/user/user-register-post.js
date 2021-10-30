@@ -49,8 +49,8 @@ describe(`POST /api/invite`, () => {
 
     const payload = {
       email: `${uuid.v4()}@example.com`,
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
     };
 
     const res = await server.inject({
@@ -67,8 +67,8 @@ describe(`POST /api/invite`, () => {
 
     const payload = {
       email: `${uuid.v4()}@example.com`,
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
       name: uuid.v4(),
       given_name: "Test",
       family_name: "Testerson",
@@ -132,8 +132,8 @@ describe(`POST /api/invite`, () => {
 
     const payload = {
       email: `${uuid.v4()}example.com`,
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
     };
 
     const res = await server.inject({
@@ -153,8 +153,8 @@ describe(`POST /api/invite`, () => {
 
     const payload = {
       email: `${uuid.v4()}@example.com`,
-      password: "synapse2",
-      pass2: "synapse1",
+      password: "test54321",
+      pass2: "test12345",
     };
 
     const res = await server.inject({
@@ -172,8 +172,8 @@ describe(`POST /api/invite`, () => {
     const queryString = querystring.stringify(getQueryParams());
 
     const payload = {
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
     };
 
     const res = await server.inject({
@@ -208,8 +208,8 @@ describe(`POST /api/invite`, () => {
 
     const payload = {
       email: `${uuid.v4()}@example.com`,
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
       birthdate: "199-17",
     };
 
@@ -227,8 +227,8 @@ describe(`POST /api/invite`, () => {
 
     const payload = {
       email: `${uuid.v4()}@example.com`,
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
       zoneinfo: "zone",
     };
 
@@ -247,8 +247,8 @@ describe(`POST /api/invite`, () => {
 
     const payload = {
       email: `${uuid.v4()}@example.com`,
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
       zoneinfo: "1234",
     };
 
@@ -268,8 +268,8 @@ describe(`POST /api/invite`, () => {
     const queryString = querystring.stringify(getQueryParams());
     const payload = {
       email: `${uuid.v4()}@example.com`,
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
     };
 
     const res = await server.inject({
