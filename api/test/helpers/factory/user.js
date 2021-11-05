@@ -1,5 +1,6 @@
 const bookshelf = require('../../../src/lib/bookshelf');
 const User = bookshelf.model('user');
+const config = require('../../../config');
 
 const initialize = factory => {
   factory.define('user', User,  {
@@ -9,8 +10,8 @@ const initialize = factory => {
       email_verified: false,
       phone_number_verified: false,
     },
-    email: factory.chance('email', { domain: process.env.OIDC_EMAIL_DOMAIN || 'example.com' }),
-    email_lower: factory.chance('email', { domain: process.env.OIDC_EMAIL_DOMAIN || 'example.com' }),
+    email: factory.chance('email', { domain: config('email/domain') || 'example.com' }),
+    email_lower: factory.chance('email', { domain: config('email/domain') || 'example.com' }),
   });
 };
 

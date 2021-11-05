@@ -26,7 +26,7 @@ describe(`POST /api/invite`, () => {
 
   afterEach(() => {
     sinon.restore();
-  })
+  });
 
   it(`invites user`, async () => {
     const sendEmailMock = await mockSendEmail();

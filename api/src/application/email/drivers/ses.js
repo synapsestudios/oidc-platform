@@ -1,10 +1,14 @@
 const AWS = require('aws-sdk');
-const ses = new AWS.SES({apiVersion: '2010-12-01'});
 const checkWhitelist = require('../check-whitelist');
 const Boom = require('boom');
+const config = require('../../../../config');
 
 class SesDriver {
+
   send(emailObject) {
+
+    const ses = new AWS.SES({apiVersion: '2010-12-01'});
+    
     return new Promise((resolve, reject) => {
       if (!emailObject.to) {
         return reject(new Error('no to address provided'));
@@ -34,15 +38,15 @@ class SesDriver {
             Data: emailObject.subject,
           },
         },
-        Source: emailObject.from || 'no-reply@' + process.env.OIDC_EMAIL_DOMAIN,
+        Source: emailObject.from || 'no-reply@' + config('/email/domain'),
       };
 
       ses.sendEmail(params).promise().then(result => {
         resolve(result);
       })
-        .catch(err => {
+      .catch(err => {
           reject(Boom.wrap(err, err.statusCode));
-        });
+      });
     });
   }
 }
