@@ -15,7 +15,7 @@ const webhookService = require("../../../src/application/webhook/webhook-service
 const { JSDOM } = require('jsdom');
 const { getByText } = require('@testing-library/dom');
 
-describe(`POST /api/invite`, () => {
+describe(`POST /user/register`, () => {
   let server, client;
 
   before(async () => {
@@ -90,6 +90,8 @@ describe(`POST /api/invite`, () => {
       payload,
     });
 
+    expect(res.statusCode).to.equal(302);
+
     const user = await bookshelf
       .model("user")
       .where({
@@ -117,15 +119,14 @@ describe(`POST /api/invite`, () => {
     expect(user_profile.phone_number).to.equal(payload.phone_number);
   });
 
-  /*it(`returns 400 with missing payload`, async () => {
+  it(`returns 400 with missing payload`, async () => {
     const queryString = querystring.stringify(getQueryParams());
     const res = await server.inject({
       method: "POST",
       url: `/user/register?${queryString}`,
     });
     expect(res.statusCode).to.equal(400);
-
-  });*/
+  });
 
   it(`returns 400 with an invalid email`, async () => {
     const queryString = querystring.stringify(getQueryParams());
