@@ -56,7 +56,7 @@ describe('send email with mailgun', () => {
         expect(mailgunClient.messages().send.calledOnce).to.equal(false);
     });
 
-    it(`throws error if attachments are present`, async () => {
+    it(`throws error if attachments are not in an array`, async () => {
       const email = { ...email_template, attachments: {} };
       await expect(mailgunDriver.send(email)).to.reject(Error, 'attachments must be an array');
       expect(mailgunClient.messages().send.calledOnce).to.equal(false);
