@@ -12,8 +12,10 @@ const uuid = require("uuid");
 const bookshelf = require("../../../src/lib/bookshelf");
 const querystring = require("querystring");
 const webhookService = require("../../../src/application/webhook/webhook-service");
+const { JSDOM } = require('jsdom');
+const { getByText } = require('@testing-library/dom');
 
-describe(`POST /api/invite`, () => {
+describe(`POST /user/register`, () => {
   let server, client;
 
   before(async () => {
@@ -47,8 +49,8 @@ describe(`POST /api/invite`, () => {
 
     const payload = {
       email: `${uuid.v4()}@example.com`,
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
     };
 
     const res = await server.inject({
@@ -56,13 +58,6 @@ describe(`POST /api/invite`, () => {
       url: `/user/register?${queryString}`,
       payload,
     });
-
-    const user = await bookshelf
-      .model("user")
-      .where({
-        email_lower: payload.email.toLowerCase(),
-      })
-      .fetch();
 
     expect(res.statusCode).to.equal(302);
   });
@@ -72,8 +67,8 @@ describe(`POST /api/invite`, () => {
 
     const payload = {
       email: `${uuid.v4()}@example.com`,
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
       name: uuid.v4(),
       given_name: "Test",
       family_name: "Testerson",
@@ -94,6 +89,8 @@ describe(`POST /api/invite`, () => {
       url: `/user/register?${queryString}`,
       payload,
     });
+
+    expect(res.statusCode).to.equal(302);
 
     const user = await bookshelf
       .model("user")
@@ -122,14 +119,158 @@ describe(`POST /api/invite`, () => {
     expect(user_profile.phone_number).to.equal(payload.phone_number);
   });
 
+  it(`returns 400 with missing payload`, async () => {
+    const queryString = querystring.stringify(getQueryParams());
+    const res = await server.inject({
+      method: "POST",
+      url: `/user/register?${queryString}`,
+    });
+    expect(res.statusCode).to.equal(400);
+  });
+
+  it(`returns 400 with an invalid email`, async () => {
+    const queryString = querystring.stringify(getQueryParams());
+
+    const payload = {
+      email: `${uuid.v4()}example.com`,
+      password: "test12345",
+      pass2: "test12345",
+    };
+
+    const res = await server.inject({
+      method: "POST",
+      url: `/user/register?${queryString}`,
+      payload,
+    });
+
+    expect(res.statusCode).to.equal(400);
+    const { window } = new JSDOM(res.result);
+    getByText(window.document.body, /must be a valid email address/i);
+
+  });
+
+  it(`returns 400 if passwords do not match`, async () => {
+    const queryString = querystring.stringify(getQueryParams());
+
+    const payload = {
+      email: `${uuid.v4()}@example.com`,
+      password: "test54321",
+      pass2: "test12345",
+    };
+
+    const res = await server.inject({
+      method: "POST",
+      url: `/user/register?${queryString}`,
+      payload,
+    });
+
+    expect(res.statusCode).to.equal(400);
+    const { window } = new JSDOM(res.result);
+    getByText(window.document.body, /passwords must match/i);
+  });
+
+  it(`returns 400 if missing email`, async () => {
+    const queryString = querystring.stringify(getQueryParams());
+
+    const payload = {
+      password: "test12345",
+      pass2: "test12345",
+    };
+
+    const res = await server.inject({
+      method: "POST",
+      url: `/user/register?${queryString}`,
+      payload,
+    });
+
+    expect(res.statusCode).to.equal(400);
+    const { window } = new JSDOM(res.result);
+    getByText(window.document.body, /email address is required/i);
+  });
+  
+  it(`returns 400 if missing password`, async () => {
+    const queryString = querystring.stringify(getQueryParams());
+
+    const payload = {
+      email: `${uuid.v4()}@example.com`,
+    };
+
+    const res = await server.inject({
+      method: "POST",
+      url: `/user/register?${queryString}`,
+      payload,
+    });
+
+    expect(res.statusCode).to.equal(400);
+  });
+
+  it(`returns 400 if birthdate is not a valid date`, async () => {
+    const queryString = querystring.stringify(getQueryParams());
+
+    const payload = {
+      email: `${uuid.v4()}@example.com`,
+      password: "test12345",
+      pass2: "test12345",
+      birthdate: "199-17",
+    };
+
+    const res = await server.inject({
+      method: "POST",
+      url: `/user/register?${queryString}`,
+      payload,
+    });
+
+    expect(res.statusCode).to.equal(400);
+  });
+
+  it(`returns 400 if zone is not valid`, async () => {
+    const queryString = querystring.stringify(getQueryParams());
+
+    const payload = {
+      email: `${uuid.v4()}@example.com`,
+      password: "test12345",
+      pass2: "test12345",
+      zoneinfo: "zone",
+    };
+
+    const res = await server.inject({
+      method: "POST",
+      url: `/user/register?${queryString}`,
+      payload,
+    });
+
+    expect(res.statusCode).to.equal(400);
+
+  });
+
+  it(`returns 400 if locale is not valid`, async () => {
+    const queryString = querystring.stringify(getQueryParams());
+
+    const payload = {
+      email: `${uuid.v4()}@example.com`,
+      password: "test12345",
+      pass2: "test12345",
+      zoneinfo: "1234",
+    };
+
+    const res = await server.inject({
+      method: "POST",
+      url: `/user/register?${queryString}`,
+      payload,
+    });
+
+    expect(res.statusCode).to.equal(400);
+
+  });
+
   it(`triggers user.registered webhook`, async () => {
     sinon.stub(webhookService, "trigger");
 
     const queryString = querystring.stringify(getQueryParams());
     const payload = {
       email: `${uuid.v4()}@example.com`,
-      password: "synapse1",
-      pass2: "synapse1",
+      password: "test12345",
+      pass2: "test12345",
     };
 
     const res = await server.inject({
