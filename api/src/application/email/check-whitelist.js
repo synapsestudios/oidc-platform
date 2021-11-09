@@ -1,8 +1,9 @@
 const _ = require('lodash');
+const config = require('../../../config');
 
 const options = {
-  trap: process.env.OIDC_EMAIL_TRAP,
-  whitelist: process.env.OIDC_EMAIL_WHITELIST ? process.env.OIDC_EMAIL_WHITELIST.split(',') : null,
+  trap: config('email/trap'),
+  whitelist: config('email/whitelist') ? config('email/whitelist').split(',') : null,
 };
 
 const nonAlphaNumericPattern = /\W/g;

@@ -19,7 +19,14 @@ var config = {
       userSessionTrackingEnabled: process.env.ENABLE_USER_SESSION_TRACKING || false,
       tls: process.env.REDIS_TLS === 'true' ? { port: process.env.REDIS_TLS_PORT || 6380 } : undefined,
     },
-    email: process.env.OIDC_EMAIL_DRIVER,
+    email: {
+      driver: process.env.OIDC_EMAIL_DRIVER,
+      domain: process.env.OIDC_EMAIL_DOMAIN,
+      whitelist: process.env.OIDC_EMAIL_WHITELIST,
+      trap: process.env.OIDC_EMAIL_TRAP,
+      mailgunApiKey: process.env.MAILGUN_API_KEY,
+      sendGridApiKey: process.env.SENDGRID_API_KEY
+    },
     oidc: {
       cookieKeys: [process.env.COOKIE_KEY, process.env.OLD_COOKIE_KEY],
       initialAccessToken: process.env.OIDC_INITIAL_ACCESS_TOKEN,
@@ -47,6 +54,10 @@ var config = {
     dbConnection: {
       database: `${process.env.OIDC_DB_NAME}_test`,
     },
+    email: {
+      mailgunApiKey: 'test-key',
+      sendGridApiKey: 'SG.test-key-123'
+    }
   },
 };
 
