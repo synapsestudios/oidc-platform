@@ -1,21 +1,21 @@
 const _ = require('lodash');
 const config = require('../../../config');
 
-const options = {
-  trap: config('email/trap'),
-  whitelist: config('email/whitelist') ? config('email/whitelist').split(',') : null,
-};
-
 const nonAlphaNumericPattern = /\W/g;
 const domainPattern = /@(.*)$/;
 
 module.exports = (emailAddress, reject) => {
+  const options = {
+    trap: config('email/trap'),
+    whitelist: config('email/whitelist') ? config('email/whitelist').split(',') : null,
+  };
+
   if (options.whitelist && !options.trap) {
-    reject('trap option must be set if using whitelist');
+    return reject(new Error('trap option must be set if using whitelist'));
   }
 
   if (options.trap && (!options.whitelist || !options.whitelist.length) ) {
-    reject('whitelist option must be set if using email trap');
+    return reject(new Error('whitelist option must be set if using email trap'));
   }
 
   if (!options.whitelist || !options.whitelist.length) {
@@ -28,13 +28,9 @@ module.exports = (emailAddress, reject) => {
     return emailAddress;
   }
 
-  if (!options.trap) {
-    reject('trap option must be set if using whitelist');
-  }
   else {
     const intendedRecipient = emailAddress.replace(nonAlphaNumericPattern, '');
     const [ user, host ] = options.trap.split('@');
-
     return `${user}+${intendedRecipient}@${host}`;
   }
 };
