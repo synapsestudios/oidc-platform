@@ -2,7 +2,7 @@ const Lab = require('@hapi/lab');
 const Code = require('@hapi/code');
 const { truncateAll } = require('../../helpers/db');
 
-const { describe, it, before, after, beforeEach, afterEach } = exports.lab = Lab.script();
+const { describe, it, after, beforeEach, afterEach } = exports.lab = Lab.script();
 const sinon = require('sinon');
 const { expect } = Code;
 const getEmailService = require('../../../src/application/email/email-service');
@@ -12,9 +12,9 @@ const sgMail = require('@sendgrid/mail');
 const AWS = require('aws-sdk-mock');
 const path = require('path');
 AWS.setSDK(path.resolve(__dirname, '../../../node_modules/aws-sdk')) 
+
+const getMailgunDriver = require('../../../src/application/email/drivers/mailgun');
 const Mailgun = require('mailgun-js');
-
-
 
 describe('email service', () => {
 
@@ -26,11 +26,6 @@ describe('email service', () => {
       html: '<h1>Welcome to ODIC!</h1>', 
       from: 'no-reply@example.com'
     };
-
-
-    before(async () => {
-      
-    });
 
     beforeEach(async () => {  
       confidenceGetStub = sinon.stub();
@@ -100,13 +95,22 @@ describe('email service', () => {
     });
 
     it(`mailgun configuration sends email`, async () => {
-        confidenceGetStub.withArgs('email/driver').returns('mailgun');
-        confidenceGetStub.withArgs('email/mailgunApiKey').returns('test-key');
-        confidenceGetStub.withArgs('email/domain').returns('test.com');
 
-        emailService = getEmailService();
-        sinon.stub(emailService, 'send').returns("resolved");
-        const response = await emailService.send(email_template);
-        expect(response).to.equal("resolved");
+      confidenceGetStub.withArgs('/email/driver').returns('mailgun');
+      confidenceGetStub.withArgs('/email/mailgunApiKey').returns('test-key');
+      confidenceGetStub.withArgs('/email/domain').returns('test.com');
+
+      const mailgunDriver = getMailgunDriver();
+      const mailgunClient = mailgunDriver.client();
+      const mailgunStub = sinon.stub().yields(null, "resolved");
+      sinon.stub(Mailgun({ apiKey: 'foo', domain: 'bar' }).Mailgun.prototype, 'messages').returns({
+        send: mailgunStub,
+      });
+       
+      emailService = getEmailService();
+      const response = await emailService.send(email_template);
+
+      expect(mailgunClient.messages().send.calledOnce).to.equal(true);
+      expect(response).to.equal("resolved");
     });
 })
