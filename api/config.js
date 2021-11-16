@@ -45,6 +45,10 @@ var config = {
       retryDelay: process.env.WEBHOOK_RETRY_DELAY || 10000,
       concurrency: process.env.WEBHOOK_CONCURRENCY || 1,
     } : false,
+    errorLogging: {
+      sentryDSN: process.env.SENTRY_DSN,
+      rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN
+    }
   },
   'development': {},
   'qa': {},
@@ -57,6 +61,10 @@ var config = {
     email: {
       mailgunApiKey: 'test-key',
       sendGridApiKey: 'SG.test-key-123'
+    },
+    errorLogging: {
+      sentryDSN: 'test_dsn',
+      rollbarAccessToken: 'test_rollbar_token'
     }
   },
 };

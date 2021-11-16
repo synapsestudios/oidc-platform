@@ -73,6 +73,7 @@
     "jsdom": "^10.1.0",
     "nodemon": "1.18.9",
     "sinon": "^9.0.2",
-    "aws-sdk-mock": "^5.4.0"
+    "aws-sdk-mock": "^5.4.0",
+    "sentry-testkit": "^3.3.7"
   }
 }
