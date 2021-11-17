@@ -151,6 +151,10 @@ module.exports = (emailService, clientService, RedisAdapter, themeService, userE
       return self.redisAdapter.getAndDestroySessionsByUserId(userId);
     },
 
+    delete: function(id) {
+      return bookshelf.model('user').forge({ id }).destroy();
+    }
+
   };
 
   return self;
