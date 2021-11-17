@@ -9,7 +9,7 @@ const getMailgunDriver = require('../../../src/application/email/drivers/mailgun
 
 describe('send email with mailgun', () => {
 
-    let mailgunDriver;
+    let mailgunDriver, mailgunClient, mailgunStub;
 
     const email_template = {
       to: 'test@example.com', 
