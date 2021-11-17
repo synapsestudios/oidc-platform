@@ -1,0 +1,20 @@
+version: '2'
+services:
+  redis:
+    image: redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_TLS_ENABLED: ${REDIS_TLS}
+      REDIS_TLS_CERT_FILE: /usr/local/etc/redis/redis.crt
+      REDIS_TLS_KEY_FILE: /usr/local/etc/redis/redis.key
+      REDIS_TLS_CA_FILE: /usr/local/etc/redis/ca.crt
+    env_file:
+      - ./common.env
+    volumes: 
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/tls/redis.crt:/usr/local/etc/redis/tls/redis.crt
+      - ./redis/tls/redis.key:/usr/local/etc/redis/tls/redis.key
+      - ./redis/tls/ca.crt:/usr/local/etc/redis/tls/ca.crt
+    ports:
+      - "6379:6379"
+      - "6380:6380"

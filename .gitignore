@@ -1,3 +1,7 @@
 common.env
 node_modules/
 npm-debug.log
+
+# redis certs
+redis.config
+tls/
