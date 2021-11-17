@@ -373,7 +373,7 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
           userId: rowExists('user', 'id', 'User not found')
         }),
       }
-    }
+    },
   }
 ];
 

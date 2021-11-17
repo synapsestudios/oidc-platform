@@ -153,7 +153,7 @@ module.exports = (emailService, clientService, RedisAdapter, themeService, userE
 
     delete: function(id) {
       return bookshelf.model('user').forge({ id }).destroy();
-    }
+    },
 
   };
 
