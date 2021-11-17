@@ -63,8 +63,9 @@ var config = {
       sendGridApiKey: 'SG.test-key-123'
     },
     errorLogging: {
-      sentryDSN: 'test_dsn',
-      rollbarAccessToken: 'test_rollbar_token'
+      sentryDSN: 'https://dummyDSN@test.sentry.io/0',
+      rollbarAccessToken: 'test_rollbar_token',
+      testkitTransport: true
     }
   },
 };

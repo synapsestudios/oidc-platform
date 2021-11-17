@@ -1,10 +1,10 @@
 const RollbarTransport = require('winston-rollbar-transport').default;
 const winston = require('winston');
 const SentryTransport = require('@synapsestudios/winston-sentry');
-
+const config = require('../../config');
 const transports = [new winston.transports.Console()];
 
-if (process.env.SENTRY_DSN) {
+if (config('/errorLogging/sentryDSN')) {
   const Sentry = require('./sentry');
   transports.push(
     new SentryTransport({
@@ -15,9 +15,9 @@ if (process.env.SENTRY_DSN) {
   )
 }
 
-if (process.env.ROLLBAR_ACCESS_TOKEN) {
+if (config('/errorLogging/rollbarAccessToken')) {
   transports.push(new RollbarTransport({
-    rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN,
+    rollbarAccessToken: config('/errorLogging/rollbarAccessToken'),
     level: 'error',
   }));
 }
