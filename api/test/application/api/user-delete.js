@@ -9,7 +9,7 @@ const { truncateAll } = require('../../helpers/db');
 const factory = require('../../helpers/factory');
 const knex = require('../../../src/lib/knex');
 
-describe.only('DELETE /api/users/{userId}', () => {
+describe('DELETE /api/users/{userId}', () => {
   let server;
 
   before(async () => {
