@@ -1,10 +1,14 @@
 const version = require('../../package.json').version;
-const env = require('../../config')('/env');
+const config = require('../../config');
+
 const Sentry = require('@sentry/node');
+
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
+  dsn: config('/errorLogging/sentryDSN'),
   release: version,
-  environment: env,
-});
+  environment: config('/env'),
+  transport: (config('/errorLogging/testkitTransport') && require('../../test/lib/sentry-testkit').sentryTransport)
+})
+
 
 module.exports = Sentry;
