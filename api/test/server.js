@@ -2,23 +2,28 @@ const Glue = require('glue');
 const ioc = require('electrolyte');
 const manifestPromise = require('../manifest');
 const keystore = require('../keystore');
-const storageAdapter = require('../src/lib/storage-adapter');
+const getStorageAdapter = require('../src/lib/storage-adapter');
 const bookshelf = require('../src/lib/bookshelf');
 
-// Prevent s3 calls that happen on initialize
-storageAdapter.get = function(container, key) {
-  if (key === process.env.KEYSTORE) {
-    return Promise.resolve(JSON.stringify(keystore));
-  } else {
-    throw new Error('Not expecting getObject call');
-  }
-}
 
-const options = {
-  relativeTo: __dirname + '/../src',
-};
 
 module.exports = async function() {
+
+  const storageAdapter = getStorageAdapter();
+
+  // Prevent s3 calls that happen on initialize
+  storageAdapter.get = function(container, key) {
+    if (key === process.env.KEYSTORE) {
+      return Promise.resolve(JSON.stringify(keystore));
+    } else {
+      throw new Error('Not expecting getObject call');
+    }
+  }
+
+  const options = {
+    relativeTo: __dirname + '/../src',
+  };
+
   const manifest = await manifestPromise;
 
   // Remove good from plugins.
