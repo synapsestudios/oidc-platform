@@ -17,6 +17,7 @@ module.exports = options => {
     cookies: {
       long: { signed: true },
       short: { signed: true },
+      keys: options.keys
     },
     discovery: {
       service_documentation: '',
