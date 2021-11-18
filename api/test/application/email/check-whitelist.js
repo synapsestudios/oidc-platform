@@ -2,11 +2,12 @@ const Lab = require('@hapi/lab');
 const Code = require('@hapi/code');
 const { truncateAll } = require('../../helpers/db');
 
-const { describe, it, after, beforeEach, afterEach } = exports.lab = Lab.script();
+const { describe, it, after, before, beforeEach, afterEach } = exports.lab = Lab.script();
 const sinon = require('sinon');
 const { expect } = Code;
 const { stubConfig } = require("../../helpers/stubs");
 const checkWhitelist = require('../../../src/application/email/check-whitelist');
+const logger = require('../../../src/lib/logger');
 
 
 describe('white list', () => {
@@ -17,6 +18,10 @@ describe('white list', () => {
         return new Promise((resolve, reject) => reject(message));
     }
 
+    before(async () => {
+        logger.transports['console'].silent = true;
+    })
+
     beforeEach(async () => {  
       confidenceGetStub = sinon.stub();
       confidenceLoadStub = sinon.stub();
@@ -26,6 +31,7 @@ describe('white list', () => {
 
     after(async () => {
       await truncateAll();
+      logger.transports['console'].silent = false;
     });
 
     afterEach(async() => {
