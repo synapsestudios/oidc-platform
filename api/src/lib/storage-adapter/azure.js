@@ -1,21 +1,21 @@
 const config = require('../../../config');
 const { BlobServiceClient, StorageSharedKeyCredential } = require('@azure/storage-blob');
 
-// [Node.js only] A helper method used to read a Node.js readable stream into string
-async function streamToString(readableStream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    readableStream.on("data", (data) => {
-      chunks.push(data.toString());
+  // [Node.js only] A helper method used to read a Node.js readable stream into string
+  async function streamToString(readableStream) {
+    return new Promise((resolve, reject) => {
+      const chunks = [];
+      readableStream.on("data", (data) => {
+        chunks.push(data.toString());
+      });
+      readableStream.on("end", () => {
+        resolve(chunks.join(""));
+      });
+      readableStream.on("error", reject);
     });
-    readableStream.on("end", () => {
-      resolve(chunks.join(""));
-    });
-    readableStream.on("error", reject);
-  });
-}
-
-module.exports = function() {
+  }
+  
+  module.exports = function() {
 
   const azureStorageAccount = config('/azure/storageAccount');
   const azureAccessKey = config('/azure/accessKey');
@@ -25,11 +25,12 @@ module.exports = function() {
     azureStorageAccount,
     azureAccessKey
   );
+
   const blobServiceClient = new BlobServiceClient(
     `https://${azureStorageAccount}.blob.core.windows.net`,
     sharedKeyCredential
   );
-
+  
   return {
     async upload(stream, blobName, contentType) {
       const containerClient = blobServiceClient.getContainerClient(azureStorageContainer);
