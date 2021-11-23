@@ -1,18 +1,19 @@
 const Code = require('@hapi/code');
 const Lab = require('@hapi/lab');
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 
 const getServer = require('../../server');
 const { expect } = Code;
-const { it, describe, after, before, beforeEach, afterEach } = exports.lab = Lab.script();
+const { it, describe, after, before, beforeEach, afterEach } = (exports.lab =
+  Lab.script());
 const { truncateAll } = require('../../helpers/db');
 const factory = require('../../helpers/factory');
-const knex = require('../../../src/lib/knex');
 const { stringify } = require('querystring');
 const sinon = require('sinon');
+const { getTokenForUser } = require('../../helpers/tokens');
 
 describe('POST /user/profile', () => {
-    let server, client;
+  let server, client;
 
   before(async () => {
     server = await getServer();
@@ -40,36 +41,19 @@ describe('POST /user/profile', () => {
     expect(res.statusCode).to.equal(401);
   });
 
-  it('responds with a 403 with invalid token', async () => {
-    const user = await factory.create('user');
-
+  it('redirects to an error page when given an invalid token', async () => {
     const query = {
-        access_token: uuid(),
-        client_id: client.get('client_id'),
-        redirect_uri: client.related('redirect_uris').at(0).get('uri'),
-      };
+      access_token: await getTokenForUser(uuid.v4()),
+      client_id: client.get('client_id'),
+      redirect_uri: client.related('redirect_uris').at(0).get('uri'),
+    };
 
     const res = await server.inject({
       method: 'POST',
-      url: `/user/profile${stringify(query)}`,
+      url: `/user/profile?${stringify(query)}`,
     });
 
-    expect(res.statusCode).to.equal(403);
-  });
-
-  it('responds with a 404 with non-existent user', async () => {
-    const query = {
-        access_token: uuid(),
-        id_token_hint: uuid(),
-        client_id: client.get('client_id'),
-        redirect_uri: client.related('redirect_uris').at(0).get('uri'),
-      };
-
-    const res = await server.inject({
-      method: 'POST',
-      url: `/user/profile${stringify(query)}`,
-    });
-
-    expect(res.statusCode).to.equal(404);
+    expect(res.statusCode).to.equal(302);
+    expect(res.headers.location).to.match(/error=unauthorized/);
   });
 });
