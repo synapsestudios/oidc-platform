@@ -354,6 +354,27 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       }
     }
   },
+  {
+    method: 'DELETE',
+    path: '/api/users/{userId}',
+    handler: async (request, reply) => {
+      await userService.delete(request.params.userId);
+      reply().code(204);
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin',
+      },
+      validate: {
+        params: mixedValidation({
+          userId: Joi.any().required(),
+        }, {
+          userId: rowExists('user', 'id', 'User not found')
+        }),
+      }
+    },
+  }
 ];
 
 module.exports['@singleton'] = true;

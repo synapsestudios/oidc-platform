@@ -55,6 +55,10 @@ var config = {
       fileName: process.env.KEYSTORE,
       bucket: process.env.KEYSTORE_BUCKET,
       container: process.env.KEYSTORE_CONTAINER
+    },
+    errorLogging: {
+      sentryDSN: process.env.SENTRY_DSN,
+      rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN
     }
   },
   'development': {},
@@ -68,6 +72,11 @@ var config = {
     email: {
       mailgunApiKey: 'test-key',
       sendGridApiKey: 'SG.test-key-123'
+    },
+    errorLogging: {
+      sentryDSN: 'https://dummyDSN@test.sentry.io/0',
+      rollbarAccessToken: 'test_rollbar_token',
+      testkitTransport: true
     }
   },
 };
