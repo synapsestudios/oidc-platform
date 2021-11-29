@@ -1,7 +1,7 @@
 const Lab = require('@hapi/lab');
 const Code = require('@hapi/code');
 
-const { describe, it, afterEach } = exports.lab = Lab.script();
+const { describe, it, afterEach } = (exports.lab = Lab.script());
 const { expect } = Code;
 const { PassThrough } = require('stream');
 
@@ -10,9 +10,9 @@ const streamToString = require('../../../src/lib/stream-to-string');
 describe('stream-to-string function', () => {
   let mockReadableStream;
 
-  afterEach(async() => {
+  afterEach(async () => {
     mockReadableStream.push(null);
-  })
+  });
 
   it(`accepts a data stream and returns the expected data`, async () => {
     mockReadableStream = new PassThrough({
@@ -36,10 +36,16 @@ describe('stream-to-string function', () => {
         return;
       },
     });
-    await expect(streamToString(mockReadableStream)).to.reject(Error, 'Stream crossed...');
+    await expect(streamToString(mockReadableStream)).to.reject(
+      Error,
+      'Stream crossed...'
+    );
   });
 
   it(`rejects if a non-stream object is provided`, async () => {
-    await expect(streamToString('notAStream')).to.reject(Error, 'readableStream.on is not a function');
+    await expect(streamToString('notAStream')).to.reject(
+      Error,
+      'readableStream.on is not a function'
+    );
   });
-})
+});
