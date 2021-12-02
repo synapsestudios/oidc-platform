@@ -1,6 +1,3 @@
 common.env
 node_modules/
 npm-debug.log
-
-tls/
-redis.conf
