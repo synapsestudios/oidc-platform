@@ -6,19 +6,19 @@
 
 # Generate some test certificates which are used by the regression test suite:
 #
-#   tls/ca.{crt,key}          Self signed CA certificate.
-#   tls/redis.{crt,key}       A certificate with no key usage/policy restrictions.
-#   tls/client.{crt,key}      A certificate restricted for SSL client usage.
-#   tls/server.{crt,key}      A certificate restricted fro SSL server usage.
-#   tls/redis.dh              DH Params file.
+#   redis/tls/ca.{crt,key}          Self signed CA certificate.
+#   redis/tls/redis.{crt,key}       A certificate with no key usage/policy restrictions.
+#   redis/tls/client.{crt,key}      A certificate restricted for SSL client usage.
+#   redis/tls/server.{crt,key}      A certificate restricted fro SSL server usage.
+#   redis/tls/redis.dh              DH Params file.
 
 generate_cert() {
     local name=$1
     local cn="$2"
     local opts="$3"
 
-    local keyfile=tls/${name}.key
-    local certfile=tls/${name}.crt
+    local keyfile=redis/tls/${name}.key
+    local certfile=redis/tls/${name}.crt
 
     [ -f $keyfile ] || openssl genrsa -out $keyfile 2048
     openssl req \
@@ -27,25 +27,25 @@ generate_cert() {
         -key $keyfile | \
         openssl x509 \
             -req -sha256 \
-            -CA tests/tls/ca.crt \
-            -CAkey tests/tls/ca.key \
-            -CAserial tests/tls/ca.txt \
+            -CA redis/tls/ca.crt \
+            -CAkey redis/tls/ca.key \
+            -CAserial redis/tls/ca.txt \
             -CAcreateserial \
             -days 365 \
             $opts \
             -out $certfile
 }
 
-mkdir -p tls
-[ -f tls/ca.key ] || openssl genrsa -out tls/ca.key 4096
+mkdir -p redis/tls
+[ -f redis/tls/ca.key ] || openssl genrsa -out redis/tls/ca.key 4096
 openssl req \
     -x509 -new -nodes -sha256 \
-    -key tls/ca.key \
+    -key redis/tls/ca.key \
     -days 3650 \
     -subj '/O=Redis Test/CN=Certificate Authority' \
-    -out tls/ca.crt
+    -out redis/tls/ca.crt
 
-cat > tls/openssl.cnf <<_END_
+cat > redis/tls/openssl.cnf <<_END_
 [ server_cert ]
 keyUsage = digitalSignature, keyEncipherment
 nsCertType = server
@@ -54,8 +54,8 @@ keyUsage = digitalSignature, keyEncipherment
 nsCertType = client
 _END_
 
-generate_cert server "Server-only" "-extfile tls/openssl.cnf -extensions server_cert"
-generate_cert client "Client-only" "-extfile tls/openssl.cnf -extensions client_cert"
-generate_cert redis "Generic-cert"
+generate_cert server "Server-only" "-extfile redis/tls/openssl.cnf -extensions server_cert"
+generate_cert client "Client-only" "-extfile redis/tls/openssl.cnf -extensions client_cert"
+generate_cert redis "redis"
 
-[ -f tls/redis.dh ] || openssl dhparam -out tls/redis.dh 2048
+[ -f redis/tls/redis.dh ] || openssl dhparam -out redis/tls/redis.dh 2048

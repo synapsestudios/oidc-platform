@@ -1,4 +1,5 @@
 var Confidence = require('confidence');
+const fs = require('fs');
 
 var config = {
   '$filter': 'env',
@@ -17,7 +18,14 @@ var config = {
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD,
       userSessionTrackingEnabled: process.env.ENABLE_USER_SESSION_TRACKING || false,
-      tls: process.env.REDIS_TLS === 'true' ? { port: process.env.REDIS_TLS_PORT || 6380 } : undefined,
+      tls: process.env.REDIS_TLS === 'true' ? { 
+        port: process.env.REDIS_TLS_PORT || 6380,
+        // Necessary only if the server requires client certificate authentication.
+        key: fs.readFileSync('/usr/local/etc/redis/tls/redis.key').toString(),
+        cert: fs.readFileSync('/usr/local/etc/redis/tls/redis.crt').toString(),
+        // Necessary only if the server uses a self-signed certificate.
+        ca: fs.readFileSync('/usr/local/etc/redis/tls/ca.crt').toString(),
+      } : undefined,
     },
     email: {
       driver: process.env.OIDC_EMAIL_DRIVER,
