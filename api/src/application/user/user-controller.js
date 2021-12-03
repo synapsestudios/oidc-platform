@@ -1,13 +1,7 @@
 const querystring = require('querystring');
-const formatError = require('../../lib/format-error');
-const get = require('lodash/get');
 const set = require('lodash/set');
-const Uuid = require('uuid');
-const config = require('../../../config');
-const Boom = require('boom');
+const omit = require('lodash/omit');
 const views = require('./user-views');
-const errorMessages = require('./user-error-messages');
-const userFormData = require('./user-form-data');
 const comparePasswords = require('../../lib/comparePasswords');
 const bookshelf = require('../../lib/bookshelf');
 const webhookService = require('../webhook/webhook-service');
@@ -28,10 +22,8 @@ const expandDotPaths = function(object) {
 
 module.exports = (
   userService,
-  emailService,
   imageService,
   themeService,
-  validationError,
   clientService,
   formHandler,
   userEmails,
@@ -39,7 +31,9 @@ module.exports = (
 ) => {
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
-      user = await userService.create(request.payload.email, request.payload.password)
+      const profile = omit(request.payload, ['email', 'password', 'pass2']);
+      user = await userService.create(request.payload.email, request.payload.password, { profile });
+      webhookService.trigger('user.registered', user);
       await userEmails.sendVerificationEmail(user, client, request.payload.email, request.query);
       reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
     }),
@@ -237,10 +231,8 @@ module.exports = (
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
-  'email/email-service',
   'image/image-service',
   'theme/theme-service',
-  'validator/validation-error',
   'client/client-service',
   'form-handler',
   'user/user-emails',
