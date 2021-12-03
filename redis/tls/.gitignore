@@ -1,0 +1,6 @@
+*
+
+!.gitignore
+!ca.crt
+!redis.crt
+!redis.key
