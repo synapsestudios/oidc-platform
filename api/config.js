@@ -36,6 +36,11 @@ var config = {
     aws: {
       s3Bucket: process.env.OIDC_S3_BUCKET,
     },
+    azure: {
+      storageAccount: process.env.AZURE_STORAGE_ACCOUNT,
+      accessKey: process.env.AZURE_STORAGE_ACCESS_KEY,
+      storageContainer: process.env.OIDC_AZURE_STORAGE_CONTAINER
+    },
     clientInitiatedLogout: process.env.CLIENT_INITIATED_LOGOUT === 'true' ? true : false,
     userRegistration: process.env.ENABLE_USER_REGISTRATION === 'true' ? true : false,
     webhooks: process.env.ENABLE_WEBHOOKS === 'true' ? {
@@ -45,6 +50,12 @@ var config = {
       retryDelay: process.env.WEBHOOK_RETRY_DELAY || 10000,
       concurrency: process.env.WEBHOOK_CONCURRENCY || 1,
     } : false,
+    storageDriver: process.env.OIDC_STORAGE_DRIVER,
+    keystore: {
+      fileName: process.env.KEYSTORE,
+      bucket: process.env.KEYSTORE_BUCKET,
+      container: process.env.KEYSTORE_CONTAINER
+    },
     errorLogging: {
       sentryDSN: process.env.SENTRY_DSN,
       rollbarAccessToken: process.env.ROLLBAR_ACCESS_TOKEN

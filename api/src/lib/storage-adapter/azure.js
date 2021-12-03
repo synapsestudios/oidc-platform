@@ -1,67 +1,68 @@
+const config = require('../../../config');
 const { BlobServiceClient, StorageSharedKeyCredential } = require('@azure/storage-blob');
+const streamToString = require('../stream-to-string');
 
-const sharedKeyCredential = new StorageSharedKeyCredential(
-  process.env.AZURE_STORAGE_ACCOUNT,
-  process.env.AZURE_STORAGE_ACCESS_KEY
-);
-const blobServiceClient = new BlobServiceClient(
-  `https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net`,
-  sharedKeyCredential
-);
+module.exports = function () {
+  const azureStorageAccount = config('/azure/storageAccount');
+  const azureAccessKey = config('/azure/accessKey');
+  const azureStorageContainer = config('/azure/storageContainer');
 
-// [Node.js only] A helper method used to read a Node.js readable stream into string
-async function streamToString(readableStream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    readableStream.on("data", (data) => {
-      chunks.push(data.toString());
-    });
-    readableStream.on("end", () => {
-      resolve(chunks.join(""));
-    });
-    readableStream.on("error", reject);
-  });
-}
+  const sharedKeyCredential = new StorageSharedKeyCredential(
+    azureStorageAccount,
+    azureAccessKey
+  );
 
-module.exports = {
-  async upload(stream, blobName, contentType) {
-    const containerClient = blobServiceClient.getContainerClient(process.env.OIDC_AZURE_STORAGE_CONTAINER);
-    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+  const blobServiceClient = new BlobServiceClient(
+    `https://${azureStorageAccount}.blob.core.windows.net`,
+    sharedKeyCredential
+  );
 
-    const options = {
-      blobHTTPHeaders: {
-        blobContentType: contentType,
-        blobCacheControl: 'public, must-revalidate, proxy-revalidate, max-age=0'
-      }
-    };
+  return {
+    async upload(stream, blobName, contentType) {
+      const containerClient = blobServiceClient.getContainerClient(
+        azureStorageContainer
+      );
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
-    await blockBlobClient.uploadStream(
-      stream,
-      undefined, // Keep default bufferSize
-      undefined, // Keep default maxConcurrency
-      options
-    );
+      const options = {
+        blobHTTPHeaders: {
+          blobContentType: contentType,
+          blobCacheControl:
+            'public, must-revalidate, proxy-revalidate, max-age=0',
+        },
+      };
 
-    const filename = (
-      `https://${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net/` +
-      `${process.env.OIDC_AZURE_STORAGE_CONTAINER}/${blobName}`
-    );
-    return filename;
-  },
+      await blockBlobClient.uploadStream(
+        stream,
+        undefined, // Keep default bufferSize
+        undefined, // Keep default maxConcurrency
+        options
+      );
 
-  async get(container, blob) {
-    const containerClient = blobServiceClient.getContainerClient(container);
-    const blobClient = containerClient.getBlobClient(blob);
+      const filename =
+        `https://${azureStorageAccount}.blob.core.windows.net/` +
+        `${azureStorageContainer}/${blobName}`;
+      return filename;
+    },
 
-    const downloadBlockBlobResponse = await blobClient.download();
-    const downloaded = await streamToString(downloadBlockBlobResponse.readableStreamBody);
-    return downloaded;
-  },
+    async get(container, blob) {
+      const containerClient = blobServiceClient.getContainerClient(container);
+      const blobClient = containerClient.getBlobClient(blob);
 
-  delete(pathToBlob) {
-    const blobName = pathToBlob.replace(`${process.env.OIDC_AZURE_STORAGE_CONTAINER}/`, '');
-    const containerClient = blobServiceClient.getContainerClient(process.env.OIDC_AZURE_STORAGE_CONTAINER);
-    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-    return blockBlobClient.delete();
-  },
+      const downloadBlockBlobResponse = await blobClient.download();
+      const downloaded = await streamToString(
+        downloadBlockBlobResponse.readableStreamBody
+      );
+      return downloaded;
+    },
+
+    delete(pathToBlob) {
+      const blobName = pathToBlob.replace(`${azureStorageContainer}/`, '');
+      const containerClient = blobServiceClient.getContainerClient(
+        azureStorageContainer
+      );
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+      return blockBlobClient.delete();
+    },
+  };
 };

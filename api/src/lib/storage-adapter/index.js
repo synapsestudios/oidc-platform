@@ -1,5 +1,11 @@
-if (process.env.OIDC_STORAGE_DRIVER === 'azure_blob_storage') {
-  module.exports = require('./azure');
-} else {
-  module.exports = require('./s3');
+const config = require('../../../config');
+const azureStorage = require('./azure');
+const s3 = require('./s3');
+
+module.exports = () => {
+  if (config('/storageDriver') === 'azure_blob_storage') {
+    return azureStorage();
+  } else {
+    return s3();
+  }
 };
