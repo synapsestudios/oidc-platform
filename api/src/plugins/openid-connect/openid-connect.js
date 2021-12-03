@@ -19,6 +19,8 @@ exports.register = function (server, options, next) {
     RefreshToken: parseInt(process.env.REFRESH_TOKEN_EXP, 10),
   };
 
+  options.keys = [process.env.COOKIE_KEY, process.env.OLD_COOKIE_KEY];
+
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   const provider = new OidcProvider(issuer, getConfig(options));
 
