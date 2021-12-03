@@ -16,12 +16,12 @@ jobs:
         uses: actions/checkout@v2
       - name: Send Build Triggered Notification
         id: notification
-        uses: synapsestudios/build-status@main
+        uses: synapsestudios/build-status@v1
         with:
-          type: 'trigger'
+          type: "trigger"
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
-          channel: 'CUVU8NYAY'
+          channel: "CUVU8NYAY"
 
   build_api:
     name: Build Api
@@ -34,13 +34,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up notifications
-        uses: synapsestudios/build-status@main
+        uses: synapsestudios/build-status@v1
         with:
           messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
           jobStatus: ${{ job.status }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
-          channel: 'CUVU8NYAY'
+          channel: "CUVU8NYAY"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -93,13 +93,13 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Set up notifications
-        uses: synapsestudios/build-status@main
+        uses: synapsestudios/build-status@v1
         with:
           messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
           jobStatus: ${{ job.status }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
-          channel: 'CUVU8NYAY'
+          channel: "CUVU8NYAY"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -118,7 +118,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '14'
+          node-version: "14"
 
       # - name: Cache e2e node_modules
       #   uses: actions/cache@v2
@@ -126,21 +126,18 @@ jobs:
       #   with:
       #     path: e2e/node_modules
       #     key: acceptance_tests-e2e-npm-cache-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
-
       # - name: Cache e2e Cypress binaries
       #   uses: actions/cache@v2
       #   id: acceptance_tests-e2e-cypress-binaries
       #   with:
       #     path: ~/.cache/Cypress
       #     key: acceptance_tests-e2e-cypress-binaries-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
-
       # - name: Cache frontend node_modules
       #   uses: actions/cache@v2
       #   id: acceptance_tests-frontend-npm-cache
       #   with:
       #     path: frontend/node_modules
       #     key: acceptance_tests-frontend-npm-cache-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
-
       - name: Install dependencies for e2e
         run: npm i
         working-directory: e2e
@@ -213,7 +210,7 @@ jobs:
           CHOKIDAR_USEPOLLING: 1
         run: npm run test:ci
 
-      - name: 'Upload Cypress Screenshots'
+      - name: "Upload Cypress Screenshots"
         if: always()
         uses: actions/upload-artifact@v2
         with:
@@ -221,7 +218,7 @@ jobs:
           path: e2e/cypress/screenshots/
           retention-days: 1
 
-      - name: 'Upload Cypress Videos'
+      - name: "Upload Cypress Videos"
         if: always()
         uses: actions/upload-artifact@v2
         with:
