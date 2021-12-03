@@ -2,7 +2,7 @@ const Lab = require('@hapi/lab');
 const Code = require('@hapi/code');
 const { truncateAll } = require('../../helpers/db');
 
-const { describe, it, after, beforeEach, afterEach } = exports.lab = Lab.script();
+const { describe, it, after, before, beforeEach, afterEach } = exports.lab = Lab.script();
 const sinon = require('sinon');
 const { expect } = Code;
 const getEmailService = require('../../../src/application/email/email-service');
@@ -16,6 +16,8 @@ AWS.setSDK(path.resolve(__dirname, '../../../node_modules/aws-sdk'))
 const getMailgunDriver = require('../../../src/application/email/drivers/mailgun');
 const Mailgun = require('mailgun-js');
 
+const logger = require('../../../src/lib/logger');
+
 describe('email service', () => {
 
     let emailService, confidenceGetStub, confidenceLoadStub;
@@ -27,6 +29,10 @@ describe('email service', () => {
       from: 'no-reply@example.com'
     };
 
+    before(async () => {
+      logger.transports['console'].silent = true;
+    });
+
     beforeEach(async () => {  
       confidenceGetStub = sinon.stub();
       confidenceLoadStub = sinon.stub();
@@ -35,6 +41,7 @@ describe('email service', () => {
 
     after(async () => {
       await truncateAll();
+      logger.transports['console'].silent = false;
     });
 
     afterEach(async() => {
