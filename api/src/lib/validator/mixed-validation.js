@@ -16,7 +16,7 @@ const mixedValidation = (joiSchema, customSchema) => {
 
       return Promise.all(
         Object.keys(customSchema).map((path) => {
-          if (! value[path]) {
+          if (!value || !value[path]) {
             return;
           }
 

@@ -1,0 +1,26 @@
+<div>
+  {{#if systemError}}
+    {{#if production}}
+      <div>Something went wrong</div>
+    {{else}}
+      <div>
+        error: {{error}}<br />
+        error description: {{error_description}}
+        <pre>{{stack}}</pre>
+      </div>
+    {{/if}}
+  {{else}}
+    <div>
+      User Land Error<br />
+      error: {{error}}<br />
+      error description: {{error_description}}
+    </div>
+  {{/if}}
+</div>
+
+{{#unless production}}
+  <div>
+    <h3>Debug Info</h3>
+    <pre>{{debug_info}}</pre>
+  </div>
+{{/unless}}

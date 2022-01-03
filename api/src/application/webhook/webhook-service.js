@@ -4,10 +4,13 @@ const bookshelf = require('../../lib/bookshelf');
 const logger = require('../../lib/logger');
 const queue = require('./getQueue')();
 const webhookConfig = require('../../../config')('/webhooks');
+const uuid = require('uuid');
 
 module.exports = {
   events: [
     'user.update',
+    'user.registered',
+    'user.accept-invite',
   ],
 
   async create(clientId, url, events) {

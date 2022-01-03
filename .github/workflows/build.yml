@@ -1,0 +1,237 @@
+name: Build
+on: [pull_request]
+# on:
+#   push:
+#     branches:
+#       - main
+concurrency: build
+jobs:
+  initialize_notification:
+    name: Initialize Slack Message
+    runs-on: ubuntu-latest
+    outputs:
+      messageTs: ${{ steps.notification.outputs.messageTs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Send Build Triggered Notification
+        id: notification
+        uses: synapsestudios/build-status@v1
+        with:
+          type: "trigger"
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+          channel: "CUVU8NYAY"
+
+  build_api:
+    name: Build Api
+    needs: initialize_notification
+    runs-on: ubuntu-latest
+    outputs:
+      artifact: ${{ steps.artifact.outputs.artifact_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up notifications
+        uses: synapsestudios/build-status@v1
+        with:
+          messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
+          jobStatus: ${{ job.status }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+          channel: "CUVU8NYAY"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Set commit output
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+      - name: Set artifact name output
+        id: artifact
+        run: |
+          echo "::set-output name=artifact_name::oidc-platform:${{steps.vars.outputs.sha_short}}"
+          echo "::set-output name=artifact_name_latest::oidc-platform:latest"
+
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./api
+          tags: ${{ steps.artifact.outputs.artifact_name }}, ${{ steps.artifact.outputs.artifact_name_latest }}
+          outputs: type=docker,dest=/tmp/build.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: /tmp/build.tar
+
+  acceptance_tests:
+    needs: [build_api, initialize_notification]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    services:
+      redis:
+        image: circleci/redis
+        ports:
+          - 6379:6379
+      postgres:
+        image: postgres:9.6.1-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up notifications
+        uses: synapsestudios/build-status@v1
+        with:
+          messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
+          jobStatus: ${{ job.status }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+          channel: "CUVU8NYAY"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: /tmp
+
+      - name: Load image
+        run: |
+          docker load --input /tmp/build.tar
+          docker image ls -a
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "14"
+
+      # - name: Cache e2e node_modules
+      #   uses: actions/cache@v2
+      #   id: acceptance_tests-e2e-npm-cache
+      #   with:
+      #     path: e2e/node_modules
+      #     key: acceptance_tests-e2e-npm-cache-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+      # - name: Cache e2e Cypress binaries
+      #   uses: actions/cache@v2
+      #   id: acceptance_tests-e2e-cypress-binaries
+      #   with:
+      #     path: ~/.cache/Cypress
+      #     key: acceptance_tests-e2e-cypress-binaries-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+      # - name: Cache frontend node_modules
+      #   uses: actions/cache@v2
+      #   id: acceptance_tests-frontend-npm-cache
+      #   with:
+      #     path: frontend/node_modules
+      #     key: acceptance_tests-frontend-npm-cache-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+      - name: Install dependencies for e2e
+        run: npm i
+        working-directory: e2e
+        # if: steps.acceptance_tests-api-npm-cache.outputs.cache-hit != 'true' || steps.acceptance_tests-e2e-cypress-binaries.outputs.cache-hit != 'true'
+
+      - name: Install dependencies for frontend
+        run: npm i
+        working-directory: test-client
+        # if: steps.acceptance_tests-frontend-npm-cache.outputs.cache-hit != 'true'
+
+      - name: Add sso-client.test host
+        run: sudo echo "0.0.0.0 sso-client.test" | sudo tee -a /etc/hosts
+
+      - name: Start api
+        run: |
+          sh ./scripts/run-api-command.sh oidc-platform:latest "npm run migrate-seed"
+          sh ./scripts/run-api.sh oidc-platform:latest "npm start"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - id: create_oidc_client
+        name: Create OIDC client
+        run: echo "::set-output name=CLIENT_JSON::$(curl -X POST http://0.0.0.0:9001/op/reg -H "Content-Type:application/json" -H "Authorization:Bearer token1" -d '{"response_types":["code id_token token"],"grant_types":["authorization_code","implicit","client_credentials"],"redirect_uris":["https://sso-client.test:3000/"],"post_logout_redirect_uris":["https://sso-client.test:3000/logout"]}')"
+
+      - id: client_id
+        name: Extract client ID
+        run: echo "::set-output name=CLIENT_ID::$(echo '${{ steps.create_oidc_client.outputs.CLIENT_JSON }}' | jq '.client_id')"
+
+      - id: client_secret
+        name: Extract client secret
+        run: echo "::set-output name=CLIENT_ID::$(echo '${{ steps.create_oidc_client.outputs.CLIENT_JSON }}' | jq '.client_secret')"
+
+      - name: Create test-client config
+        run: cp src/config.template.js src/config.js
+        working-directory: test-client
+
+      - name: Insert client id
+        run: |
+          sed -i "s/clientId: ''/clientId: '$CLIENT_ID'/g" src/config.js
+        working-directory: test-client
+        env:
+          CLIENT_ID: ${{ steps.client_id.outputs.client_id }}
+
+      - name: Insert client secret
+        run: |
+          sed -i "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
+        working-directory: test-client
+        env:
+          CLIENT_SECRET: ${{ steps.client_secret.outputs.client_secret }}
+
+      - name: Start frontend
+        working-directory: test-client
+        env:
+          CHOKIDAR_USEPOLLING: 1
+        run: |
+          npm start > frontend_logs 2>&1 &
+          curl --connect-timeout 600 --retry 20 --retry-delay 10 --retry-connrefused --insecure https://sso-client.test:3000
+
+      - name: Run e2e tests
+        working-directory: e2e
+        env:
+          CYPRESS_frontend_base_url: https://sso-client.test:3000
+          CYPRESS_oidc_base_url: https://sso-client.test:9000
+          CYPRESS_api_base_url: http://0.0.0.0:9001
+          # TODO: Determine if/how we can run this without CHOKIDAR_USEPOLLING
+          # https://github.com/synapsestudios/puppies.com/runs/3130846603
+          # Fixes error: "Error: ENOSPC: System limit for number of file watchers reached"
+          # This probably has something to do with the fact we are running the frontend in development mode
+          CHOKIDAR_USEPOLLING: 1
+        run: npm run test:ci
+
+      - name: "Upload Cypress Screenshots"
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress-screenshots
+          path: e2e/cypress/screenshots/
+          retention-days: 1
+
+      - name: "Upload Cypress Videos"
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress-videos
+          path: e2e/cypress/videos/
+          retention-days: 1
+
+      # - name: Print frontend logs
+      #   if: always()
+      #   working-directory: frontend
+      #   run: cat frontend_logs
+
+      # - name: Print API logs
+      #   if: always()
+      #   working-directory: api
+      #   run: cat api_logs

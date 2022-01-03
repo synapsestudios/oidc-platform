@@ -16,7 +16,11 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | ENABLE_USER_REGISTRATION  | Set to true if you want to enable user registration at the `/user/register` endpoint. If this is disabled client initiated invites is the only way to make new users |
 | REDIS_HOST                | Set if different from default 'localhost' |
 | REDIS_PORT                | Set if different from default '6379' |
+| REDIS_PASSWORD            | Set if using password authentication for redis |
+| REDIS_TLS                 | Set to true if connecting to redis over SSL |
+| REDIS_TLS_PORT            | Set if different from default '6380' |
 | ENABLE_USER_SESSION_TRACKING | Set to true if you want to enable session tracking by user id in order to bulk delete sessions by user id at the `/user/invalidate-user-sessions` endpoint. |
+| KEEP_ALIVE_TIMEOUT | Duration for which OIDC will keep connections open with the client. This setting should be at least as long as the client's expecting connections to remain open e.g. ELB's `Idle timeout` setting. |
 
 ## Keystores
 node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes **YOU MUST PROVIDE YOUR OWN KEYS IN PRODUCTION**. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own in dev mode, but the server will *not* start in production unless you provide your own keys.
@@ -47,6 +51,16 @@ Now you have a `keystores.json` file. Put that in an AWS S3 bucket and configure
 
 When `KEYSTORE` and `KEYSTORE_BUCKET` are provided the Synapse OpenID Provider will attempt to pull the keystores from S3 when the node service starts. If you provide the `KEYSTORE` and `KEYSTORE_BUCKET` variables but NOT the AWS credential variables then the provider api will fail to start.
 
+Alternatively, the keystore can be placed in an Azure Blob Storage container. In that case, the following environment variables must be set:
+
+| Environment Variables    | Description |
+| ------------------------ | ----------- |
+| OIDC_STORAGE_DRIVER      | This must be set to azure_blob_storage, otherwise s3 will be used |
+| KEYSTORE                 | The name of your keystore file |
+| KEYSTORE_CONTAINER       | The name of the container your keystore can be found in |
+| AZURE_STORAGE_ACCOUNT    | The name of the storage account |
+| AZURE_STORAGE_ACCESS_KEY | Secret access key |
+
 ## Database
 
 The OIDC Platform supports Postgres or MySQL. The database server is not packaged with the OIDC platform. You must create a blank database and provide connection details to the OIDC Platform through environment variables.
@@ -72,15 +86,16 @@ npm run migrate
 
 ## Email
 
-The OIDC platform provides some features that will send emails. In order to send emails the OIDC Provider needs to be configured to use an email service. Currently the platform only supports [mailgun](https://www.mailgun.com/) and [AWS SES](https://aws.amazon.com/ses/). Configuring your email provider occurs in environment variables.
+The OIDC platform provides some features that will send emails. In order to send emails the OIDC Provider needs to be configured to use an email service. Currently the platform supports [mailgun](https://www.mailgun.com/), [AWS SES](https://aws.amazon.com/ses/), and [SendGrid](https://sendgrid.com/). Configuring your email provider occurs in environment variables.
 
 | Environment Variables | Provider | Description |
 | --------------------- | -------- | ----------- |
-| OIDC_EMAIL_DRIVER     | both     | Tell the platform which email provider to user. Value can be either 'ses' or 'mailgun' |
-| OIDC_EMAIL_DOMAIN     | both     | The domain to send emails from |
-| OIDC_EMAIL_WHITELIST  | both     | A whitelist of domains (comma separated) that emails can be sent to. If OIDC_EMAIL_WHITELIST is not set then the whitelist feature will not be used |
-| OIDC_EMAIL_TRAP       | both     | If whitelist check fails then the email will be sent to the email specified by OIDC_EMAIL_TRAP |
+| OIDC_EMAIL_DRIVER     | all      | Tell the platform which email provider to user. Value can be either 'ses', 'sendgrid' or 'mailgun' |
+| OIDC_EMAIL_DOMAIN     | all      | The domain to send emails from |
+| OIDC_EMAIL_WHITELIST  | all      | A whitelist of domains (comma separated) that emails can be sent to. If OIDC_EMAIL_WHITELIST is not set then the whitelist feature will not be used |
+| OIDC_EMAIL_TRAP       | all      | If whitelist check fails then the email will be sent to the email specified by OIDC_EMAIL_TRAP |
 | MAILGUN_API_KEY       | mailgun  | If you're using mailgun you must provide an api key |
+| SENDGRID_API_KEY      | sendgrid | If you're using SendGrid you must provide an api key |
 | AWS_ACCESS_KEY        | ses      | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 | AWS_SECRET_ACCESS_KEY | ses      | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 
@@ -94,6 +109,14 @@ Users can upload profile pictures when editing their profile. The platform makes
 | AWS_ACCESS_KEY        | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 | AWS_SECRET_ACCESS_KEY | Documented [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html) |
 
+If you are storing your keystore using Azure Blob Storage, then your uploads will also use Azure. In that case, make sure the following variables are defined:
+
+| Environment Variables        | Description |
+| ---------------------------- | ----------- |
+| OIDC_STORAGE_DRIVER          | This must be set to azure_blob_storage, otherwise s3 will be used |
+| AZURE_STORAGE_ACCOUNT        | The name of the storage account |
+| AZURE_STORAGE_ACCESS_KEY     | Secret access key |
+| OIDC_AZURE_STORAGE_CONTAINER | The name of the container where uploads will be stored |
 ## Webhooks
 
 | Environment Variables | Description |

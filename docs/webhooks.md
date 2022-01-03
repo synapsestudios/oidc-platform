@@ -23,4 +23,6 @@ The POST request will have an `Authorization` header with a jwt bearer token. Yo
 
 | Event | Description |
 | ----- | ----------- |
-| user.update | Fired when user data changes (currently only fires for email change. Full implementation coming soon!) |
+| user.update | Fired when user data changes |
+| user.registered | Fired when a user is registered using the registration form at /user/register |
+| user.accept-invite | Fired when an invite email is accepted (and the user has set their password) |

@@ -1,0 +1,243 @@
+name: e2e PR
+on: [pull_request]
+jobs:
+  e2e_diff:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: true
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          concurrent_skipping: 'never'
+          paths: '["api/**/*", "test-client/**/*", "e2e/**/*", ".github/workflows/e2e_pr.yml"]'
+
+  # initialize_notification:
+  #   needs: e2e_diff
+  #   if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
+  #   name: Initialize Slack Message
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     messageTs: ${{ steps.notification.outputs.messageTs }}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+  #     - name: Send e2e Test Triggered Notification
+  #       id: notification
+  #       uses: synapsestudios/build-status@main
+  #       with:
+  #         type: 'trigger'
+  #         githubToken: ${{ secrets.GITHUB_TOKEN }}
+  #         token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+  #         channel: 'CUVU8NYAY'
+
+  e2e_commit_stage:
+    needs: e2e_diff
+    if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: e2e
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14'
+
+      - name: Cache e2e node_modules
+        uses: actions/cache@v2
+        id: e2e_commit_stage-e2e-npm-cache
+        with:
+          path: e2e/node_modules
+          key: e2e_commit_stage-e2e-npm-cache-${{ runner.os }}-modules-${{ hashFiles('e2e/package-lock.json') }}
+
+      - name: Install dependencies for e2e
+        run: npm i
+        if: steps.e2e_commit_stage-e2e-npm-cache.outputs.cache-hit != 'true'
+
+      - name: Run lint on e2e
+        run: npm run lint:ci
+
+      - name: Run prettier on e2e
+        run: npm run prettier:ci
+
+  e2e_tests:
+    needs: [e2e_diff, initialize_notification]
+    if: ${{ needs.e2e_diff.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    services:
+      redis:
+        image: circleci/redis
+        ports:
+          - 6379:6379
+      postgres:
+        image: postgres:9.6.1-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      OIDC_BASE_URL: https://0.0.0.0:9000
+      OIDC_DB_HOST: 0.0.0.0
+      OIDC_INITIAL_ACCESS_TOKEN: token1
+      OIDC_PAIRWISE_SALT: 0731adf16f1dcdf0422238808a407436
+      OIDC_EMAIL_DRIVER: ses
+      OIDC_EMAIL_DOMAIN: syn0.com
+      OIDC_EMAIL_WHITELIST: syn0.com
+      OIDC_EMAIL_TRAP: andrew@syn0.com
+      OIDC_S3_BUCKET: oidc-test-keystore
+      CLIENT_INITIATED_LOGOUT: true
+      ENABLE_USER_REGISTRATION: true
+      ENABLE_USER_SESSION_TRACKING: true
+      REDIS_HOST: 0.0.0.0
+      REDIS_PORT: 6379
+      COOKIE_KEY: cookie
+      OLD_COOKIE_KEY: oldcookie
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-west-2
+    steps:
+      - uses: actions/checkout@v2
+
+      # - name: Set up notifications
+      #   uses: synapsestudios/build-status@main
+      #   with:
+      #     messageTs: ${{ needs.initialize_notification.outputs.messageTs }}
+      #     jobStatus: ${{ job.status }}
+      #     githubToken: ${{ secrets.GITHUB_TOKEN }}
+      #     token: ${{ secrets.SYNOPS_SLACK_API_TOKEN }}
+      #     channel: 'CUVU8NYAY'
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14'
+
+      - name: Cache e2e node_modules
+        uses: actions/cache@v2
+        id: e2e_tests-e2e-npm-cache
+        with:
+          path: e2e/node_modules
+          key: e2e_tests-e2e-npm-cache-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+
+      - name: Cache e2e Cypress binaries
+        uses: actions/cache@v2
+        id: e2e_tests-e2e-cypress-binaries
+        with:
+          path: ~/.cache/Cypress
+          key: e2e_tests-e2e-cypress-binaries-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+
+      - name: Cache frontend node_modules
+        uses: actions/cache@v2
+        id: e2e_tests-frontend-npm-cache
+        with:
+          path: frontend/node_modules
+          key: e2e_tests-frontend-npm-cache-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Cache api node_modules
+        uses: actions/cache@v2
+        id: e2e_tests-api-npm-cache
+        with:
+          path: api/node_modules
+          key: e2e_tests-api-npm-cache-${{ runner.os }}-${{ hashFiles('api/package-lock.json') }}
+
+      - name: Install dependencies for e2e
+        run: npm i
+        working-directory: e2e
+        if: steps.e2e_tests-api-npm-cache.outputs.cache-hit != 'true' || steps.e2e_tests-e2e-cypress-binaries.outputs.cache-hit != 'true'
+
+      - name: Install dependencies for frontend
+        run: npm i
+        working-directory: test-client
+        if: steps.e2e_tests-frontend-npm-cache.outputs.cache-hit != 'true'
+
+      - name: Install dependencies for API
+        run: npm i
+        working-directory: api
+        if: steps.api-npm-cache.outputs.cache-hit != 'true'
+
+      - name: Add sso-client.test host
+        run: sudo echo "sso-client.test 0.0.0.0" | sudo tee -a /etc/hosts
+
+      - name: Perform database migrations
+        working-directory: api
+        run: npm run migrate-seed
+
+      - name: Start API
+        working-directory: api
+        env:
+          DUPLICATE_IMAGE_SIMILARITY_THRESHOLD: 0.85
+        run: |
+          npm run start > api_logs 2>&1 &
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://sso-client.test:9000/health-check
+
+      - id: create_oidc_client
+        name: Create OIDC client
+        uses: ./.github/actions/create-oidc-client
+
+      - name: Create test-client config
+        run: |
+          cp src/config.template.js src/config.js
+          sed -E -i "" -e "s/clientId: ''/clientId: '$CLIENT_ID'/g" src/config.js
+          sed -E -i "" -e "s/clientSecret: ''/clientSecret: '$CLIENT_SECRET'/g" src/config.js
+        working-directory: test-client
+        env:
+          CLIENT_ID: ${{ steps.create_oidc_client.outputs.client_id }}
+          CLIENT_SECRET: ${{ steps.create_oidc_client.outputs.client_secret }}
+
+      - name: Start frontend
+        working-directory: frontend
+        env:
+          CHOKIDAR_USEPOLLING: 1
+        run: |
+          npm start > frontend_logs 2>&1 &
+          wget --retry-connrefused --waitretry=10 --read-timeout=20 --timeout=20 --tries 20 https://sso-client.test:3000
+
+      - name: Run e2e tests
+        working-directory: e2e
+        env:
+          CYPRESS_frontend_base_url: https://sso-client.test:3000
+          CYPRESS_oidc_base_url: https://sso-client.test:9000
+          CYPRESS_api_base_url: http://0.0.0.0:9001
+          # TODO: Determine if/how we can run this without CHOKIDAR_USEPOLLING
+          # https://github.com/synapsestudios/puppies.com/runs/3130846603
+          # Fixes error: "Error: ENOSPC: System limit for number of file watchers reached"
+          # This probably has something to do with the fact we are running the frontend in development mode
+          CHOKIDAR_USEPOLLING: 1
+        run: npm run test:ci
+
+      - name: 'Upload Cypress Screenshots'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress-screenshots
+          path: e2e/cypress/screenshots/
+          retention-days: 1
+
+      - name: 'Upload Cypress Videos'
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress-videos
+          path: e2e/cypress/videos/
+          retention-days: 1
+
+      - name: Print frontend logs
+        if: always()
+        working-directory: frontend
+        run: cat frontend_logs
+
+      - name: Print API logs
+        if: always()
+        working-directory: api
+        run: cat api_logs

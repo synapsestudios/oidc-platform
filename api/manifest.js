@@ -1,4 +1,3 @@
-const handlebars = require('handlebars');
 const ioc = require('electrolyte');
 const GoodWinston = require('good-winston');
 const fs = require('fs');
@@ -51,8 +50,43 @@ module.exports = Promise.all([
             failAction: (request, reply, source, error) => {
               reply(formatError(error));
             }
-          }
-        }
+          },
+          ext: {
+            onPreResponse: [{ method: async (request, reply) => {
+              const res = request.response;
+              const accept = request.headers.accept;
+
+              // if we have an error and they have an accept header with
+              // text/html then render them an error page
+              if (res.isBoom && accept && accept.match(/text\/html/)) {
+                const debug = {
+                  method: request.method, // e.g GET/POST
+                  url: request.url.path, // the path the person requested
+                  headers: request.headers, // all HTTP Headers
+                  info: request.info, // all additional request info (useful for debug)
+                  auth: request.auth, // any authentication details e.g. the decoded JWT
+                  payload: request.payload, // the complete request payload received
+                  response: res.output.payload, // response before error intercepted
+                };
+
+                const template = await lib.themeService.renderThemedTemplate('error', {
+                  error: res.output.payload.error,
+                  error_description: res.output.payload.message,
+                  stack: res.stack,
+                  systemError: true,
+                  production: env === 'production',
+                  debug_info: JSON.stringify(debug, null, 4),
+                  debug,
+                }, request.query.client_id);
+
+
+                return reply(template).code(res.output.statusCode);
+              }
+
+              return reply.continue();
+            }}],
+          },
+        },
       }
     },
     connections,
@@ -63,8 +97,8 @@ module.exports = Promise.all([
         }
       },
       {
-        plugin : {
-          register: 'vision',
+        plugin: {
+          register: 'vision'
         }
       },
       {
@@ -97,14 +131,6 @@ module.exports = Promise.all([
           register: './plugins/openid-connect/openid-connect',
           options: {
             logger,
-            vision: {
-              engines: {
-                hbs: handlebars
-              },
-              path: './templates',
-              layoutPath: './templates/layout',
-              layout: 'default',
-            },
             prefix: 'op',
             getTemplate: lib.themeService.renderThemedTemplate.bind(lib.themeService),
             authenticateUser: lib.userService.authenticate,
@@ -117,7 +143,15 @@ module.exports = Promise.all([
               return (name === 'Client') ? new lib.sqlOidcAdapter(name): new lib.redisOidcAdapter(name);
             },
             keystore: lib.keystore,
-            formats: { default: config('/oidc/defaultFormat') || 'opaque' }
+            formats: { default: config('/oidc/defaultFormat') || 'opaque' },
+            renderError: async (ctx, error) => {
+              ctx.type = 'html';
+              ctx.body = await lib.themeService.renderThemedTemplate('error', {
+                ...error,
+                systemError: true,
+                production: env === 'production',
+              });
+            }
           }
         }
       }

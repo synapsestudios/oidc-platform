@@ -9,8 +9,7 @@ module.exports = (options) => ({
 
       try {
         if (account) {
-
-          const { AccessToken, IdToken } = providerInstance;
+          const { AccessToken, IdToken, RefreshToken } = providerInstance;
           const at = new AccessToken({
             accountId: account.accountId,
             clientId: ctx.oidc.client.clientId,
@@ -20,12 +19,25 @@ module.exports = (options) => ({
 
           const accessToken = await at.save();
           const expiresIn = AccessToken.expiresIn;
-
           const token = new IdToken(
             Object.assign({}, await Promise.resolve(account.claims())),
             ctx.oidc.client
           );
+
+          const refreshToken = new RefreshToken({
+            clientId: ctx.oidc.client.clientId,
+            scope: ctx.oidc.params.scope || '',
+            accountId: account.accountId,
+            grantId: ctx.oidc.uuid,
+            claims: {
+              id_token: { sub: { value: account.accountId } },
+            },
+          });
+
+          const refreshTokenValue = await refreshToken.save();
+
           token.set('at_hash', accessToken);
+          token.set('rt_hash', refreshTokenValue);
           token.set('sub', account.accountId);
 
           const idToken = await token.sign();
@@ -35,6 +47,7 @@ module.exports = (options) => ({
             expires_in: expiresIn,
             token_type: 'Bearer',
             id_token: idToken,
+            refresh_token: refreshTokenValue,
           };
         } else {
           ctx.body = {
@@ -54,7 +67,6 @@ module.exports = (options) => ({
         ctx.status = 500;
         await next();
       }
-
     };
-  }
+  },
 });

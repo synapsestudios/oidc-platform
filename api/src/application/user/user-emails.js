@@ -3,23 +3,16 @@ const base = config('/baseUrl');
 const querystring = require('querystring');
 const Hoek = require('hoek');
 const userViews = require('./user-views');
-const handlebars = require('handlebars');
+const handlebars = require('../../lib/handlebars');
 
-module.exports = (emailService, themeService, renderTemplate, emailTokenService) => {
+module.exports = (emailService, themeService, emailTokenService) => {
   const renderAndSend = async (to, clientId, page, context) => {
-    const {template, renderedTemplate} = await themeService.getThemedTemplate(clientId, page, context);
+    const {template, renderedTemplate} = await themeService.getThemedTemplate(page, context, clientId);
 
     let from, html, subject = context.subject;
-    if (!template) {
-      html = await renderTemplate(page, context, {
-        layout: 'email',
-      });
-    } else {
-      html = renderedTemplate;
-      subject = template.get('options') && template.get('options').subject || subject;
-      from = template.get('options') && template.get('options').from || from;
-    }
-
+    html = renderedTemplate;
+    subject = template && template.get('options') && template.get('options').subject || subject;
+    from = template && template.get('options') && template.get('options').from || from;
     await emailService.send({to, subject, html, from});
   };
 
@@ -157,6 +150,5 @@ module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'email/email-service',
   'theme/theme-service',
-  'render-template',
   'email-token/email-token-service',
 ];

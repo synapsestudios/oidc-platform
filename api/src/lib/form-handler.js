@@ -3,12 +3,19 @@ module.exports = (
   themeService,
   clientService
 ) => {
-  return (templateName, getView, postHandler) => async (request, reply, source, error) => {
+  return (templateName, getView, postHandler, ...rest) => async (request, reply, source, err) => {
+    const error = err || request.pre.error;
     if (error && error.output.statusCode === 404) {
       return reply(error);
     }
+
     try {
       const client = await clientService.findById(request.query.client_id);
+
+      if (!client) {
+        return reply('404: Client not found').code(404);
+      }
+
       let user = null;
       if (request.auth.isAuthenticated) {
         switch(request.auth.strategy) {
@@ -27,16 +34,12 @@ module.exports = (
 
       const render = async e => {
         const viewContext = getView(user, client, request, e);
-        const template = await themeService.renderThemedTemplate(request.query.client_id, templateName, viewContext);
-        if (template) {
-          return reply(template);
-        } else {
-          return reply.view(templateName, viewContext);
-        }
+        const template = await themeService.renderThemedTemplate(templateName, viewContext, request.query.client_id);
+        return reply(template).code(e && e.output && e.output.statusCode || 200);
       };
 
       if (!error && request.method === 'post') {
-        error = await postHandler(request, reply, user, client, render);
+        await postHandler(request, reply, user, client, render, ...rest);
       } else {
         await render(error);
       }

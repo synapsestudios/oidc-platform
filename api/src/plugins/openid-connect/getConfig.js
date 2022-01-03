@@ -1,7 +1,4 @@
-const fs = require('fs');
-const handlebars = require('handlebars');
-
-module.exports = options => {
+module.exports = (options) => {
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   const config = {
     findById: options.findUserById,
@@ -20,6 +17,7 @@ module.exports = options => {
     cookies: {
       long: { signed: true },
       short: { signed: true },
+      keys: options.keys,
     },
     discovery: {
       service_documentation: '',
@@ -31,8 +29,23 @@ module.exports = options => {
       email: ['email', 'email_verified'],
       phone: ['phone_number', 'phone_number_verified'],
       app_metadata: ['app_metadata'],
-      profile: ['birthdate', 'family_name', 'gender', 'name', 'given_name', 'locale', 'middle_name', 'name',
-        'nickname', 'picture', 'preferred_username', 'profile', 'updated_at', 'website', 'zoneinfo'],
+      profile: [
+        'birthdate',
+        'family_name',
+        'gender',
+        'name',
+        'given_name',
+        'locale',
+        'middle_name',
+        'name',
+        'nickname',
+        'picture',
+        'preferred_username',
+        'profile',
+        'updated_at',
+        'website',
+        'zoneinfo',
+      ],
     },
     features: {
       devInteractions: false,
@@ -57,22 +70,24 @@ module.exports = options => {
     },
     logoutSource: async function renderLogoutSource(ctx, form) {
       const clientId = ctx.oidc.session.logout.clientId;
-      const template = await options.getTemplate(clientId, 'end-session', { form });
-      if (template) {
-        ctx.body = template;
-      } else {
-        const layout = fs.readFileSync('./templates/layout/default.hbs', 'utf8');
-        const logout = fs.readFileSync('./templates/end_session.hbs', 'utf8');
-
-        ctx.body = handlebars.compile(layout)({
-          content: handlebars.compile(logout)({ form })
-        });
-      }
+      const template = await options.getTemplate(clientId, 'end-session', {
+        form,
+      });
+      ctx.body = template;
     },
     subjectTypes: ['public', 'pairwise'],
-    pairwiseSaltIdentifier: async () => options.pairwiseSalt,
-    interactionUrl: async (ctx, interaction) => `/interaction/${ctx.oidc.uuid}`, // eslint-disable-line no-unused-vars
-    scopes: ['admin', 'superadmin'],
+    pairwiseSalt: options.pairwiseSalt,
+    interactionUrl: async (ctx, interaction) => `/interaction/${ctx.oidc.uuid}`,
+    scopes: ['admin', 'superadmin', 'offline_access'],
+    ttl: {
+      AccessToken: options.ttl.AccessToken || 3600,
+      AuthorizationCode: options.ttl.AuthorizationCode || 600,
+      ClientCredentials: options.ttl.ClientCredentials || 600,
+      DeviceCode: options.ttl.DeviceCode || 600,
+      IdToken: options.ttl.IdToken || 3600,
+      RefreshToken: options.ttl.RefreshToken || 1209600, // default two weeks
+    },
+    renderError: options.renderError,
   };
 
   if (options.formats) config.formats = options.formats;

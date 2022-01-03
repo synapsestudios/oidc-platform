@@ -141,7 +141,7 @@ ${providerDomain}/user/register
   &nonce=${nonce}
 ```
 
-When your user has successfully created their account and logged in they will be redirected back to your application. You can then use the OIDC Provider api coupled with the usrs access token to get that users profile information.
+When your user has successfully created their account and logged in they will be redirected back to your application. You can then use the OIDC Provider API coupled with the user's access token to get that user's profile information.
 
 ## Logging your users in and getting tokens
 
