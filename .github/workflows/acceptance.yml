@@ -1,9 +1,8 @@
-name: Build
-on: [pull_request]
-# on:
-#   push:
-#     branches:
-#       - main
+name: Acceptance
+on:
+  push:
+    branches:
+      - master
 concurrency: build
 jobs:
   initialize_notification:
