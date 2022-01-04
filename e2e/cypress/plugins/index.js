@@ -18,28 +18,11 @@ const resolve = require("resolve");
 /**
  * @type {Cypress.PluginConfig}
  */
- module.exports = (on, config) => {
-  console.log('=== Plugins starting ===')
-  const typescript = resolve.sync("typescript", {
-    baseDir: config.projectRoot,
-  });
-  console.log({typescript});
-
-  const options = { ...browserify.defaultOptions, typescript };
-  console.log({options})
-
-  const callback = cucumber(options);
-  console.log({callback})
-
-  on("file:preprocessor", callback);
-
-  console.log("=== Plugins done ===");
-};
-/*module.exports = (on, config) => {
+module.exports = (on, config) => {
   const options = {
     ...browserify.defaultOptions,
     typescript: resolve.sync("typescript", { baseDir: config.projectRoot }),
   };
 
   on("file:preprocessor", cucumber(options));
-};*/
+};
