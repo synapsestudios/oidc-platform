@@ -1,0 +1,34 @@
+{
+  "name": "oidc-platform-e2e",
+  "version": "0.1.0",
+  "scripts": {
+    "prettier": "prettier --write .",
+    "prettier:ci": "prettier --check .",
+    "lint": "eslint **/*.ts --fix",
+    "lint:ci": "eslint **/*.ts",
+    "test": "cypress open",
+    "test:ci": "cypress run --spec **/*.feature -e TAGS='not @in-process and not @third-party'",
+    "test:tags": "sh -c 'cypress-tags run -e TAGS=\"${0}\"'"
+  },
+  "author": "Synapse Studios",
+  "license": "UNLICENSED",
+  "cypress-cucumber-preprocessor": {
+    "nonGlobalStepDefinitions": true
+  },
+  "devDependencies": {
+    "@testing-library/cypress": "^7.0.6",
+    "@typescript-eslint/eslint-plugin": "^4.28.4",
+    "@typescript-eslint/parser": "^4.28.4",
+    "command-line-args": "^5.2.0",
+    "cypress": "^7.6.0",
+    "cypress-cucumber-preprocessor": "^4.1.4",
+    "date-fns": "^2.23.0",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "knex": "^0.95.4",
+    "pg": "^8.6.0",
+    "prettier": "^2.3.2",
+    "typescript": "^4.3.5"
+  }
+}

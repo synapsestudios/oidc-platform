@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import queryString from 'query-string';
 import localstorage from 'store2';
-import createHistory from 'history/createBrowserHistory';
+import { createBrowserHistory as createHistory } from 'history';
 import config from './config';
 import './App.css';
+import { getLoginUrl } from './oidc-url-builders';
 
 import InviteUserForm from './components/InviteUserForm';
 import UserProfileForm from './components/UserProfileForm';
@@ -72,7 +73,7 @@ class App extends Component {
     return (
       <div>
         <span>
-          <a href={`https://sso-client.test:9000/op/auth?client_id=${config.clientId}&response_type=token id_token&scope=${config.scope}&redirect_uri=${config.redirectUri}&nonce=nonce`}>Log In</a>
+          <a href={getLoginUrl()}>Log In</a>
           <span> | </span>
           <a href={`https://sso-client.test:9000/user/register?client_id=${config.clientId}&response_type=id_token token&scope=${config.scope}&redirect_uri=${config.redirectUri}&nonce=nonce`}>Sign Up</a>
         </span>
@@ -81,7 +82,6 @@ class App extends Component {
           <input type="text" id="email" value={this.state.email} onChange={({ target }) => this.setState(() => ({ email: target.value }))} />
           <input type="password" id="password" value={this.state.password} onChange={({ target }) => this.setState(() => ({ password: target.value }))}/>
           <button onClick={this.login}>login with password grant</button>
-          <a href={`https://sso-client.test:9000/user/forgot-password?client_id=${config.clientId}&redirect_uri=${config.redirectUri}`}>Forgot Password</a>
         </div>
       </div>
     );

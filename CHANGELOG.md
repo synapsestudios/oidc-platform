@@ -1,4 +1,35 @@
-## [v2.7.0](https://github.com/synapsestudios/oidc-platform/compare/v2.7.0...v2.7.1) - 2010-01-08
+## [v2.11.0](https://github.com/synapsestudios/oidc-platform/compare/v2.10.0...v2.11.0)
+### Added
+- [#445](https://github.com/synapsestudios/oidc-platform/issues/439) Edit User Profile route for Admins. Added Lab tests.
+
+## [v2.10.0](https://github.com/synapsestudios/oidc-platform/compare/v2.9.1...v2.10.0)
+### Added
+- [#449](https://github.com/synapsestudios/oidc-platform/issues/449) Add user.accept-invite webhook
+
+## [v2.9.1](https://github.com/synapsestudios/oidc-platform/compare/v2.9.0...v2.9.1)
+### Added
+- [#439](https://github.com/synapsestudios/oidc-platform/issues/439) Add `ifEq` and `ifStartsWith` to Handlebars renderer
+- [#437](https://github.com/synapsestudios/oidc-platform/issues/437) Add full `debug` to error template context
+
+### Bugs Fixed
+- [#432](https://github.com/synapsestudios/oidc-platform/issues/432) Error template assumes `production` is false
+
+## [v2.9.0](https://github.com/synapsestudios/oidc-platform/compare/v2.8.0...v2.9.0)
+### Added
+- [#421](https://github.com/synapsestudios/oidc-platform/issues/421) Don't create new urls for updated profile pictures, use `path/to/image/${userId}`.
+
+## [v2.8.0](https://github.com/synapsestudios/oidc-platform/compare/v2.7.1...v2.8.0)
+### Added
+- [#196](https://github.com/synapsestudios/oidc-platform/issues/196) Added system templates and a new error page template
+- [#405](https://github.com/synapsestudios/oidc-platform/issues/405) Password grant now returns refresh tokens
+- [#417](https://github.com/synapsestudios/oidc-platform/issues/417) Create a user without sending an invite email
+- [#376](https://github.com/synapsestudios/oidc-platform/issues/376) Update a user's profile with an api call
+- [#365](https://github.com/synapsestudios/oidc-platform/issues/365) Allow the use of the access token to validate users for profile and settings screens
+
+### Bugs Fixed
+- [#384](https://github.com/synapsestudios/oidc-platform/issues/384) Don't wipe out profile images when submitting profile form
+
+## [v2.7.1](https://github.com/synapsestudios/oidc-platform/compare/v2.7.0...v2.7.1) - 2010-01-08
 ### Added
 - [#368](https://github.com/synapsestudios/oidc-platform/issues/368) Updated the dev ssl cert to use new CA
 

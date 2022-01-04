@@ -12,8 +12,8 @@ const clientId = config.clientId;
 const clientSecret = config.clientSecret;
 
 
-module.exports = (res, reply) => {
-  const payload = JSON.parse(res.payload);
+module.exports = (request, reply) => {
+  const payload = JSON.parse(request.payload);
   const options = {
     headers: {
       Authorization: 'Basic ' + btoa(`${encodeURIComponent(clientId)}:${encodeURIComponent(clientSecret)}`),

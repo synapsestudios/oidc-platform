@@ -2,9 +2,9 @@ const Joi = require('joi');
 const webhookService = require('../webhook/webhook-service');
 const userFormData = require('../user/user-form-data');
 const Readable = require('stream').Readable;
-const bookshelf = require('../../lib/bookshelf');
 const hoursTillExpirationSchema = Joi.number().integer().greater(0).default(48);
 const allowedImageMimes = require('../image/allowed-image-mimes');
+const uuid = require('uuid');
 
 const ONE_MEGABYTE = 1048576;
 const filePayloadConfig = {
@@ -19,6 +19,8 @@ const userProfilePayloadValidation = Joi.object().keys({
   name: Joi.string().allow(''),
   given_name: Joi.string().allow(''),
   family_name: Joi.string().allow(''),
+  first_name: Joi.string().allow(''),
+  last_name: Joi.string().allow(''),
   middle_name: Joi.string().allow(''),
   nickname: Joi.string().allow(''),
   preferred_username: Joi.string().allow(''),
@@ -43,6 +45,36 @@ const userProfilePayloadValidation = Joi.object().keys({
 }).invalid(null).label('picture') // null payload means picture size validation failed
 
 module.exports = (userService, clientService, mixedValidation, rowNotExists, rowExists, clientValidator, userEmails, apiService) => [
+  {
+    method: 'POST',
+    path: '/api/user',
+    handler: (request, reply) => {
+      const { email, app_metadata, profile } = request.payload;
+      reply(userService.create(email, uuid.v4(), {
+        app_metadata: app_metadata || {},
+        profile : profile || {}
+      }));
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin'
+      },
+      validate: {
+        payload: mixedValidation(
+          {
+            email: Joi.string().email().regex(/[\*%]+/g, { invert: true }).required(),
+            app_metadata: Joi.object(),
+            profile: Joi.object(),
+          },
+          {
+            email: rowNotExists('user', 'email', 'Email already in use'),
+            client_id: clientValidator,
+          }
+        )
+      }
+    }
+  },
   {
     method: 'POST',
     path: '/api/invite',
@@ -70,7 +102,6 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
             hours_till_expiration: hoursTillExpirationSchema,
           },
           {
-            email: rowNotExists('user', 'email', 'Email already in use'),
             client_id: clientValidator,
           }
         )
@@ -285,11 +316,8 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       const userId = request.auth.strategy === 'oidc_session'
         ? request.auth.credentials.accountId()
         : request.auth.credentials.accountId;
-
-      const user = await bookshelf.model('user')
-        .where({id: userId})
-        .fetch();
-      reply(apiService.updateUserProfile(user, request.payload));
+      const user = await apiService.updateUserProfile(userId, request.payload);
+      reply(user);
     },
     config: {
       payload: filePayloadConfig,
@@ -304,6 +332,49 @@ module.exports = (userService, clientService, mixedValidation, rowNotExists, row
       }
     }
   },
+  {
+    method: 'PUT',
+    path: '/api/users/{userId}/profile',
+    handler: async (request, reply) => {
+      const user = await apiService.updateUserProfile(request.params.userId, request.payload);
+      reply(user);
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin',
+      },
+      validate: {
+        params: mixedValidation({
+          userId: Joi.any().required(),
+        }, {
+          userId: rowExists('user', 'id', 'User not found')
+        }),
+        payload: userProfilePayloadValidation,
+      }
+    }
+  },
+  {
+    method: 'DELETE',
+    path: '/api/users/{userId}',
+    handler: async (request, reply) => {
+      await userService.delete(request.params.userId);
+      reply().code(204);
+    },
+    config: {
+      auth: {
+        strategy: 'client_credentials',
+        scope: 'admin',
+      },
+      validate: {
+        params: mixedValidation({
+          userId: Joi.any().required(),
+        }, {
+          userId: rowExists('user', 'id', 'User not found')
+        }),
+      }
+    },
+  }
 ];
 
 module.exports['@singleton'] = true;

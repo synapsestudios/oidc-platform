@@ -1,6 +1,6 @@
 {
   "name": "identity-platform-api",
-  "version": "2.7.1",
+  "version": "3.0.0",
   "description": "OpenID Connect provider for synapse projects",
   "main": "server.js",
   "scripts": {
@@ -11,7 +11,12 @@
     "rebuild-db": "npm run drop-tables && knex migrate:latest && knex seed:run",
     "migrate-seed": "knex migrate:latest && knex seed:run",
     "generate-keys": "node src/bin/generate-keys.js",
-    "migrate": "knex migrate:latest"
+    "migrate": "knex migrate:latest",
+    "test:prepare": "npm run create-test-db && npm run rebuild-db-for-tests",
+    "test": "NODE_ENV=test knex migrate:latest && lab -lv",
+    "test:watch": "NODE_ENV=test knex migrate:latest && nodemon --exec lab -lvk",
+    "create-test-db": "node ./src/bin/create-test-db.js",
+    "rebuild-db-for-tests": "NODE_ENV=test npm run create-test-db && NODE_ENV=test npm run drop-tables && NODE_ENV=test knex migrate:latest"
   },
   "repository": {
     "type": "git",
@@ -24,6 +29,10 @@
   },
   "homepage": "https://github.com/synapsestudios/oidc-platform",
   "dependencies": {
+    "@azure/storage-blob": "^12.1.1",
+    "@sendgrid/mail": "^7.0.1",
+    "@sentry/node": "^5.15.5",
+    "@synapsestudios/winston-sentry": "^1.1.0",
     "aws-sdk": "^2.395.0",
     "bcrypt": "3.0.3",
     "bookshelf": "0.14.2",
@@ -37,7 +46,7 @@
     "good-console": "^6.4.0",
     "good-squeeze": "^5.0.1",
     "good-winston": "^4.0.0",
-    "handlebars": "^4.0.5",
+    "handlebars": "4.1.0",
     "hapi": "^16.7.0",
     "hapi-auth-jwt2": "^7.2.4",
     "hoek": "4.2.1",
@@ -52,15 +61,22 @@
     "pg": "7.8.0",
     "querystring": "^0.2.0",
     "queue": "^4.4.2",
-    "raven": "^2.4.2",
     "rollbar": "^2.3.9",
+    "supertest": "^6.1.6",
     "uuid": "^3.0.1",
     "vision": "^4.1.0",
     "winston": "^2.4.1",
-    "winston-raven-sentry": "^1.0.1",
     "winston-rollbar-transport": "^1.0.0"
   },
   "devDependencies": {
-    "nodemon": "1.18.9"
+    "@hapi/code": "^7.0.0",
+    "@hapi/lab": "^21.0.0",
+    "@testing-library/dom": "^6.16.0",
+    "factory-girl": "^5.0.4",
+    "jsdom": "^10.1.0",
+    "nodemon": "1.18.9",
+    "sinon": "^9.0.2",
+    "aws-sdk-mock": "^5.4.0",
+    "sentry-testkit": "^3.3.7"
   }
 }

@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const Boom = require('boom');
 const Readable = require('stream').Readable;
 const userFormData = require('./user-form-data');
 const views = require('./user-views');
@@ -6,7 +7,6 @@ const clientInitiatedLogout = require('../../../config')('/clientInitiatedLogout
 const userSessionTracking = require('../../../config')('/redis/userSessionTrackingEnabled');
 const userRegistration = require('../../../config')('/userRegistration');
 const bookshelf = require('../../lib/bookshelf');
-
 
 module.exports = (service, controller, mixedValidation, ValidationError, server, formHandler, rowExists, emailChangeTokenValidator, clientValidator) => {
   const queryValidation = mixedValidation({
@@ -28,8 +28,8 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
     return value;
   };
 
-  const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword);
-  const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword);
+  const resetPasswordHandler = formHandler('reset-password', views.resetPassword('Reset Password'), controller.resetPassword, false);
+  const setPasswordHandler = formHandler('reset-password', views.resetPassword('Set Password'), controller.resetPassword, true);
 
   let routes = [
     {
@@ -271,6 +271,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             nonce: Joi.string().optional(),
             login: Joi.string().optional(),
+            code_challenge: Joi.string().optional(),
           },{
             client_id: clientValidator,
           })
@@ -293,6 +294,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             nonce: Joi.string().optional(),
             login: Joi.string().optional(),
+            code_challenge: Joi.string().optional(),
           },{
             client_id: clientValidator,
           }),
@@ -317,6 +319,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             nonce: Joi.string().optional(),
             login: Joi.string().optional(),
+            code_challenge: Joi.string().optional(),
           }, {
             client_id: clientValidator,
           }),
@@ -344,6 +347,7 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             redirect_uri: Joi.string().required(),
             nonce: Joi.string().optional(),
             login: Joi.string().optional(),
+            code_challenge: Joi.string().optional(),
           }, {
             client_id: clientValidator,
           }),
@@ -451,8 +455,22 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
             email: Joi.string().email().regex(/[\*%]+/g, { invert: true }).required(),
             password : Joi.string().min(8).required(),
             pass2 : Joi.any().valid(Joi.ref('password')).required(),
+            // optional profile values
+            name: Joi.string().allow('').optional(),
+            given_name: Joi.string().allow('').optional(),
+            family_name: Joi.string().allow('').optional(),
+            middle_name: Joi.string().allow('').optional(),
+            nickname: Joi.string().allow('').optional(),
+            preferred_username: Joi.string().allow('').optional(),
+            profile: Joi.string().uri().allow('').optional(),
+            website: Joi.string().uri().allow('').optional(),
+            gender: Joi.string().allow('').optional(),
+            birthdate: Joi.string().isoDate().allow('').optional(),
+            zoneinfo: Joi.string().valid(userFormData.timezones).optional(),
+            locale: Joi.string().valid(Object.keys(userFormData.locales)).optional(),
+            phone_number: Joi.string().allow('').optional(),
           }, {
-            email: emailValidator,
+            email: emailValidator
           }),
           query : queryValidation,
           failAction : controller.registerHandler,

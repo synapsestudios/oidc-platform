@@ -9,7 +9,7 @@ const getValidationMessages = function(error) {
 
   if (error) {
     error = formatError(error);
-    error.output.payload.validationErrors.forEach(errorObj => {
+    get(error, 'output.payload.validationErrors', []).forEach(errorObj => {
       validationErrorMessages[errorObj.key] = validationErrorMessages[errorObj.key] || [];
 
       if (errorMessages[errorObj.key] && errorMessages[errorObj.key][errorObj.type]) {
@@ -335,6 +335,7 @@ module.exports = {
       client: client.serialize({strictOidc:true}),
       title: title,
       returnTo: (redirectSet) ? false : `${request.query.redirect_uri}`,
+      formAction: `/user/reset-password?${querystring.stringify(request.query)}`,
       error: !!error,
       validationErrorMessages: error && error.isBoom ? getValidationMessages(error) : error,
     };

@@ -10,6 +10,17 @@ const winstonKoaLogger = require('./winstonKoaLogger');
 exports.register = function (server, options, next) {
   const issuer = options.issuer || process.env.OIDC_BASE_URL || 'http://localhost:9000';
 
+  options.ttl = {
+    AccessToken: parseInt(process.env.ACCESS_TOKEN_EXP, 10),
+    AuthorizationCode: parseInt(process.env.AUTH_CODE_EXP, 10),
+    ClientCredentials: parseInt(process.env.CLIENT_CRED_EXP, 10),
+    DeviceCode: parseInt(process.env.DEVICE_CODE_EXP, 10),
+    IdToken: parseInt(process.env.ID_TOKEN_EXP, 10),
+    RefreshToken: parseInt(process.env.REFRESH_TOKEN_EXP, 10),
+  };
+
+  options.keys = [process.env.COOKIE_KEY, process.env.OLD_COOKIE_KEY];
+
   const prefix = options.prefix ? `/${options.prefix}` : '/op';
   const provider = new OidcProvider(issuer, getConfig(options));
 
@@ -37,7 +48,6 @@ exports.register = function (server, options, next) {
         }
       });
 
-      server.views(options.vision);
       addRoutes(server, issuer, options);
 
       server.expose('provider', provider);

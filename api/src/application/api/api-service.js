@@ -1,6 +1,6 @@
 const webhookService = require('../webhook/webhook-service');
-const Uuid = require('uuid');
 const set = require('lodash/set');
+const bookshelf = require('../../lib/bookshelf');
 const allowedImageMimes = require('../image/allowed-image-mimes');
 
 // e.g. convert { foo.bar: 'baz' } to { foo: { bar: 'baz' }}
@@ -17,18 +17,21 @@ const expandDotPaths = function(object) {
 
 module.exports = (userService, imageService) => {
   return {
-    async updateUserProfile(user, requestPayload) {
+    async updateUserProfile(userId, requestPayload) {
+      let user = await bookshelf.model('user')
+        .where({ id: userId })
+        .fetch();
+
       let profile = user.get('profile');
       const { shouldClearPicture, ...originalPayload } = requestPayload;
       const payload = expandDotPaths(originalPayload);
 
-      const oldPicture = profile.picture;
       const pictureMIME = originalPayload.picture
         ? originalPayload.picture.hapi.headers['content-type']
         : null;
 
       if (allowedImageMimes.indexOf(pictureMIME) >= 0) {
-        const uuid = Uuid();
+        const uuid = user.get('id')
         const bucket = uuid.substring(0, 2);
         const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);
 
@@ -36,6 +39,9 @@ module.exports = (userService, imageService) => {
       } else {
         delete originalPayload.picture;
         if (shouldClearPicture) {
+          if (payload.picture) {
+            await imageService.deleteImage(payload.picture.replace(/^.*\/\/[^\/]+\//, ''));
+          }
           profile = Object.assign(profile, payload, {picture: null});
         } else {
           profile = Object.assign(profile, payload);
@@ -44,10 +50,6 @@ module.exports = (userService, imageService) => {
 
       user = await userService.update(user.get('id'), { profile });
       webhookService.trigger('user.update', user);
-
-      if (oldPicture) {
-        await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
-      }
 
       return user;
     },

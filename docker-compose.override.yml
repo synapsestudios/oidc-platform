@@ -1,9 +1,19 @@
 version: '2'
 services:
     api:
-       ports:
+        volumes:
+            - .:/src:delegated
+        ports:
             - "9000:9000"
             - "9001:9001"
+        environment:
+            - REDIS_TLS=true
+            ## Permit self-signed certs for Redis TLS testing
+            - NODE_TLS_REJECT_UNAUTHORIZED=0
     redis:
         ports:
             - "6379:6379"
+            - "6380:6380"
+        volumes:
+            - ./redis:/etc/redis
+        command: ["redis-server", "/etc/redis/redis.conf"]

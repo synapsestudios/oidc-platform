@@ -1,13 +1,7 @@
 const querystring = require('querystring');
-const formatError = require('../../lib/format-error');
-const get = require('lodash/get');
 const set = require('lodash/set');
-const Uuid = require('uuid');
-const config = require('../../../config');
-const Boom = require('boom');
+const omit = require('lodash/omit');
 const views = require('./user-views');
-const errorMessages = require('./user-error-messages');
-const userFormData = require('./user-form-data');
 const comparePasswords = require('../../lib/comparePasswords');
 const bookshelf = require('../../lib/bookshelf');
 const webhookService = require('../webhook/webhook-service');
@@ -28,10 +22,8 @@ const expandDotPaths = function(object) {
 
 module.exports = (
   userService,
-  emailService,
   imageService,
   themeService,
-  validationError,
   clientService,
   formHandler,
   userEmails,
@@ -39,7 +31,9 @@ module.exports = (
 ) => {
   return {
     registerHandler: formHandler('user-registration', views.userRegistration, async (request, reply, user, client, render) => {
-      user = await userService.create(request.payload.email, request.payload.password)
+      const profile = omit(request.payload, ['email', 'password', 'pass2']);
+      user = await userService.create(request.payload.email, request.payload.password, { profile });
+      webhookService.trigger('user.registered', user);
       await userEmails.sendVerificationEmail(user, client, request.payload.email, request.query);
       reply.redirect(`/op/auth?${querystring.stringify(request.query)}`);
     }),
@@ -107,7 +101,7 @@ module.exports = (
       const pictureMIME = originalPayload.picture.hapi.headers['content-type'];
 
       if (uploadingNewPicture && allowedImageMimes.indexOf(pictureMIME) >= 0) {
-        const uuid = Uuid();
+        const uuid = user.get('id');
         const bucket = uuid.substring(0, 2);
         const filename = await imageService.uploadImageStream(originalPayload.picture, `pictures/${bucket}/${uuid}`);
 
@@ -124,7 +118,7 @@ module.exports = (
       user = await userService.update(user.get('id'), { profile });
       webhookService.trigger('user.update', user);
 
-      if ((uploadingNewPicture && oldPicture) || shouldClearPicture) {
+      if (shouldClearPicture) {
         await imageService.deleteImage(oldPicture.replace(/^.*\/\/[^\/]+\//, ''));
       }
 
@@ -139,12 +133,8 @@ module.exports = (
       }
 
       const viewContext = views.forgotPasswordSuccess(client, request);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'forgot-password-success', viewContext);
-      if (template) {
-        reply(template);
-      } else {
-        reply.view('forgot-password-success', viewContext);
-      }
+      const template = await themeService.renderThemedTemplate('forgot-password-success', viewContext, request.query.client_id);
+      reply(template);
     }),
 
     completeEmailUpdateHandler: async (request, reply, source, error) => {
@@ -174,12 +164,8 @@ module.exports = (
 
       const viewContext = views.completeChangePassword(user, client, request, error);
 
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
-      if (template) {
-        return reply(template);
-      } else {
-        return reply.view('email-verify-success', viewContext);
-      }
+      const template = await themeService.renderThemedTemplate('email-verify-success', viewContext, request.query.client_id);
+      return reply(template);
     },
 
     emailVerifySuccessHandler: async (request, reply, source, error) => {
@@ -198,15 +184,11 @@ module.exports = (
       const client = await clientService.findById(request.query.client_id);
       const viewContext = views.emailVerifySuccess(user, client, request, error);
 
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'email-verify-success', viewContext);
-      if (template) {
-        reply(template);
-      } else {
-        reply.view('email-verify-success', viewContext);
-      }
+      const template = await themeService.renderThemedTemplate('email-verify-success', viewContext, request.query.client_id);
+      reply(template);
     },
 
-    resetPassword: async function(request, reply, user, client, render) {
+    resetPassword: async function(request, reply, user, client, render, isInviteAcceptance) {
       const token = request.auth.credentials.token;
       const password = await userService.encryptPassword(request.payload.password)
       const profile = user.get('profile');
@@ -214,13 +196,14 @@ module.exports = (
       await userService.update(user.get('id'), { password, profile });
       await emailTokenService.destroyUserTokens(user.get('id'));
 
-      const viewContext = views.resetPasswordSuccess(request);
-      const template = await themeService.renderThemedTemplate(request.query.client_id, 'reset-password-success', viewContext);
-      if (template) {
-        reply(template);
-      } else {
-        reply.view('reset-password-success', viewContext);
+      if (isInviteAcceptance) {
+        await user.refresh();
+        webhookService.trigger('user.accept-invite', user);
       }
+
+      const viewContext = views.resetPasswordSuccess(request);
+      const template = await themeService.renderThemedTemplate('reset-password-success', viewContext, request.query.client_id);
+      reply(template);
     },
 
     logout: function(request, reply) {
@@ -248,10 +231,8 @@ module.exports = (
 module.exports['@singleton'] = true;
 module.exports['@require'] = [
   'user/user-service',
-  'email/email-service',
   'image/image-service',
   'theme/theme-service',
-  'validator/validation-error',
   'client/client-service',
   'form-handler',
   'user/user-emails',

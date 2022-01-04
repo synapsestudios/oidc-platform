@@ -1,6 +1,6 @@
 # OpenID Connect Identity Platform
 
-The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com/panva/node-oidc-provider) to provide user authentication for our clients' applications. node-oidc-provider is an [OpenID Connect](http://openid.net/connect/) provider library. In order to fully understand the ins and outs of this application understanding OpenID Connect is a must.
+The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com/panva/node-oidc-provider) to provide user authentication for our clients' applications. node-oidc-provider is an [OpenID Connect](http://openid.net/connect/) provider library. In order to fully understand the ins and outs of this application, understanding OpenID Connect is a must.
 
 ## Usage Documentation
 - [Installation](docs/installation.md)
@@ -11,7 +11,7 @@ The synapse OpenID Connect platform uses [node-oidc-provider](https://github.com
 
 ## Setting up for development
 
-0. Copy `common.template.env` as `common.env` and provide a mailgun key
+0. Copy `common.template.env` as `common.env` and provide a mailgun, SES, or sendgrid key
 0. Set the OIDC_DB_* vars based on what RDBMS you are using.
 0. Run either `./compose-mysql up` or `./compose-postgres up`. You can also just do `docker-compose up` which will use postgres.
 0. Create an oauth client by posting to http://localhost:9001/op/reg with the following:
