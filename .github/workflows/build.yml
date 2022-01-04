@@ -171,15 +171,6 @@ jobs:
         name: Extract client secret
         run: echo "::set-output name=CLIENT_ID::$(echo '${{ steps.create_oidc_client.outputs.CLIENT_JSON }}' | jq '.client_secret')"
 
-      - name: Log outputs
-        run: echo "Outputs -'${{ steps.create_oidc_client.outputs }}'"
-
-      - name: Get client id
-        run: echo "Client ID - '${{ steps.create_oidc_client.outputs.client_id }}'"
-
-      - name: Get client secret
-        run: echo "Client Secret - '${{ steps.create_oidc_client.outputs.client_secret }}'"
-
       - name: Create test-client config
         run: cp src/config.template.js src/config.js
         working-directory: test-client
