@@ -16,7 +16,7 @@ module.exports = () => {
     wreck.post('/op/token', {
       payload: `grant_type=client_credentials&scope=admin`,
       headers: {
-        Authorization: 'Basic ' + btoa(`${clientId}:${clientSecret}`),
+        Authorization: 'Basic ' + btoa(`${encodeURIComponent(clientId)}:${encodeURIComponent(clientSecret)}`),
         'Content-Type': 'application/x-www-form-urlencoded'
       },
     }, (error, response, payload) => {
