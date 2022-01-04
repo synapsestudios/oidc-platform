@@ -22,19 +22,23 @@ class App extends Component {
   }
 
   login = () => {
-    fetch('http://localhost:8080/token', {
+    fetch(`${config.testServer}token`, {
       method: 'POST',
       body: JSON.stringify({ grant_type: 'password', username: this.state.email, password: this.state.password }),
     })
       .then(res => res.json())
       .then(json => {
-        localstorage({
-          accessToken: json.access_token,
-          expiresIn: json.expires_in,
-          idToken: json.id_token,
-          tokenType: json.token_type,
-        });
-        this.setState(localstorage());
+        if (json.statusCode >= 300) {
+          console.error(json)
+        } else {
+          localstorage({
+            accessToken: json.access_token,
+            expiresIn: json.expires_in,
+            idToken: json.id_token,
+            tokenType: json.token_type,
+          });
+          this.setState(localstorage());
+        }
       })
       .catch(e => console.error(e));
   }
@@ -51,7 +55,7 @@ class App extends Component {
   checkForCode() {
     const query = queryString.parse(location.hash.substr(1));
 
-    if (query.code && !localstorage('accessToken')) {
+    if (query.id_token && !localstorage('accessToken')) {
       localstorage({
         accessToken: query.access_token,
         expiresIn: query.expires_in,
@@ -71,7 +75,7 @@ class App extends Component {
         <span>
           <a href={getLoginUrl()}>Log In</a>
           <span> | </span>
-          <a href={`https://sso-client.test:9000/user/register?client_id=${config.clientId}&response_type=code id_token token&scope=${config.scope}&redirect_uri=${config.redirectUri}&nonce=nonce`}>Sign Up</a>
+          <a href={`https://sso-client.test:9000/user/register?client_id=${config.clientId}&response_type=id_token token&scope=${config.scope}&redirect_uri=${config.redirectUri}&nonce=nonce`}>Sign Up</a>
         </span>
 
         <div>

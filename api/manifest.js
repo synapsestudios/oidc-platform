@@ -98,6 +98,11 @@ module.exports = Promise.all([
       },
       {
         plugin: {
+          register: 'vision'
+        }
+      },
+      {
+        plugin: {
           register: './plugins/access-token-scheme',
         }
       },
@@ -138,6 +143,7 @@ module.exports = Promise.all([
               return (name === 'Client') ? new lib.sqlOidcAdapter(name): new lib.redisOidcAdapter(name);
             },
             keystore: lib.keystore,
+            formats: { default: config('/oidc/defaultFormat') || 'opaque' },
             renderError: async (ctx, error) => {
               ctx.type = 'html';
               ctx.body = await lib.themeService.renderThemedTemplate('error', {

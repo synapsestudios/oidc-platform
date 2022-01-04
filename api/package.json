@@ -1,6 +1,6 @@
 {
   "name": "identity-platform-api",
-  "version": "2.11.0",
+  "version": "3.0.0",
   "description": "OpenID Connect provider for synapse projects",
   "main": "server.js",
   "scripts": {
@@ -34,7 +34,7 @@
     "@sentry/node": "^5.15.5",
     "@synapsestudios/winston-sentry": "^1.1.0",
     "aws-sdk": "^2.395.0",
-    "bcrypt": "1.0.3",
+    "bcrypt": "3.0.3",
     "bookshelf": "0.14.2",
     "boom": "^4.2.0",
     "btoa": "^1.1.2",
@@ -57,13 +57,14 @@
     "mailgun-js": "0.22.0",
     "mysql": "2.16.0",
     "node-jose": "1.1.1",
-    "oidc-provider": "^2.18.2",
+    "oidc-provider": "5.5.3",
     "pg": "7.8.0",
     "querystring": "^0.2.0",
     "queue": "^4.4.2",
     "rollbar": "^2.3.9",
     "supertest": "^6.1.6",
     "uuid": "^3.0.1",
+    "vision": "^4.1.0",
     "winston": "^2.4.1",
     "winston-rollbar-transport": "^1.0.0"
   },

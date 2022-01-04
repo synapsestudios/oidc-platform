@@ -23,9 +23,7 @@ Each release of the Synapse OIDC Platform is built as a docker public docker ima
 | KEEP_ALIVE_TIMEOUT | Duration for which OIDC will keep connections open with the client. This setting should be at least as long as the client's expecting connections to remain open e.g. ELB's `Idle timeout` setting. |
 
 ## Keystores
-**DEPRECATION WARNING:** The Synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but **DO NOT USE THE DEFAULTS IN PRODUCTION**. Use of these keys in a non-development environment will be removed in the next version and OIDC will not start.
-
-node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes **YOU SHOULD PROVIDE YOUR OWN KEYS**. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own, but **PLEASE DO NOT USE THE DEFAULTS IN PRODUCTION.**
+node-oidc-provider uses [node-jose](https://github.com/cisco/node-jose) keys and stores to encrypt, sign and decrypt things (mostly tokens and stuff). For security purposes **YOU MUST PROVIDE YOUR OWN KEYS IN PRODUCTION**. The synapse OpenID Connect platform provides a default set of keys so that it will work if you do not provide your own in dev mode, but the server will *not* start in production unless you provide your own keys.
 
 ### Generating Keys
 
