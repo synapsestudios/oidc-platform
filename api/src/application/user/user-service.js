@@ -59,7 +59,7 @@ module.exports = (emailService, clientService, RedisAdapter, themeService, userE
     async inviteUser({email, hours_till_expiration, template, app_metadata, profile, ...payload}) {
       const client = await clientService.findById(payload.client_id);
       return bookshelf.transaction(async trx => {
-        let user = await bookshelf.model('user').where({ email }).fetch();
+        let user = await bookshelf.model('user').where({ email_lower: email.toLowerCase() }).fetch();
 
         if (!user) {
           user = await self.create(email, uuid.v4(), {

@@ -59,6 +59,6 @@ describe(`POST /api/invite`, () => {
     expect(emailTokens.length).to.equal(1);
 
     expect(sendEmailMock.calledOnce).to.equal(true);
-  })
+  });
 
 });
