@@ -8,6 +8,7 @@
   Authorization: 'Basic ' + btoa(`${encodeURIComponent(clientId)}:${encodeURIComponent(clientSecret)}`),
 ...
 ```
+- If you are using `grant_type=authorization_code` with a PKCE challenge (supplying the `code_challenge` query param) you will need to ensure that you are using the `S256` challenge method by appending `code_challenge_method=S256`. This will also require that your `code_challenge` value be a base64-encoded sha256 hash of 32 random bytes, and you should store the base64-encoded non-sha256-hashed version of the same bytes as your `code_verifier`. Auth0 has a reference implementation documented [here](https://auth0.com/docs/get-started/authentication-and-authorization-flow/call-your-api-using-the-authorization-code-flow-with-pkce#steps) but it will require changes to work in the browser.
 
 ## v2.2.0 -> v2.3.0
 - `AWS_REGION` variable must now be provided in the environment for the SES driver
