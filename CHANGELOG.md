@@ -1,3 +1,7 @@
+## [v2.11.1](https://github.com/synapsestudios/oidc-platform/compare/v2.11.0...v2.11.1)
+### Fixed
+- [#544](https://github.com/synapsestudios/oidc-platform/issues/544) user.accept-invite webhook not being called
+
 ## [v2.11.0](https://github.com/synapsestudios/oidc-platform/compare/v2.10.0...v2.11.0)
 ### Added
 - [#445](https://github.com/synapsestudios/oidc-platform/issues/439) Edit User Profile route for Admins. Added Lab tests.
