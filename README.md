@@ -45,3 +45,13 @@ Sessions are persisted by default, a user can manually log out by visiting `${pr
 ## Clients
 
 Clients can be registered dynamically with the `registration` endpoint defined in the OICD provider's Hapi plugin. By default this is `${prefix}/reg`. Any of the [OpenID Client Metadata](http://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) can be supplied. The Bearer token for this request is validated against the `OIDC_INITIAL_ACCESS_TOKEN` environment variable. YOU MUST PROVIDE A STRONG TOKEN in production to prevent unauthorized clients from being added.
+
+## Releasing
+1. Ensure you've checked out `master` and that it's up-to-date (or if hotfixing, check out a new branch from a previous release's tag)
+2. Update the version number in `api/package.json` and `api/package-lock.json` and commit the changes
+3. `cd api` if you're in the root of the repo
+4. `docker build -t synapsestudios/oidc-platform:vX.Y.Z .`
+5. `docker push synapsestudios/oidc-platform:vX.Y.Z`
+6. `git push`
+7. `git tag vX.Y.Z && git push tags`
+8. If hotfixing, you can `git push :refs/heads/hotfix-branch-name` to delete the hotfix branch
