@@ -404,6 +404,10 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
       path: '/user/logout',
       handler: controller.logout,
       config: {
+        state: {
+          parse: false,
+          failAction: 'ignore',
+        },
         validate: {
           query: {
             post_logout_redirect_uri: Joi.string().required(),
