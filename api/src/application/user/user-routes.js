@@ -405,7 +405,6 @@ module.exports = (service, controller, mixedValidation, ValidationError, server,
       handler: controller.logout,
       config: {
         state: {
-          parse: false,
           failAction: 'ignore',
         },
         validate: {
