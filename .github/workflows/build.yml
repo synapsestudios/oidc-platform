@@ -37,7 +37,7 @@ jobs:
           outputs: type=docker,dest=/tmp/build.tar
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build
           path: /tmp/build.tar
@@ -177,7 +177,7 @@ jobs:
 
       - name: "Upload Cypress Screenshots"
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: cypress-screenshots
           path: e2e/cypress/screenshots/
@@ -185,7 +185,7 @@ jobs:
 
       - name: "Upload Cypress Videos"
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: cypress-videos
           path: e2e/cypress/videos/
