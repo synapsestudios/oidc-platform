@@ -30,7 +30,7 @@ jobs:
           echo "::set-output name=artifact_name_latest::oidc-platform:latest"
 
       - name: Build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./api
           tags: ${{ steps.artifact.outputs.artifact_name }}, ${{ steps.artifact.outputs.artifact_name_latest }}
