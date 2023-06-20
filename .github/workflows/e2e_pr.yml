@@ -48,7 +48,7 @@ jobs:
           node-version: '14'
 
       - name: Cache e2e node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: e2e_commit_stage-e2e-npm-cache
         with:
           path: e2e/node_modules
@@ -124,28 +124,28 @@ jobs:
           node-version: '14'
 
       - name: Cache e2e node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: e2e_tests-e2e-npm-cache
         with:
           path: e2e/node_modules
           key: e2e_tests-e2e-npm-cache-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
       - name: Cache e2e Cypress binaries
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: e2e_tests-e2e-cypress-binaries
         with:
           path: ~/.cache/Cypress
           key: e2e_tests-e2e-cypress-binaries-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
       - name: Cache frontend node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: e2e_tests-frontend-npm-cache
         with:
           path: frontend/node_modules
           key: e2e_tests-frontend-npm-cache-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
 
       - name: Cache api node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: e2e_tests-api-npm-cache
         with:
           path: api/node_modules
