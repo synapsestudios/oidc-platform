@@ -21,7 +21,7 @@ jobs:
   #     messageTs: ${{ steps.notification.outputs.messageTs }}
   #   steps:
   #     - name: Checkout
-  #       uses: actions/checkout@v2
+  #       uses: actions/checkout@v3
   #     - name: Send e2e Test Triggered Notification
   #       id: notification
   #       uses: synapsestudios/build-status@main
@@ -40,7 +40,7 @@ jobs:
         shell: bash
         working-directory: e2e
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup node
         uses: actions/setup-node@v1
@@ -107,7 +107,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: us-west-2
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # - name: Set up notifications
       #   uses: synapsestudios/build-status@main
