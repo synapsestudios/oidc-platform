@@ -43,7 +43,7 @@ jobs:
           path: /tmp/build.tar
 
   acceptance_tests:
-    needs: [build_api, initialize_notification]
+    needs: [build_api]
     runs-on: ubuntu-latest
     defaults:
       run:
