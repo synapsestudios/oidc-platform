@@ -29,6 +29,6 @@
     "knex": "^0.95.4",
     "pg": "^8.6.0",
     "prettier": "^2.3.2",
-    "typescript": "^4.3.5"
+    "typescript": "^5.1.6"
   }
 }
