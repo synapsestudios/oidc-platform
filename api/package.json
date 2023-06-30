@@ -61,7 +61,7 @@
     "pg": "7.8.0",
     "querystring": "^0.2.0",
     "queue": "^4.4.2",
-    "rollbar": "^2.3.9",
+    "rollbar": "^2.26.2",
     "supertest": "^6.1.6",
     "uuid": "^3.0.1",
     "vision": "^4.1.0",
