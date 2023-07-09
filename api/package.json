@@ -73,7 +73,7 @@
     "@hapi/lab": "^21.0.0",
     "@testing-library/dom": "^6.16.0",
     "factory-girl": "^5.0.4",
-    "jsdom": "^10.1.0",
+    "jsdom": "^22.1.0",
     "nodemon": "1.18.9",
     "sinon": "^9.0.2",
     "aws-sdk-mock": "^5.4.0",
