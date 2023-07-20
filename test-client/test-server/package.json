@@ -15,7 +15,7 @@
     "hapi": "^16.1.1",
     "hapi-auth-jwt2": "^7.3.0",
     "lodash": "^4.17.4",
-    "node-jose": "^0.10.0",
+    "node-jose": "^2.2.0",
     "wreck": "^12.2.0"
   },
   "devDependencies": {
