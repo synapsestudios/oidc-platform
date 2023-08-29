@@ -31,7 +31,7 @@
   "dependencies": {
     "@azure/storage-blob": "^12.1.1",
     "@sendgrid/mail": "^7.0.1",
-    "@sentry/node": "^5.15.5",
+    "@sentry/node": "^7.65.0",
     "@synapsestudios/winston-sentry": "^1.1.0",
     "aws-sdk": "^2.395.0",
     "bcrypt": "3.0.3",
