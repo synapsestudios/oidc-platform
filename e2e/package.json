@@ -16,7 +16,7 @@
     "nonGlobalStepDefinitions": true
   },
   "devDependencies": {
-    "@testing-library/cypress": "^7.0.6",
+    "@testing-library/cypress": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^4.28.4",
     "@typescript-eslint/parser": "^4.28.4",
     "command-line-args": "^5.2.0",
