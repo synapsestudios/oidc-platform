@@ -63,7 +63,7 @@
     "queue": "^4.4.2",
     "rollbar": "^2.3.9",
     "supertest": "^6.1.6",
-    "uuid": "^3.0.1",
+    "uuid": "^9.0.1",
     "vision": "^4.1.0",
     "winston": "^2.4.1",
     "winston-rollbar-transport": "^1.0.0"
