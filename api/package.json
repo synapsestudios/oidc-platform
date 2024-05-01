@@ -57,7 +57,7 @@
     "mailgun-js": "0.22.0",
     "mysql": "2.16.0",
     "node-jose": "1.1.1",
-    "oidc-provider": "5.5.3",
+    "oidc-provider": "8.4.6",
     "pg": "7.8.0",
     "querystring": "^0.2.0",
     "queue": "^4.4.2",
